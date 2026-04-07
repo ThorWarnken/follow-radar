@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>follow radar — tests</title>
+<style>
+  body{font-family:ui-monospace,Menlo,monospace;padding:2rem;background:#fafafa;color:#222}
+  h1{font-size:1.2rem;margin-bottom:1rem}
+  .test{padding:6px 10px;margin-bottom:4px;border-radius:4px;font-size:0.85rem}
+  .pass{background:#e6f9ec;color:#0a6e2e}
+  .fail{background:#fde8e8;color:#a01a1a;white-space:pre-wrap}
+  .summary{margin-top:1rem;padding:10px;border-radius:6px;font-weight:700}
+  .summary.ok{background:#0a6e2e;color:#fff}
+  .summary.bad{background:#a01a1a;color:#fff}
+</style>
+</head>
+<body>
+<h1>follow radar — tests</h1>
+<div id="out"></div>
+<div id="summary" class="summary"></div>
+
+<script>window.__followRadarTest = {};</script>
+<script src="b.js"></script>
+<script>
+(()=>{
+  const out=document.getElementById('out');
+  const sum=document.getElementById('summary');
+  let passed=0,failed=0;
+  window.test=function(name,fn){
+    try{
+      const r=fn();
+      if(r&&typeof r.then==='function'){
+        return r.then(()=>{passed++;render(name,true)},e=>{failed++;render(name,false,e)});
+      }
+      passed++;render(name,true);
+    }catch(e){failed++;render(name,false,e)}
+  };
+  window.assert=function(cond,msg){if(!cond)throw new Error(msg||'assertion failed')};
+  window.assertEq=function(a,b,msg){
+    const ja=JSON.stringify(a),jb=JSON.stringify(b);
+    if(ja!==jb)throw new Error((msg||'not equal')+'\n  expected: '+jb+'\n  actual:   '+ja);
+  };
+  function render(name,ok,err){
+    const d=document.createElement('div');
+    d.className='test '+(ok?'pass':'fail');
+    d.textContent=(ok?'PASS  ':'FAIL  ')+name+(err?'\n  '+(err.stack||err.message||err):'');
+    out.appendChild(d);
+  }
+  window.addEventListener('load',()=>{
+    setTimeout(()=>{
+      const total=passed+failed;
+      sum.textContent=`${passed}/${total} passed`;
+      sum.className='summary '+(failed===0?'ok':'bad');
+    },200);
+  });
+})();
+</script>
+<!-- Test files are appended below as new tasks add them. -->
+</body>
+</html>
