@@ -1,5 +1,17 @@
+// ═══════════════════════════════════════════════════════════════════
+// LOADER STUB (this is the bookmarklet href in index.html, not part of b.js):
+//
+// javascript:(()=>{if(!/(^|\.)instagram\.com$/.test(location.hostname)){alert('Open instagram.com first, then click this bookmarklet.');return}fetch('https://follow-radar.app/b.js?v='+Date.now()).then(r=>r.text()).then(eval).catch(e=>alert('Could not load follow radar: '+e.message))})()
+//
+// The stub fetches this file, evals it. We use fetch+eval rather than
+// <script src> injection because instagram.com's CSP is more likely to
+// block external script injection than connect-src to follow-radar.app.
+// If both are blocked, the contingency is to inline this entire file
+// into the javascript: URL above. Not implemented for v1.
+// ═══════════════════════════════════════════════════════════════════
+
 // follow radar bookmarklet payload (b.js)
-// Loaded fresh on every click via the loader stub in index.html.
+// Loaded fresh on every click via the loader stub above.
 // Runs on instagram.com in the user's own logged-in session.
 // See docs/superpowers/specs/2026-04-07-bookmarklet-redesign-design.md
 (function () {
