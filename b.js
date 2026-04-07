@@ -228,6 +228,93 @@
     return paginate(c => buildFollowingUrl(userId, c), initial, initialCursor, onProgress);
   }
 
+  // ─── Current user resolution + size check ────────────────────────
+
+  async function getCurrentUser() {
+    // Try _sharedData (works on legacy IG web pages).
+    try {
+      const sd = window._sharedData && window._sharedData.config && window._sharedData.config.viewer;
+      if (sd && sd.id && sd.username) {
+        return { userId: String(sd.id), username: sd.username };
+      }
+    } catch (e) { /* fall through */ }
+
+    // Try the modern in-page accounts info endpoint.
+    try {
+      const r = await doFetch('https://www.instagram.com/api/v1/web/accounts/login/ajax/info/', {
+        credentials: 'include',
+        headers: { 'X-IG-App-ID': IG_APP_ID, 'Accept': 'application/json' },
+      });
+      if (r.ok) {
+        const j = await r.json();
+        if (j && j.user_id && j.username) return { userId: String(j.user_id), username: j.username };
+      }
+    } catch (e) { /* fall through */ }
+
+    throw new Error("Could not determine logged-in user. Make sure you're logged into instagram.com.");
+  }
+
+  async function checkAccountSize(username) {
+    // /api/v1/users/web_profile_info/?username=...
+    const url = 'https://i.instagram.com/api/v1/users/web_profile_info/?username=' + encodeURIComponent(username);
+    const r = await doFetch(url, {
+      credentials: 'include',
+      headers: { 'X-IG-App-ID': IG_APP_ID, 'Accept': 'application/json' },
+    });
+    if (!r.ok) throw new Error('Could not fetch profile info: http ' + r.status);
+    const j = await r.json();
+    const u = j && j.data && j.data.user;
+    if (!u) throw new Error('Unexpected profile info shape');
+    const followers = (u.edge_followed_by && u.edge_followed_by.count) || 0;
+    const following = (u.edge_follow && u.edge_follow.count) || 0;
+    return { followers, following };
+  }
+
+  // ─── Progress overlay ────────────────────────────────────────────
+
+  let overlayEl = null;
+  let overlayBarEl = null;
+  let overlayTextEl = null;
+
+  function createOverlay() {
+    if (overlayEl) return;
+    overlayEl = document.createElement('div');
+    overlayEl.setAttribute('style', [
+      'position:fixed','bottom:24px','right:24px','z-index:2147483647',
+      'background:#fff','color:#1a1a2e','padding:14px 18px',
+      'border-radius:14px','box-shadow:0 12px 40px rgba(225,48,108,0.18)',
+      'font:600 13px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
+      'min-width:240px','border:1px solid rgba(225,48,108,0.18)',
+    ].join(';'));
+    overlayTextEl = document.createElement('div');
+    overlayTextEl.textContent = 'Starting…';
+    overlayTextEl.style.marginBottom = '8px';
+    overlayEl.appendChild(overlayTextEl);
+    const track = document.createElement('div');
+    track.setAttribute('style', 'height:4px;background:rgba(0,0,0,0.06);border-radius:2px;overflow:hidden');
+    overlayBarEl = document.createElement('div');
+    overlayBarEl.setAttribute('style', 'height:100%;width:0%;background:linear-gradient(90deg,#f77737,#e1306c,#833ab4);transition:width 0.3s ease');
+    track.appendChild(overlayBarEl);
+    overlayEl.appendChild(track);
+    document.body.appendChild(overlayEl);
+  }
+
+  function updateOverlay(text, fraction) {
+    if (!overlayEl) return;
+    overlayTextEl.textContent = text;
+    if (typeof fraction === 'number') {
+      const pct = Math.max(0, Math.min(100, fraction * 100));
+      overlayBarEl.style.width = pct + '%';
+    }
+  }
+
+  function destroyOverlay() {
+    if (overlayEl && overlayEl.parentNode) overlayEl.parentNode.removeChild(overlayEl);
+    overlayEl = null;
+    overlayBarEl = null;
+    overlayTextEl = null;
+  }
+
   // Expose for tests. In real bookmarklet runs, window.__followRadarTest is undefined.
   if (typeof window !== 'undefined' && window.__followRadarTest) {
     window.__followRadarTest.RateLimitError = RateLimitError;
