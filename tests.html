@@ -378,5 +378,20 @@ test('scrapeFollowers: onProgress called per page', async () => {
   assertEq(progress, [1, 2]);
 });
 </script>
+
+<script>
+test('main is exposed in test mode', () => {
+  assert(typeof window.__followRadarTest.main === 'function');
+});
+
+test('shipResults via encode/decode round-trip', async () => {
+  const enc = window.__followRadarTest.encodePayload;
+  const dec = window.__followRadarTest.decodePayload;
+  const obj = {username: 'thor', userId: '1', scrapedAt: 't', followers: [], following: []};
+  const encoded = await enc(obj);
+  const back = await dec(encoded);
+  assertEq(back, obj);
+});
+</script>
 </body>
 </html>

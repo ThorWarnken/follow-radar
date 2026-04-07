@@ -315,6 +315,132 @@
     overlayTextEl = null;
   }
 
+  // ─── Ship results ────────────────────────────────────────────────
+
+  async function shipResults(payload) {
+    const encoded = await encodePayload(payload);
+    window.location = FOLLOW_RADAR_URL + '/#data=' + encoded;
+  }
+
+  // ─── Main entry ──────────────────────────────────────────────────
+
+  async function main() {
+    if (!/(^|\.)instagram\.com$/.test(location.hostname)) {
+      alert("Open instagram.com first, then click this bookmarklet.");
+      return;
+    }
+
+    let user;
+    try {
+      user = await getCurrentUser();
+    } catch (e) {
+      alert(e.message);
+      return;
+    }
+
+    // Check resume state.
+    const existing = loadResumeState(user.userId);
+    if (existing && existing.mismatch) {
+      alert("You have a scan in progress on a different account. Switch back to that account, or clear it from DevTools (localStorage key '" + RESUME_KEY + "').");
+      return;
+    }
+
+    const resume = existing;
+    const initialFollowers = (resume && resume.partialFollowers) || null;
+    const initialFollowing = (resume && resume.partialFollowing) || null;
+    let initialCursor = (resume && resume.cursor) || null;
+    let phase = (resume && resume.phase) || 'followers';
+
+    // Size check (only on fresh runs, not on resume).
+    if (!resume) {
+      try {
+        const sizes = await checkAccountSize(user.username);
+        if (sizes.followers > MAX_ACCOUNT_SIZE || sizes.following > MAX_ACCOUNT_SIZE) {
+          alert(
+            "follow radar is built for accounts under " + MAX_ACCOUNT_SIZE.toLocaleString() + " followers/following.\n\n" +
+            "Yours has " + sizes.followers.toLocaleString() + " followers and " + sizes.following.toLocaleString() + " following.\n\n" +
+            "If you really need this for a bigger account, the code is open source — fork it and remove the cap."
+          );
+          return;
+        }
+      } catch (e) {
+        alert("Could not check account size: " + e.message);
+        return;
+      }
+    }
+
+    createOverlay();
+
+    let followers = initialFollowers || [];
+    let following = initialFollowing || [];
+
+    try {
+      if (phase === 'followers') {
+        updateOverlay('Scanning followers… ' + followers.length, 0);
+        followers = await scrapeFollowers(user.userId, followers, initialCursor, (n) => {
+          updateOverlay('Scanning followers… ' + n, 0.1 + Math.min(0.4, n / 10000));
+        });
+        phase = 'following';
+        initialCursor = null;
+      }
+      updateOverlay('Scanning following… ' + following.length, 0.5);
+      following = await scrapeFollowing(user.userId, following, phase === 'following' ? initialCursor : null, (n) => {
+        updateOverlay('Scanning following… ' + n, 0.5 + Math.min(0.5, n / 10000));
+      });
+    } catch (e) {
+      destroyOverlay();
+      if (e instanceof RateLimitError) {
+        // paginate() attached .cursor and .partial to the error at the point of failure.
+        // The in-flight phase's partial list lives on the error; the completed-so-far list
+        // (for the OTHER phase) is whatever `followers` or `following` holds locally.
+        let partialFollowers = followers;
+        let partialFollowing = following;
+        if (phase === 'followers') {
+          partialFollowers = Array.isArray(e.partial) ? e.partial : followers;
+        } else {
+          partialFollowing = Array.isArray(e.partial) ? e.partial : following;
+        }
+        saveResumeState({
+          userId: user.userId,
+          username: user.username,
+          phase: phase,
+          cursor: (typeof e.cursor !== 'undefined') ? e.cursor : null,
+          partialFollowers: partialFollowers,
+          partialFollowing: partialFollowing,
+        });
+        const payload = {
+          username: user.username,
+          userId: user.userId,
+          scrapedAt: new Date().toISOString(),
+          followers: partialFollowers,
+          following: partialFollowing,
+          partial: true,
+          phase: phase,
+        };
+        try { await shipResults(payload); } catch (err) { alert("Could not redirect: " + err.message); }
+        return;
+      }
+      alert("Something went wrong: " + (e.message || e) + ". Try again in a few minutes.");
+      return;
+    }
+
+    destroyOverlay();
+    clearResumeState();
+
+    const payload = {
+      username: user.username,
+      userId: user.userId,
+      scrapedAt: new Date().toISOString(),
+      followers: followers,
+      following: following,
+    };
+    try {
+      await shipResults(payload);
+    } catch (e) {
+      alert("Could not redirect to follow radar: " + e.message);
+    }
+  }
+
   // Expose for tests. In real bookmarklet runs, window.__followRadarTest is undefined.
   if (typeof window !== 'undefined' && window.__followRadarTest) {
     window.__followRadarTest.RateLimitError = RateLimitError;
@@ -336,8 +462,14 @@
     window.__followRadarTest.scrapeFollowers = scrapeFollowers;
     window.__followRadarTest.scrapeFollowing = scrapeFollowing;
     window.__followRadarTest.setFetchPageImpl = function (fn) { fetchPageImpl = fn; };
+    window.__followRadarTest.shipResults = shipResults;
+    window.__followRadarTest.main = main;
     return; // skip main() in test mode
   }
 
-  // main() and the rest of the module are added in subsequent tasks.
+  // Production entry point.
+  main().catch(e => {
+    console.error('[follow radar]', e);
+    alert("Unexpected error: " + (e.message || e));
+  });
 })();
