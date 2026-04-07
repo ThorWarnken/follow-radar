@@ -82,53 +82,48 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;padding:2rem;
 }
-.hero-icon{width:72px;height:72px;margin:0 auto 1rem;position:relative}
+.hero-icon{width:72px;height:72px;margin:0 auto 1.25rem;position:relative}
 .hero-icon svg{width:100%;height:100%}
 .hero-icon .radar-ping{animation:radar-ping 3s ease-out infinite}
 @keyframes radar-ping{0%{opacity:0.7;r:8}70%{opacity:0;r:28}100%{opacity:0;r:28}}
 
-.hero h1{
-  font-family:var(--font);font-weight:900;
-  font-size:clamp(2.5rem,7vw,5rem);line-height:1.05;
-  letter-spacing:-0.02em;margin-bottom:1rem;
-}
-.hero h1 .gradient{
-  background:var(--gradient-candy);-webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;background-clip:text;
-}
-.hero p{
-  font-size:clamp(1rem,2.5vw,1.2rem);color:var(--text-soft);
-  max-width:480px;margin:0 auto 2rem;line-height:1.8;
-}
-.hero p strong{color:var(--pink);font-weight:700}
 .hero-tag{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:6px 16px;border-radius:var(--radius-pill);
+  display:inline-flex;align-items:center;gap:7px;
+  padding:7px 18px;border-radius:var(--radius-pill);
   background:var(--green-bg);color:var(--green);
-  font-size:0.8rem;font-weight:700;margin-bottom:1.5rem;
-  border:1px solid rgba(92,214,123,0.2);
+  font-size:0.78rem;font-weight:700;margin-bottom:1.75rem;
+  border:1px solid rgba(92,214,123,0.2);letter-spacing:0.01em;
 }
 .hero-tag::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse-dot 2s ease infinite}
 @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.7)}}
 
-.btn-primary{
-  display:inline-flex;align-items:center;gap:10px;
-  padding:16px 36px;border-radius:var(--radius-pill);
-  background:var(--gradient-candy);color:#fff;
-  font-family:var(--font);font-weight:800;font-size:1rem;
-  box-shadow:var(--shadow-glow);
-  transition:transform 0.4s var(--bounce),box-shadow 0.4s ease;
+.hero h1{
+  font-family:var(--font);font-weight:900;
+  font-size:clamp(3rem,8vw,6rem);line-height:1.02;
+  letter-spacing:-0.03em;margin-bottom:1.5rem;
+  max-width:14ch;
 }
-.btn-primary:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 8px 32px rgba(255,107,157,0.35)}
-.btn-primary svg{width:18px;height:18px}
+.hero h1 .gradient{
+  background:linear-gradient(110deg,#f77737 0%,#e1306c 30%,#833ab4 50%,#e1306c 70%,#f77737 100%);
+  background-size:200% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:shimmer 6s linear infinite;
+}
+@keyframes shimmer{to{background-position:-200% center}}
+
+.hero p.subtitle{
+  font-size:clamp(1rem,2vw,1.15rem);color:var(--text-soft);
+  max-width:520px;margin:0 auto;line-height:1.7;font-weight:500;
+}
 
 .scroll-hint{
-  position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);
-  display:flex;flex-direction:column;align-items:center;gap:6px;
-  color:var(--text-muted);font-size:0.75rem;font-weight:600;
+  position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  color:var(--text-muted);font-size:0.72rem;font-weight:700;
+  letter-spacing:0.1em;text-transform:uppercase;
 }
 .scroll-bounce{animation:scroll-b 2s ease-in-out infinite}
-.scroll-bounce svg{width:20px;height:20px;color:var(--text-muted)}
+.scroll-bounce svg{width:18px;height:18px;color:var(--text-muted)}
 @keyframes scroll-b{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
 
 /* ═══════════ SECTION ═══════════ */
@@ -284,7 +279,6 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   .hero{min-height:90vh;padding:1.5rem}
   .hero h1{font-size:clamp(2.2rem,10vw,3.5rem)}
   .section{padding:3rem 1.25rem}
-  .btn-primary{padding:18px 40px;font-size:1.05rem}
   .card{padding:0.85rem 1rem}
   .card-link{width:40px;height:40px}
   .controls{flex-direction:column}
@@ -309,16 +303,13 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-tag"><span></span>100% private &middot; your data never leaves your device</div>
   <div class="hero-icon"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="24" r="10" stroke="url(#ig)" stroke-width="3"/><path d="M12 56c0-11 9-20 20-20s20 9 20 20" stroke="url(#ig)" stroke-width="3" stroke-linecap="round"/><circle class="radar-ping" cx="32" cy="32" r="8" fill="none" stroke="url(#ig)" stroke-width="1.5"/><circle class="radar-ping" cx="32" cy="32" r="8" fill="none" stroke="url(#ig)" stroke-width="1.5" style="animation-delay:1.5s"/><defs><linearGradient id="ig" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#f77737"/><stop offset="50%" stop-color="#e1306c"/><stop offset="100%" stop-color="#833ab4"/></linearGradient></defs></svg></div>
-  <h1><span class="gradient">follow radar</span></h1>
-  <p>find out who's <strong>not following you back</strong> on instagram. no login needed, no sketchy apps &mdash; just use instagram's built-in download feature and we'll do the rest.</p>
-  <button class="btn-primary" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">
-    let's go
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
-  </button>
+  <div class="hero-tag">runs entirely in your browser</div>
+  <h1>see who doesn't <span class="gradient">follow you back</span>.</h1>
+  <p class="subtitle">one click on instagram. no login, no upload, no server. we never see your data.</p>
   <div class="scroll-hint">
-    <div class="scroll-bounce"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l5 5 5-5"/></svg></div>
+    scroll
+    <div class="scroll-bounce"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l5 5 5-5"/></svg></div>
   </div>
 </section>
 
