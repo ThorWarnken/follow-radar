@@ -126,6 +126,58 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .scroll-bounce svg{width:18px;height:18px;color:var(--text-muted)}
 @keyframes scroll-b{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
 
+/* ═══════════ HOW IT WORKS ═══════════ */
+.how{
+  position:relative;z-index:3;
+  max-width:1080px;margin:0 auto;padding:6rem 1.5rem;
+  text-align:center;
+}
+.how-head{margin-bottom:3rem}
+.how-head .section-badge{margin-bottom:0.9rem}
+.how-head h2{
+  font-family:var(--font);font-weight:900;
+  font-size:clamp(2rem,5vw,3rem);letter-spacing:-0.015em;line-height:1.15;
+}
+.how-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;
+  position:relative;
+}
+.how-card{
+  position:relative;padding:2.25rem 1.75rem 2rem;
+  background:rgba(255,255,255,0.7);
+  border:1px solid var(--border);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-sm);
+  text-align:left;overflow:hidden;
+  transition:transform 0.4s var(--bounce),box-shadow 0.4s ease,border-color 0.3s ease;
+}
+.how-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 12px 40px rgba(225,48,108,0.08);
+  border-color:rgba(225,48,108,0.18);
+}
+.how-card .num{
+  position:absolute;top:0.75rem;right:1.25rem;
+  font-family:var(--font);font-weight:900;
+  font-size:3rem;line-height:1;color:rgba(0,0,0,0.06);
+  letter-spacing:-0.02em;
+}
+.how-card .icon{width:36px;height:36px;color:var(--pink);margin-bottom:1rem}
+.how-card .icon svg{width:100%;height:100%}
+.how-card h3{font-family:var(--font);font-weight:800;font-size:1.05rem;margin-bottom:0.5rem;letter-spacing:-0.005em}
+.how-card p{color:var(--text-soft);font-size:0.9rem;line-height:1.65}
+.how-arrow{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:32px;height:12px;color:rgba(225,48,108,0.35);
+}
+.how-arrow.a1{left:calc(33.33% - 16px)}
+.how-arrow.a2{left:calc(66.66% - 16px)}
+.how-arrow svg{width:100%;height:100%}
+@media(max-width:760px){
+  .how-grid{grid-template-columns:1fr;gap:1rem}
+  .how-arrow{display:none}
+  .how{padding:4rem 1.25rem}
+}
+
 /* ═══════════ SECTION ═══════════ */
 .section{position:relative;z-index:3;padding:5rem 1.5rem;max-width:800px;margin:0 auto}
 .section-icon{width:40px;height:40px;margin-bottom:0.75rem;color:var(--pink)}
@@ -310,6 +362,36 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   <div class="scroll-hint">
     scroll
     <div class="scroll-bounce"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l5 5 5-5"/></svg></div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="how-head">
+    <div class="section-badge badge-pink">how it works</div>
+    <h2>three steps. about sixty seconds.</h2>
+  </div>
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="num">01</div>
+      <div class="icon"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h20v28l-10-6-10 6V4z"/></svg></div>
+      <h3>drag the button to your bookmarks bar</h3>
+      <p>it's a tiny piece of code. costs nothing, does nothing until you click it.</p>
+    </div>
+    <svg class="how-arrow a1" viewBox="0 0 32 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h26"/><path d="M22 1l6 5-6 5"/></svg>
+    <div class="how-card">
+      <div class="num">02</div>
+      <div class="icon"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="28" height="28" rx="7"/><circle cx="18" cy="18" r="6"/><circle cx="26" cy="10" r="1.6" fill="currentColor"/></svg></div>
+      <h3>open instagram and log in</h3>
+      <p>has to be the web version, not the app. mobile safari works.</p>
+    </div>
+    <svg class="how-arrow a2" viewBox="0 0 32 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h26"/><path d="M22 1l6 5-6 5"/></svg>
+    <div class="how-card">
+      <div class="num">03</div>
+      <div class="icon"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 6l4 22 5-9 9-3-18-10z"/></svg></div>
+      <h3>click the bookmarklet, wait a minute</h3>
+      <p>we'll scan your followers and following, then bring you back here with the answers.</p>
+    </div>
   </div>
 </section>
 
