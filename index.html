@@ -138,157 +138,6 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 }
 .section-desc{color:var(--text-soft);max-width:520px;margin-bottom:2rem;font-size:1rem;line-height:1.8}
 
-/* ═══════════ INSTRUCTIONS ═══════════ */
-.ig-btn{
-  display:inline-flex;align-items:center;gap:10px;
-  padding:14px 28px;border-radius:var(--radius-pill);
-  background:var(--gradient-ig);color:#fff;
-  font-family:var(--font);font-weight:800;font-size:0.95rem;
-  box-shadow:0 4px 20px rgba(225,48,108,0.25);
-  transition:transform 0.4s var(--bounce),box-shadow 0.4s ease;
-  margin-bottom:2rem;
-}
-.ig-btn:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 8px 28px rgba(225,48,108,0.35)}
-.ig-btn svg{width:18px;height:18px}
-
-.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}
-.step{
-  padding:1.5rem;border-radius:var(--radius-lg);
-  background:var(--bg-card);border:1px solid var(--border);
-  box-shadow:var(--shadow-sm);
-  transition:transform 0.4s var(--bounce),box-shadow 0.3s ease,border-color 0.3s ease;
-}
-.step:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:var(--border-hover)}
-.step-num{
-  display:inline-flex;align-items:center;justify-content:center;
-  width:32px;height:32px;border-radius:10px;
-  background:var(--gradient-sunset);color:#fff;
-  font-family:var(--font);font-weight:900;font-size:0.85rem;
-  margin-bottom:0.75rem;
-}
-.step h3{font-family:var(--font);font-weight:800;font-size:0.95rem;margin-bottom:0.4rem}
-.step p{color:var(--text-soft);font-size:0.85rem;line-height:1.6}
-.step strong{color:var(--pink);font-weight:700}
-
-/* ═══════════ WALKTHROUGH ═══════════ */
-.wt-toggle{
-  display:inline-flex;align-items:center;gap:6px;
-  margin-top:1.5rem;padding:10px 20px;border-radius:var(--radius-pill);
-  background:var(--bg-card);border:1.5px solid var(--border);
-  font-size:0.85rem;font-weight:700;color:var(--text-soft);
-  transition:all 0.3s ease;cursor:pointer;
-}
-.wt-toggle:hover{border-color:var(--border-hover);color:var(--text)}
-.wt-toggle svg{transition:transform 0.3s ease}
-.wt-toggle.open svg{transform:rotate(180deg)}
-.walkthrough{
-  margin-top:1rem;padding:2rem;border-radius:var(--radius-lg);
-  background:var(--bg-card);border:1px solid var(--border);
-  box-shadow:var(--shadow-sm);text-align:center;
-  max-height:0;overflow:hidden;opacity:0;padding:0 2rem;
-  transition:max-height 0.4s var(--ease),opacity 0.3s ease,padding 0.4s ease;
-  border-width:0;
-}
-.walkthrough.open{
-  max-height:500px;opacity:1;padding:2rem;border-width:1px;
-}
-.wt-label{
-  font-family:var(--font);font-weight:800;font-size:0.7rem;
-  letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);
-  margin-bottom:1.25rem;display:flex;align-items:center;justify-content:center;gap:8px;
-}
-.wt-label .dot{width:6px;height:6px;border-radius:50%;background:var(--pink);animation:pulse-dot 1.5s ease infinite}
-
-.phone{
-  width:260px;max-width:100%;margin:0 auto;
-  border-radius:20px;overflow:hidden;
-  background:#fafafa;border:2px solid #eee;
-  box-shadow:var(--shadow-md);
-}
-.phone-bar{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:12px 14px 8px;background:#fafafa;border-bottom:1px solid #eee;
-}
-.phone-bar-title{font-family:var(--font);font-weight:800;font-size:0.8rem;color:var(--text)}
-.phone-body{min-height:280px;transition:opacity 0.3s ease}
-
-.phone-row{
-  display:flex;align-items:center;gap:10px;
-  padding:12px 14px;border-bottom:1px solid #f0f0f0;
-  transition:background 0.3s ease;
-}
-.phone-row.hl{background:#fff0f5}
-.phone-row.hl .phone-row-text{color:var(--text);font-weight:700}
-.phone-row-icon{
-  width:28px;height:28px;border-radius:8px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-  background:#f5f5f5;
-}
-.phone-row-icon svg{width:14px;height:14px;color:var(--text-soft)}
-.phone-row-text{font-size:0.78rem;color:var(--text-soft);flex:1}
-.phone-row-arrow{color:var(--text-muted);font-size:0.65rem}
-
-.wt-dots{display:flex;justify-content:center;gap:6px;margin-top:1.25rem}
-.wt-dot{
-  width:8px;height:8px;border-radius:50%;background:#eee;cursor:pointer;
-  transition:all 0.3s ease;
-}
-.wt-dot.on{background:var(--pink);transform:scale(1.3)}
-.wt-caption{text-align:center;margin-top:0.75rem;font-size:0.82rem;color:var(--text-soft);min-height:1.4em;transition:opacity 0.3s ease}
-
-/* ═══════════ DROP ZONE ═══════════ */
-.drop{
-  position:relative;padding:3rem 2rem;border-radius:var(--radius-xl);
-  background:var(--bg-card);
-  border:3px dashed var(--pink-soft);
-  text-align:center;cursor:pointer;
-  transition:all 0.4s var(--bounce);
-  box-shadow:var(--shadow-sm);margin-bottom:1.5rem;
-}
-.drop:hover{border-color:var(--pink);transform:translateY(-3px);box-shadow:var(--shadow-md)}
-.drop.drag-over{border-color:var(--pink);border-style:solid;background:var(--pink-bg);transform:scale(1.01)}
-.drop.has-files{border-color:var(--green);border-style:solid;background:var(--green-bg)}
-.drop.err{border-color:#ff5050;border-style:solid}
-
-.drop-icon{width:48px;height:48px;margin:0 auto 0.75rem;color:var(--pink-soft)}
-.drop-icon svg{width:100%;height:100%}
-.drop-icon .upload-arrow{animation:upload-float 2s ease-in-out infinite}
-@keyframes upload-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-
-.drop h3{font-family:var(--font);font-weight:800;font-size:1.1rem;margin-bottom:0.4rem}
-.drop .hint{color:var(--text-muted);font-size:0.88rem}
-.drop .err-msg{color:#ff5050;font-size:0.82rem;margin-top:0.5rem;font-weight:600}
-.drop input[type="file"]{display:none}
-
-.chips{display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center;margin-top:1rem}
-.chip{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:7px 14px;border-radius:var(--radius-pill);font-size:0.82rem;font-weight:700;
-  animation:pop-in 0.3s var(--bounce);
-}
-@keyframes pop-in{from{opacity:0;transform:scale(0.8)}to{opacity:1;transform:scale(1)}}
-.chip-followers{background:var(--purple-bg);color:var(--purple);border:1px solid rgba(180,77,255,0.2)}
-.chip-following{background:var(--orange-bg);color:var(--orange);border:1px solid rgba(255,138,80,0.2)}
-.chip .ct{opacity:0.6;font-size:0.75rem}
-.chip .rm{
-  width:16px;height:16px;border-radius:50%;
-  background:rgba(0,0,0,0.06);color:inherit;
-  display:flex;align-items:center;justify-content:center;
-  font-size:0.6rem;cursor:pointer;transition:all 0.2s ease;
-}
-.chip .rm:hover{background:rgba(255,80,80,0.15);color:#ff5050}
-
-.btn-analyze{
-  display:none;margin:0 auto;padding:16px 48px;border-radius:var(--radius-pill);
-  background:var(--gradient-candy);color:#fff;
-  font-family:var(--font);font-weight:800;font-size:1.05rem;
-  box-shadow:var(--shadow-glow);
-  transition:transform 0.4s var(--bounce),box-shadow 0.4s ease;
-}
-.btn-analyze.show{display:inline-flex}
-.btn-analyze:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 8px 32px rgba(255,107,157,0.35)}
-.analyze-row{text-align:center}
-
 /* ═══════════ RESULTS ═══════════ */
 .results{display:none;position:relative;z-index:1}
 .results.show{display:block;animation:fadeUp 0.5s var(--ease)}
@@ -414,26 +263,16 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .footer a{color:var(--pink);font-weight:700;text-decoration:underline;text-underline-offset:3px}
 
 /* ═══════════ MOBILE OPTIMIZATIONS ═══════════ */
-.drop-mobile{display:none}
 @media(max-width:768px){
-  .drop-desktop{display:none}
-  .drop-mobile{display:block}
   .hero{min-height:90vh;padding:1.5rem}
   .hero h1{font-size:clamp(2.2rem,10vw,3.5rem)}
   .section{padding:3rem 1.25rem}
-  .steps{grid-template-columns:1fr}
-  .step{padding:1.25rem}
-  .drop{padding:2.5rem 1.5rem;border-width:3px}
-  .drop h3{font-size:1.2rem}
   .btn-primary{padding:18px 40px;font-size:1.05rem}
-  .btn-analyze{padding:18px 48px;font-size:1.1rem}
-  .ig-btn{padding:16px 28px;font-size:1rem}
   .card{padding:0.85rem 1rem}
   .card-link{width:40px;height:40px}
   .controls{flex-direction:column}
   .search{min-width:100%}
   .sort{width:100%}
-  .wt-toggle{width:100%;justify-content:center;padding:14px 20px}
   .scroll-hint{display:none}
 }
 @media(max-width:380px){
@@ -465,66 +304,6 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   </div>
 </section>
 
-<!-- INSTRUCTIONS -->
-<section class="section" id="how">
-  <div class="section-icon"><svg class="icon-pulse" viewBox="0 0 40 40" fill="none"><rect x="4" y="4" width="32" height="32" rx="8" stroke="currentColor" stroke-width="2.5"/><circle cx="20" cy="18" r="6" stroke="currentColor" stroke-width="2"/><circle cx="28" cy="10" r="2.5" fill="currentColor" opacity="0.6"/><path d="M12 30c0-4 3.5-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.4"/></svg></div>
-  <div class="section-badge badge-pink">step 1</div>
-  <h2 class="section-title">get your follower list from instagram</h2>
-  <p class="section-desc">instagram has a built-in feature that saves your followers and following lists. works on iPhone, Android, or desktop &mdash; takes about 2 minutes.</p>
-
-  <a class="ig-btn" href="https://accountscenter.instagram.com/info_and_permissions/dyi/" target="_blank" rel="noopener">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-    open instagram settings
-  </a>
-
-  <div class="steps">
-    <div class="step"><div class="step-num">1</div><h3>request your list</h3><p>tap the button above &rarr; pick <strong>Some of your information</strong> &rarr; check <strong>Followers</strong> and <strong>Following</strong> &rarr; choose <strong>JSON</strong></p></div>
-    <div class="step"><div class="step-num">2</div><h3>check your email</h3><p>instagram emails you a download link in a few minutes &mdash; tap it to save the .zip to your phone</p></div>
-    <div class="step"><div class="step-num">3</div><h3>upload it here</h3><p>tap the upload button below &rarr; find the .zip in your <strong>Downloads</strong> folder &mdash; that's it</p></div>
-  </div>
-
-  <button class="wt-toggle" id="wt-toggle" onclick="document.getElementById('walkthrough').classList.toggle('open');this.classList.toggle('open')">
-    need help? see visual guide
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M6 9l6 6 6-6"/></svg>
-  </button>
-  <div class="walkthrough" id="walkthrough">
-    <div class="wt-label"><span class="dot"></span> visual guide</div>
-    <div class="phone">
-      <div class="phone-bar">
-        <span class="phone-bar-title">Accounts Center</span>
-      </div>
-      <div class="phone-body" id="phone-body"></div>
-    </div>
-    <div class="wt-dots" id="wt-dots">
-      <div class="wt-dot on" data-s="0"></div>
-      <div class="wt-dot" data-s="1"></div>
-      <div class="wt-dot" data-s="2"></div>
-      <div class="wt-dot" data-s="3"></div>
-    </div>
-    <div class="wt-caption" id="wt-caption"></div>
-  </div>
-</section>
-
-<!-- UPLOAD -->
-<section class="section" id="upload">
-  <div class="section-icon" style="color:var(--purple)"><svg class="icon-pulse" viewBox="0 0 40 40" fill="none"><path d="M8 14l12-8 12 8v16l-12 8-12-8V14z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><path d="M8 14l12 8 12-8" stroke="currentColor" stroke-width="2" stroke-linejoin="round" opacity="0.4"/><line x1="20" y1="22" x2="20" y2="38" stroke="currentColor" stroke-width="2" opacity="0.4"/></svg></div>
-  <div class="section-badge badge-purple">step 2</div>
-  <h2 class="section-title">upload your files</h2>
-  <p class="section-desc">drop the files from instagram here &mdash; we'll automatically figure out the rest. nothing gets uploaded to any server.</p>
-
-  <div class="drop" id="drop">
-    <div class="drop-icon"><svg viewBox="0 0 48 48" fill="none"><rect x="8" y="6" width="32" height="36" rx="4" stroke="currentColor" stroke-width="2.5"/><g class="upload-arrow"><path d="M24 32V18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M18 24l6-6 6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g><line x1="16" y1="36" x2="32" y2="36" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.35"/></svg></div>
-    <h3 class="drop-desktop">drop your .zip here</h3>
-    <h3 class="drop-mobile">tap to upload your .zip</h3>
-    <p class="hint drop-desktop">or tap to browse your files</p>
-    <p class="hint drop-mobile">find it in your Downloads folder</p>
-    <input type="file" accept=".json,.zip" multiple>
-    <div class="chips" id="chips"></div>
-  </div>
-  <div class="analyze-row">
-    <button class="btn-analyze" id="btn-go">run the check <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;vertical-align:middle;margin-left:2px"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg></button>
-  </div>
-</section>
 
 <!-- RESULTS -->
 <section class="section results" id="results">
@@ -644,152 +423,14 @@ function draw(){const t=(Date.now()-t0)/1000;gl.clearColor(0,0,0,1);gl.clear(gl.
 requestAnimationFrame(draw);
 })();
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 (()=>{
 'use strict';
-const state={followers:new Map(),following:new Map(),mutuals:new Set(),nonFol:[],filtered:[],loaded:{followers:false,following:false},names:{followers:[],following:[]},q:'',sort:'recent'};
+const state={mutuals:new Set(),nonFol:[],filtered:[],q:'',sort:'recent'};
 const $=s=>document.querySelector(s);
-const el={drop:$('#drop'),chips:$('#chips'),go:$('#btn-go'),res:$('#results'),sf:$('#s-followers'),sg:$('#s-following'),sn:$('#s-nonfol'),sm:$('#s-mutuals'),q:$('#q'),qx:$('#qx'),srt:$('#srt'),cnt:$('#cnt'),csv:$('#csv'),list:$('#list'),inner:$('#list-inner'),spT:$('#sp-top'),spB:$('#sp-bot'),empty:$('#empty')};
-
-function parse(d,t){
-  let e;
-  if(Array.isArray(d))e=d;
-  else if(typeof d==='object'&&d!==null){
-    const k=t==='followers'?['relationships_followers','followers']:['relationships_following','following'];
-    for(const x of k){if(d[x]&&Array.isArray(d[x])){e=d[x];break}}
-    if(!e)for(const x of Object.keys(d)){if(Array.isArray(d[x])&&d[x].length>0){e=d[x];break}}
-  }
-  if(!e||!Array.isArray(e))throw new Error('Unrecognized format');
-  const m=new Map();
-  for(const i of e){
-    let u='',h='',ts=0;
-    if(i.string_list_data&&i.string_list_data.length>0){const x=i.string_list_data[0];u=(x.value||'').trim();h=x.href||'';ts=x.timestamp||0}
-    else if(i.title)u=i.title.trim();
-    if(u){const k=u.toLowerCase();if(!h)h='https://www.instagram.com/'+encodeURIComponent(u)+'/';m.set(k,{dn:u,href:h,ts:ts})}
-  }
-  return m;
-}
-
-function detect(d,n){
-  const l=(n||'').toLowerCase();
-  if(l.includes('following'))return'following';if(l.includes('follower'))return'followers';
-  if(typeof d==='object'&&!Array.isArray(d)&&d!==null){
-    if(d.relationships_following||d.following)return'following';
-    if(d.relationships_followers||d.followers)return'followers';
-  }
-  return null;
-}
-
-function readJSON(f){return new Promise((ok,no)=>{const r=new FileReader();r.onload=e=>{try{ok(JSON.parse(e.target.result))}catch(x){no(new Error('Invalid JSON: '+f.name))}};r.onerror=()=>no(new Error('Read failed: '+f.name));r.readAsText(f)})}
-
-async function handleZip(file){
-  try{
-    const zip=await JSZip.loadAsync(file);
-    const jsonFiles=[];
-    zip.forEach((path,entry)=>{if(!entry.dir&&path.endsWith('.json'))jsonFiles.push({path,entry})});
-    if(!jsonFiles.length){showErr('no follower/following files found in zip');return}
-    for(const{path,entry}of jsonFiles){
-      try{
-        const txt=await entry.async('string');
-        const d=JSON.parse(txt);
-        const name=path.split('/').pop();
-        let t=detect(d,name);
-        if(!t){try{const p=parse(d,'followers');if(p.size>0){t='followers'}}catch(_){try{const p=parse(d,'following');if(p.size>0){t='following'}}catch(__){continue}}}
-        if(!t)continue;
-        const p=parse(d,t);
-        for(const[k,v]of p)state[t].set(k,v);
-        state.loaded[t]=true;state.names[t].push(name);
-      }catch(_){}
-    }
-  }catch(x){showErr('could not read zip file')}
-}
-
-async function handleFiles(files){
-  const arr=Array.from(files);
-  const zips=arr.filter(f=>f.name.endsWith('.zip'));
-  const jsons=arr.filter(f=>f.name.endsWith('.json'));
-  if(!zips.length&&!jsons.length){showErr('please upload a .zip or .json file');return}
-  clearErr();
-  for(const f of zips)await handleZip(f);
-  for(const f of jsons){
-    try{
-      const d=await readJSON(f);let t=detect(d,f.name);
-      if(!t){try{const p=parse(d,'followers');if(p.size>0){t='followers'}}catch(_){try{const p=parse(d,'following');if(p.size>0){t='following'}}catch(__){showErr("can't recognize "+f.name);continue}}}
-      if(!t)continue;
-      const p=parse(d,t);
-      for(const[k,v]of p)state[t].set(k,v);
-      state.loaded[t]=true;state.names[t].push(f.name);
-    }catch(x){showErr(x.message)}
-  }
-  renderChips();checkReady();
-}
-
-function renderChips(){
-  el.chips.innerHTML='';const any=state.loaded.followers||state.loaded.following;
-  el.drop.classList.toggle('has-files',any);
-  for(const t of['followers','following']){
-    if(!state.loaded[t])continue;
-    const c=document.createElement('div');c.className='chip chip-'+t;
-    c.innerHTML='<span>'+(t==='followers'?'Followers':'Following')+'</span><span class="ct">'+state[t].size.toLocaleString()+'</span><button class="rm" data-t="'+t+'">&times;</button>';
-    el.chips.appendChild(c);
-  }
-  el.chips.querySelectorAll('.rm').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const x=b.dataset.t;state[x]=new Map();state.loaded[x]=false;state.names[x]=[];renderChips();checkReady()}));
-}
-
-function showErr(m){el.drop.classList.add('err');let e=el.drop.querySelector('.err-msg');if(!e){e=document.createElement('p');e.className='err-msg';el.drop.appendChild(e)}e.textContent=m}
-function clearErr(){el.drop.classList.remove('err');const e=el.drop.querySelector('.err-msg');if(e)e.remove()}
-function checkReady(){el.go.classList.toggle('show',state.loaded.followers&&state.loaded.following)}
-
-function setupDrop(){
-  const z=el.drop,fi=z.querySelector('input[type="file"]');
-  z.addEventListener('click',e=>{if(e.target.closest('.rm'))return;fi.click()});
-  fi.addEventListener('change',()=>{if(fi.files.length)handleFiles(fi.files);fi.value=''});
-  z.addEventListener('dragenter',e=>{e.preventDefault();z.classList.add('drag-over')});
-  z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('drag-over')});
-  z.addEventListener('dragleave',e=>{if(!z.contains(e.relatedTarget))z.classList.remove('drag-over')});
-  z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('drag-over');if(e.dataTransfer.files.length)handleFiles(e.dataTransfer.files)});
-}
-
-// WALKTHROUGH
-function initWT(){
-  const body=$('#phone-body'),cap=$('#wt-caption'),dots=document.querySelectorAll('.wt-dot');
-  if(!body)return;
-  const steps=[
-    {cap:'tap "Your information and permissions"',items:[{i:'user',t:'Personal details'},{i:'key',t:'Password and security'},{i:'dl',t:'Your information and permissions',hl:true},{i:'bell',t:'Notifications'}]},
-    {cap:'tap "Download or transfer information"',items:[{i:'eye',t:'Access your information'},{i:'dl',t:'Download or transfer information',hl:true},{i:'trash',t:'Delete your information'}]},
-    {cap:'pick "Some of your information"',items:[{i:'chk',t:'your_account'},{i:'o',t:'All available information'},{i:'chkf',t:'Some of your information',hl:true}]},
-    {cap:'check Followers + Following, pick JSON',items:[{i:'chkf',t:'Followers',hl:true},{i:'chkf',t:'Following',hl:true},{i:'o',t:'Other connections'},{i:'json',t:'Format: JSON',hl:true}]}
-  ];
-  let cur=0;
-  function show(idx){
-    const s=steps[idx];body.style.opacity='0';
-    setTimeout(()=>{body.innerHTML='';s.items.forEach(it=>{const r=document.createElement('div');r.className='phone-row'+(it.hl?' hl':'');r.innerHTML='<div class="phone-row-icon">'+ico(it.i)+'</div><span class="phone-row-text">'+it.t+'</span><span class="phone-row-arrow">&rsaquo;</span>';body.appendChild(r)});body.style.opacity='1'},250);
-    cap.style.opacity='0';setTimeout(()=>{cap.textContent=s.cap;cap.style.opacity='1'},350);
-    dots.forEach((d,i)=>d.classList.toggle('on',i===idx));
-  }
-  function ico(n){
-    const s='viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
-    const map={user:'<svg '+s+'><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',key:'<svg '+s+'><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>',dl:'<svg '+s+'><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',bell:'<svg '+s+'><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',eye:'<svg '+s+'><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',trash:'<svg '+s+'><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',chk:'<svg '+s+'><polyline points="20 6 9 17 4 12"/></svg>',chkf:'<svg viewBox="0 0 24 24" fill="#e1306c" stroke="#e1306c" stroke-width="0"><rect x="3" y="3" width="18" height="18" rx="4"/><polyline points="9 12 11 14 15 10" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',o:'<svg '+s+'><circle cx="12" cy="12" r="9"/></svg>',json:'<svg '+s+'><path d="M16 18l6-6-6-6"/><path d="M8 6l-6 6 6 6"/></svg>'};
-    return map[n]||map.o;
-  }
-  show(0);
-  let iv=setInterval(()=>{cur=(cur+1)%steps.length;show(cur)},3500);
-  dots.forEach(d=>d.addEventListener('click',()=>{clearInterval(iv);cur=parseInt(d.dataset.s);show(cur);iv=setInterval(()=>{cur=(cur+1)%steps.length;show(cur)},3500)}));
-}
+const el={res:$('#results'),sf:$('#s-followers'),sg:$('#s-following'),sn:$('#s-nonfol'),sm:$('#s-mutuals'),q:$('#q'),qx:$('#qx'),srt:$('#srt'),cnt:$('#cnt'),csv:$('#csv'),list:$('#list'),inner:$('#list-inner'),spT:$('#sp-top'),spB:$('#sp-bot'),empty:$('#empty')};
 
 // ANALYZE
-function analyze(){
-  const{followers,following}=state;
-  const mu=new Set();for(const u of followers.keys())if(following.has(u))mu.add(u);
-  state.mutuals=mu;
-  const nf=[];for(const[u,d]of following.entries())if(!followers.has(u))nf.push({un:d.dn,ul:u,href:d.href,ts:d.ts});
-  state.nonFol=nf;state.filtered=[...nf];
-  doSort();render();
-  el.res.classList.add('show');
-  setTimeout(()=>el.res.scrollIntoView({behavior:'smooth',block:'start'}),100);
-  anim(el.sf,followers.size);anim(el.sg,following.size);anim(el.sn,nf.length);anim(el.sm,mu.size);
-}
 
 function doSort(){
   const a=state.filtered;
@@ -853,16 +494,12 @@ function exportCSV(){
 function debounce(fn,ms){let t;return()=>{clearTimeout(t);t=setTimeout(fn,ms)}}
 
 function init(){
-  setupDrop();initWT();
-  el.go.addEventListener('click',analyze);
   const df=debounce(()=>{state.q=el.q.value;el.qx.classList.toggle('on',!!state.q);filter()},150);
   el.q.addEventListener('input',df);
   el.qx.addEventListener('click',()=>{el.q.value='';state.q='';el.qx.classList.remove('on');filter()});
   el.srt.addEventListener('change',()=>{state.sort=el.srt.value;doSort();render()});
   el.list.addEventListener('scroll',()=>{if(state.filtered.length>200)requestAnimationFrame(vRender)});
   el.csv.addEventListener('click',exportCSV);
-  const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)';obs.unobserve(e.target)}})},{threshold:0.15});
-  document.querySelectorAll('.step').forEach((c,i)=>{c.style.opacity='0';c.style.transform='translateY(16px)';c.style.transition='opacity 0.5s var(--ease) '+(i*0.08)+'s, transform 0.5s var(--ease) '+(i*0.08)+'s';obs.observe(c)});
 }
 
 document.addEventListener('DOMContentLoaded',init);
