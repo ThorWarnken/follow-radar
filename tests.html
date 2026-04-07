@@ -77,5 +77,40 @@ test('constants are exposed', () => {
   assertEq(c.RESUME_KEY, 'follow-radar:resume');
 });
 </script>
+
+<script>
+test('encodePayload / decodePayload round-trip on small object', async () => {
+  const enc = window.__followRadarTest.encodePayload;
+  const dec = window.__followRadarTest.decodePayload;
+  const obj = { username: 'thor', followers: [{username:'a',full_name:'A',is_private:false}] };
+  const s = await enc(obj);
+  assert(typeof s === 'string', 'should return string');
+  assert(s.startsWith('g:') || s.startsWith('r:'), 'should have tag prefix');
+  const back = await dec(s);
+  assertEq(back, obj);
+});
+
+test('encodePayload / decodePayload round-trip on 2000-account list', async () => {
+  const enc = window.__followRadarTest.encodePayload;
+  const dec = window.__followRadarTest.decodePayload;
+  const followers = [];
+  for (let i = 0; i < 2000; i++) {
+    followers.push({username: 'user' + i, full_name: 'User ' + i, is_private: i % 7 === 0});
+  }
+  const obj = {username: 'thor', userId: '123', scrapedAt: '2026-04-07T00:00:00Z', followers, following: []};
+  const s = await enc(obj);
+  const back = await dec(s);
+  assertEq(back.followers.length, 2000);
+  assertEq(back.followers[0], followers[0]);
+  assertEq(back.followers[1999], followers[1999]);
+});
+
+test('decodePayload throws on garbage', async () => {
+  const dec = window.__followRadarTest.decodePayload;
+  let threw = false;
+  try { await dec('x:notreal'); } catch (e) { threw = true; }
+  assert(threw, 'should throw on unknown tag');
+});
+</script>
 </body>
 </html>
