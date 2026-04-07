@@ -112,5 +112,81 @@ test('decodePayload throws on garbage', async () => {
   assert(threw, 'should throw on unknown tag');
 });
 </script>
+
+<script>
+function mockStorage() {
+  const data = {};
+  return {
+    getItem: k => (k in data) ? data[k] : null,
+    setItem: (k, v) => { data[k] = String(v); },
+    removeItem: k => { delete data[k]; },
+    _data: data,
+  };
+}
+
+test('saveResumeState writes JSON with timestamp', () => {
+  const s = mockStorage();
+  const save = window.__followRadarTest.saveResumeState;
+  save({userId: 'u1', cursor: 'abc', phase: 'followers', partialFollowers: [], partialFollowing: []}, s);
+  const raw = s.getItem('follow-radar:resume');
+  assert(raw, 'should write something');
+  const obj = JSON.parse(raw);
+  assertEq(obj.userId, 'u1');
+  assertEq(obj.cursor, 'abc');
+  assert(typeof obj.timestamp === 'number');
+});
+
+test('loadResumeState returns null when nothing stored', () => {
+  const s = mockStorage();
+  const load = window.__followRadarTest.loadResumeState;
+  assertEq(load('u1', s), null);
+});
+
+test('loadResumeState returns state when user matches and not stale', () => {
+  const s = mockStorage();
+  const save = window.__followRadarTest.saveResumeState;
+  const load = window.__followRadarTest.loadResumeState;
+  save({userId: 'u1', cursor: 'abc'}, s);
+  const r = load('u1', s);
+  assert(r && !r.mismatch, 'should return real state');
+  assertEq(r.userId, 'u1');
+  assertEq(r.cursor, 'abc');
+});
+
+test('loadResumeState returns mismatch when userId differs', () => {
+  const s = mockStorage();
+  const save = window.__followRadarTest.saveResumeState;
+  const load = window.__followRadarTest.loadResumeState;
+  save({userId: 'u1', cursor: 'abc'}, s);
+  const r = load('u2', s);
+  assert(r && r.mismatch === true, 'should return mismatch object');
+  assertEq(r.userId, 'u1');
+});
+
+test('loadResumeState returns null when stale (>24h)', () => {
+  const s = mockStorage();
+  const load = window.__followRadarTest.loadResumeState;
+  const stale = {userId: 'u1', cursor: 'abc', timestamp: Date.now() - (25 * 60 * 60 * 1000)};
+  s.setItem('follow-radar:resume', JSON.stringify(stale));
+  assertEq(load('u1', s), null);
+});
+
+test('clearResumeState removes the key', () => {
+  const s = mockStorage();
+  const save = window.__followRadarTest.saveResumeState;
+  const clear = window.__followRadarTest.clearResumeState;
+  save({userId: 'u1'}, s);
+  assert(s.getItem('follow-radar:resume') !== null);
+  clear(s);
+  assertEq(s.getItem('follow-radar:resume'), null);
+});
+
+test('loadResumeState returns null on garbage JSON', () => {
+  const s = mockStorage();
+  const load = window.__followRadarTest.loadResumeState;
+  s.setItem('follow-radar:resume', 'not valid json');
+  assertEq(load('u1', s), null);
+});
+</script>
 </body>
 </html>

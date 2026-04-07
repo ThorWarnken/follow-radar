@@ -83,6 +83,36 @@
     return JSON.parse(new TextDecoder().decode(raw));
   }
 
+  // ─── Resume state ────────────────────────────────────────────────
+
+  // storage param lets tests inject a mock; defaults to real localStorage.
+  function saveResumeState(state, storage) {
+    const s = storage || localStorage;
+    const wrapped = Object.assign({timestamp: Date.now()}, state);
+    s.setItem(RESUME_KEY, JSON.stringify(wrapped));
+  }
+
+  function loadResumeState(currentUserId, storage) {
+    const s = storage || localStorage;
+    const raw = s.getItem(RESUME_KEY);
+    if (!raw) return null;
+    let parsed;
+    try { parsed = JSON.parse(raw); } catch (e) { return null; }
+    if (!parsed || typeof parsed !== 'object') return null;
+    if (typeof parsed.timestamp !== 'number') return null;
+    if (Date.now() - parsed.timestamp > RESUME_MAX_AGE_MS) return null;
+    if (parsed.userId !== currentUserId) {
+      // Caller is responsible for surfacing the mismatch.
+      return { mismatch: true, userId: parsed.userId };
+    }
+    return parsed;
+  }
+
+  function clearResumeState(storage) {
+    const s = storage || localStorage;
+    s.removeItem(RESUME_KEY);
+  }
+
   // Expose for tests. In real bookmarklet runs, window.__followRadarTest is undefined.
   if (typeof window !== 'undefined' && window.__followRadarTest) {
     window.__followRadarTest.RateLimitError = RateLimitError;
@@ -92,6 +122,9 @@
     };
     window.__followRadarTest.encodePayload = encodePayload;
     window.__followRadarTest.decodePayload = decodePayload;
+    window.__followRadarTest.saveResumeState = saveResumeState;
+    window.__followRadarTest.loadResumeState = loadResumeState;
+    window.__followRadarTest.clearResumeState = clearResumeState;
     return; // skip main() in test mode
   }
 
