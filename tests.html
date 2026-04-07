@@ -188,5 +188,89 @@ test('loadResumeState returns null on garbage JSON', () => {
   assertEq(load('u1', s), null);
 });
 </script>
+
+<script>
+test('classifyResponse: 200 with users array returns users + cursor', () => {
+  const c = window.__followRadarTest.classifyResponse;
+  const r = c(200, {users: [{username:'a'}, {username:'b'}], next_max_id: 'cur1'});
+  assertEq(r.users.length, 2);
+  assertEq(r.nextCursor, 'cur1');
+});
+
+test('classifyResponse: 200 with users but no next_max_id returns null cursor', () => {
+  const c = window.__followRadarTest.classifyResponse;
+  const r = c(200, {users: [{username:'a'}]});
+  assertEq(r.nextCursor, null);
+});
+
+test('classifyResponse: 429 throws RateLimitError', () => {
+  const c = window.__followRadarTest.classifyResponse;
+  const E = window.__followRadarTest.RateLimitError;
+  let threw = null;
+  try { c(429, {}); } catch (e) { threw = e; }
+  assert(threw instanceof E, 'should throw RateLimitError');
+  assertEq(threw.reason, 'http 429');
+});
+
+test('classifyResponse: 401 throws RateLimitError', () => {
+  const c = window.__followRadarTest.classifyResponse;
+  const E = window.__followRadarTest.RateLimitError;
+  let threw = null;
+  try { c(401, {}); } catch (e) { threw = e; }
+  assert(threw instanceof E);
+  assertEq(threw.reason, 'http 401');
+});
+
+test('classifyResponse: feedback_required body throws RateLimitError', () => {
+  const c = window.__followRadarTest.classifyResponse;
+  const E = window.__followRadarTest.RateLimitError;
+  let threw = null;
+  try { c(200, {message: 'feedback_required'}); } catch (e) { threw = e; }
+  assert(threw instanceof E);
+  assertEq(threw.reason, 'feedback_required');
+});
+
+test('classifyResponse: login_required throws RateLimitError', () => {
+  const c = window.__followRadarTest.classifyResponse;
+  const E = window.__followRadarTest.RateLimitError;
+  let threw = null;
+  try { c(200, {message: 'login_required'}); } catch (e) { threw = e; }
+  assert(threw instanceof E);
+});
+
+test('classifyResponse: 500 throws generic Error (not RateLimitError)', () => {
+  const c = window.__followRadarTest.classifyResponse;
+  const E = window.__followRadarTest.RateLimitError;
+  let threw = null;
+  try { c(500, {}); } catch (e) { threw = e; }
+  assert(threw && !(threw instanceof E), 'should be generic Error');
+});
+
+test('classifyResponse: 200 with no users field throws generic Error', () => {
+  const c = window.__followRadarTest.classifyResponse;
+  let threw = null;
+  try { c(200, {something: 'else'}); } catch (e) { threw = e; }
+  assert(threw && threw.message.indexOf('users') >= 0);
+});
+
+test('fetchPage uses injected fetch and skipThrottle', async () => {
+  const set = window.__followRadarTest.setFetch;
+  const fp = window.__followRadarTest.fetchPage;
+  let calledWith = null;
+  set(async (url, opts) => {
+    calledWith = {url, opts};
+    return {
+      status: 200,
+      json: async () => ({users: [{username:'x'}], next_max_id: 'n'}),
+    };
+  });
+  const r = await fp('https://i.instagram.com/api/v1/friendships/123/followers/?count=200', {skipThrottle: true});
+  assertEq(r.users.length, 1);
+  assertEq(r.nextCursor, 'n');
+  assert(calledWith.url.indexOf('/followers/') >= 0);
+  assertEq(calledWith.opts.headers['X-IG-App-ID'], '936619743392459');
+  assertEq(calledWith.opts.credentials, 'include');
+});
+</script>
 </body>
 </html>

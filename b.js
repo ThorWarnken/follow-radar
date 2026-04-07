@@ -113,6 +113,58 @@
     s.removeItem(RESUME_KEY);
   }
 
+  // ─── Fetch + classification ──────────────────────────────────────
+
+  // doFetch is replaceable in tests via window.__followRadarTest.setFetch().
+  let doFetch = (typeof fetch !== 'undefined') ? fetch.bind(typeof window !== 'undefined' ? window : undefined) : null;
+
+  async function throttle() {
+    const ms = THROTTLE_MS + Math.random() * THROTTLE_JITTER_MS;
+    await new Promise(r => setTimeout(r, ms));
+  }
+
+  // Classify a parsed JSON response into either {users, nextCursor} or
+  // a thrown RateLimitError. Pure function — easy to unit-test.
+  function classifyResponse(status, body) {
+    if (status === 429) throw new RateLimitError('http 429');
+    if (status === 401) throw new RateLimitError('http 401');
+    if (status >= 500) throw new Error('instagram server error: http ' + status);
+    if (status !== 200) throw new Error('unexpected http status: ' + status);
+    if (!body || typeof body !== 'object') throw new Error('non-object response body');
+    // IG sometimes 200s with a "feedback_required" body when throttled.
+    if (body.message === 'feedback_required' || body.spam === true) {
+      throw new RateLimitError('feedback_required');
+    }
+    if (body.require_login || body.message === 'login_required') {
+      throw new RateLimitError('login_required');
+    }
+    if (!Array.isArray(body.users)) throw new Error('response missing users array');
+    return { users: body.users, nextCursor: body.next_max_id || null };
+  }
+
+  // fetchPage does the actual HTTP call, with throttling.
+  // Returns {users, nextCursor} or throws.
+  async function fetchPage(url, opts) {
+    opts = opts || {};
+    if (!opts.skipThrottle) await throttle();
+    let resp;
+    try {
+      resp = await doFetch(url, {
+        credentials: 'include',
+        headers: { 'X-IG-App-ID': IG_APP_ID, 'Accept': 'application/json' },
+      });
+    } catch (e) {
+      throw new Error('network error: ' + e.message);
+    }
+    let body;
+    try {
+      body = await resp.json();
+    } catch (e) {
+      throw new Error('non-json response from instagram');
+    }
+    return classifyResponse(resp.status, body);
+  }
+
   // Expose for tests. In real bookmarklet runs, window.__followRadarTest is undefined.
   if (typeof window !== 'undefined' && window.__followRadarTest) {
     window.__followRadarTest.RateLimitError = RateLimitError;
@@ -125,6 +177,9 @@
     window.__followRadarTest.saveResumeState = saveResumeState;
     window.__followRadarTest.loadResumeState = loadResumeState;
     window.__followRadarTest.clearResumeState = clearResumeState;
+    window.__followRadarTest.classifyResponse = classifyResponse;
+    window.__followRadarTest.fetchPage = fetchPage;
+    window.__followRadarTest.setFetch = function (fn) { doFetch = fn; };
     return; // skip main() in test mode
   }
 
