@@ -285,6 +285,42 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   .bm-diagram .arrow-path{animation:none}
 }
 
+/* ═══════════ PRIVACY ═══════════ */
+.privacy{position:relative;z-index:3;max-width:1080px;margin:0 auto;padding:5rem 1.5rem;text-align:center}
+.privacy-head{margin-bottom:2.5rem}
+.privacy-head .section-badge{margin-bottom:0.9rem}
+.privacy-head h2{
+  font-family:var(--font);font-weight:900;
+  font-size:clamp(1.75rem,4.5vw,2.5rem);letter-spacing:-0.015em;
+}
+.privacy-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:1.75rem;
+  text-align:left;
+}
+.privacy-item{padding:0.5rem}
+.privacy-item .icon{width:24px;height:24px;color:var(--pink);margin-bottom:0.85rem}
+.privacy-item .icon svg{width:100%;height:100%}
+.privacy-item h3{font-family:var(--font);font-weight:800;font-size:0.95rem;margin-bottom:0.4rem;letter-spacing:-0.005em}
+.privacy-item p{color:var(--text-soft);font-size:0.85rem;line-height:1.65}
+
+@media(max-width:760px){
+  .privacy{padding:3.5rem 0}
+  .privacy-head{padding:0 1.25rem}
+  .privacy-grid{
+    grid-template-columns:none;
+    grid-auto-flow:column;grid-auto-columns:78%;
+    overflow-x:auto;scroll-snap-type:x mandatory;
+    gap:1rem;padding:0 1.25rem;
+    scrollbar-width:none;
+  }
+  .privacy-grid::-webkit-scrollbar{display:none}
+  .privacy-item{
+    scroll-snap-align:start;
+    padding:1.25rem;background:rgba(255,255,255,0.7);
+    border:1px solid var(--border);border-radius:var(--radius-lg);
+  }
+}
+
 /* ═══════════ RESULTS ═══════════ */
 .results{display:none;position:relative;z-index:3}
 .results.show{display:block;animation:fadeUp 0.5s var(--ease)}
@@ -518,6 +554,36 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
     </div>
 
     <p class="bm-helper">don't see your bookmarks bar? press <kbd>⌘⇧B</kbd> on mac or <kbd>Ctrl+Shift+B</kbd> on windows.</p>
+  </div>
+</section>
+
+<!-- PRIVACY -->
+<section class="privacy" id="privacy">
+  <div class="privacy-head">
+    <div class="section-badge badge-purple">privacy</div>
+    <h2>nothing leaves your browser. truly.</h2>
+  </div>
+  <div class="privacy-grid">
+    <div class="privacy-item">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+      <h3>no login</h3>
+      <p>we never ask for your password. instagram never sees us at all.</p>
+    </div>
+    <div class="privacy-item">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M2 9h20"/><path d="M7 18v3M17 18v3M5 21h14"/></svg></div>
+      <h3>no server</h3>
+      <p>everything runs in your browser. there is no backend to leak data from.</p>
+    </div>
+    <div class="privacy-item">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></div>
+      <h3>no tracking</h3>
+      <p>no analytics, no cookies, no fingerprinting. open the network tab and check.</p>
+    </div>
+    <div class="privacy-item">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+      <h3>open source</h3>
+      <p>the bookmarklet is a few hundred lines of javascript. read it before you run it.</p>
+    </div>
   </div>
 </section>
 
