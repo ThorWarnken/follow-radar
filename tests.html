@@ -56,5 +56,26 @@
 })();
 </script>
 <!-- Test files are appended below as new tasks add them. -->
+
+<script>
+test('RateLimitError is an Error subclass', () => {
+  const E = window.__followRadarTest.RateLimitError;
+  const e = new E('429');
+  assert(e instanceof Error, 'should be Error');
+  assert(e instanceof E, 'should be RateLimitError');
+  assertEq(e.name, 'RateLimitError');
+  assertEq(e.reason, '429');
+  assert(e.message.indexOf('429') >= 0, 'message includes reason');
+});
+
+test('constants are exposed', () => {
+  const c = window.__followRadarTest.constants;
+  assertEq(c.MAX_ACCOUNT_SIZE, 10000);
+  assertEq(c.THROTTLE_MS, 1500);
+  assertEq(c.PAGE_SIZE, 200);
+  assertEq(c.FOLLOW_RADAR_URL, 'https://follow-radar.app');
+  assertEq(c.RESUME_KEY, 'follow-radar:resume');
+});
+</script>
 </body>
 </html>
