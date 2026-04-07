@@ -54,13 +54,13 @@ body{
   position:relative;
 }
 body::before{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:2;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   opacity:0.035;mix-blend-mode:multiply;
 }
 .orb{
   position:fixed;top:-200px;right:-200px;width:600px;height:600px;
-  border-radius:50%;pointer-events:none;z-index:0;
+  border-radius:50%;pointer-events:none;z-index:1;
   background:radial-gradient(circle, rgba(225,48,108,0.22), rgba(131,58,180,0.12) 40%, transparent 70%);
   filter:blur(80px);
 }
@@ -78,7 +78,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 
 /* ═══════════ HERO ═══════════ */
 .hero{
-  position:relative;z-index:1;min-height:100vh;
+  position:relative;z-index:3;min-height:100vh;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;padding:2rem;
 }
@@ -132,7 +132,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 @keyframes scroll-b{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
 
 /* ═══════════ SECTION ═══════════ */
-.section{position:relative;z-index:1;padding:5rem 1.5rem;max-width:800px;margin:0 auto}
+.section{position:relative;z-index:3;padding:5rem 1.5rem;max-width:800px;margin:0 auto}
 .section-icon{width:40px;height:40px;margin-bottom:0.75rem;color:var(--pink)}
 .section-icon svg{width:100%;height:100%}
 .section-icon .icon-pulse{animation:icon-breathe 2.5s ease-in-out infinite}
@@ -156,7 +156,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .section-desc{color:var(--text-soft);max-width:520px;margin-bottom:2rem;font-size:1rem;line-height:1.8}
 
 /* ═══════════ RESULTS ═══════════ */
-.results{display:none;position:relative;z-index:1}
+.results{display:none;position:relative;z-index:3}
 .results.show{display:block;animation:fadeUp 0.5s var(--ease)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 
@@ -266,7 +266,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 
 /* ═══════════ FOOTER ═══════════ */
 .footer{
-  position:relative;z-index:1;text-align:center;padding:2.5rem 1.5rem;
+  position:relative;z-index:3;text-align:center;padding:2.5rem 1.5rem;
   color:var(--text-muted);font-size:0.82rem;
 }
 .footer-lock{
