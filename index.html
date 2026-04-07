@@ -808,83 +808,270 @@ requestAnimationFrame(draw);
 <script>
 (()=>{
 'use strict';
-const state={mutuals:new Set(),nonFol:[],filtered:[],q:'',sort:'recent'};
-const $=s=>document.querySelector(s);
-const el={res:$('#results'),sf:$('#s-followers'),sg:$('#s-following'),sn:$('#s-nonfol'),sm:$('#s-mutuals'),q:$('#q'),qx:$('#qx'),srt:$('#srt'),cnt:$('#cnt'),csv:$('#csv'),list:$('#list'),inner:$('#list-inner'),spT:$('#sp-top'),spB:$('#sp-bot'),empty:$('#empty')};
 
-// ANALYZE
+// ─── State ──────────────────────────────────────────────────────
+const state = {
+  followers: [],     // Array<{username, full_name, is_private}>
+  following: [],     // Array<{username, full_name, is_private}>
+  nonFol: [],        // Array<{username, full_name, href, is_private}>
+  filtered: [],
+  q: '',
+  sort: 'alpha',
+  partial: false,
+};
+
+const $ = s => document.querySelector(s);
+const el = {
+  res:    $('#results'),
+  banner: $('#banner'),
+  sf:     $('#s-followers'),
+  sg:     $('#s-following'),
+  sn:     $('#s-nonfol'),
+  sm:     $('#s-mutuals'),
+  q:      $('#q'),
+  qx:     $('#qx'),
+  srt:    $('#srt'),
+  cnt:    $('#cnt'),
+  csv:    $('#csv'),
+  list:   $('#list'),
+  inner:  $('#list-inner'),
+  spT:    $('#sp-top'),
+  spB:    $('#sp-bot'),
+  empty:  $('#empty'),
+};
+
+// ─── Hash decode (mirror of b.js encodePayload) ─────────────────
+function base64ToBytes(b64){
+  const s = atob(b64);
+  const bytes = new Uint8Array(s.length);
+  for (let i = 0; i < s.length; i++) bytes[i] = s.charCodeAt(i);
+  return bytes;
+}
+async function gunzipBytes(bytes){
+  if (typeof DecompressionStream === 'undefined') return null;
+  const ds = new DecompressionStream('gzip');
+  const stream = new Blob([bytes]).stream().pipeThrough(ds);
+  const buf = await new Response(stream).arrayBuffer();
+  return new Uint8Array(buf);
+}
+async function decodePayload(s){
+  if (typeof s !== 'string' || s.length < 3) throw new Error('payload too short');
+  const tag = s.slice(0,2), body = s.slice(2);
+  const bytes = base64ToBytes(body);
+  let raw;
+  if (tag === 'g:'){
+    raw = await gunzipBytes(bytes);
+    if (!raw) throw new Error('gzip payload but DecompressionStream unavailable');
+  } else if (tag === 'r:'){
+    raw = bytes;
+  } else {
+    throw new Error('unknown payload tag: ' + tag);
+  }
+  return JSON.parse(new TextDecoder().decode(raw));
+}
+
+// ─── Dev mock ───────────────────────────────────────────────────
+function devMockPayload(){
+  const followers = [];
+  const following = [];
+  const names = ['ada','grace','linus','margaret','dennis','ken','brian','rob','katherine','annie','bjarne','niklaus','donald','tony','barbara','john','larry','sergey','tim','vint','radia','jean','frances','steve','woz','susan','sheryl','marissa','melanie','reshma','kimberly','julia','alexandra','sara','whitney','arianna','jane','grace2','meg','indra','sophia','aileen','kirsten','susanne','padmasree','therese','ursula','lucy','aileen2'];
+  for (let i = 0; i < names.length; i++){
+    following.push({username: names[i], full_name: names[i].replace(/^./, c => c.toUpperCase()), is_private: i % 9 === 0});
+  }
+  // Half the names also follow back; the other half don't.
+  for (let i = 0; i < names.length; i += 2){
+    followers.push({username: names[i], full_name: names[i].replace(/^./, c => c.toUpperCase()), is_private: false});
+  }
+  // A few people follow you that you don't follow back.
+  followers.push({username:'mystery_fan_42', full_name:'A Stranger', is_private:false});
+  followers.push({username:'old_classmate', full_name:'', is_private:true});
+  return {
+    username: 'devmock',
+    userId: '0',
+    scrapedAt: new Date().toISOString(),
+    followers,
+    following,
+  };
+}
+
+// ─── Compute + render ───────────────────────────────────────────
+function profileUrl(u){return 'https://www.instagram.com/' + encodeURIComponent(u) + '/'}
+
+function loadPayload(p){
+  state.followers = Array.isArray(p.followers) ? p.followers : [];
+  state.following = Array.isArray(p.following) ? p.following : [];
+  state.partial = !!p.partial;
+
+  // Compute mutuals + not-following-back.
+  const followerSet = new Set(state.followers.map(u => u.username.toLowerCase()));
+  const mutuals = [];
+  const nonFol = [];
+  for (const u of state.following){
+    const k = u.username.toLowerCase();
+    if (followerSet.has(k)) mutuals.push(u);
+    else nonFol.push({username: u.username, full_name: u.full_name || '', href: profileUrl(u.username), is_private: !!u.is_private});
+  }
+  state.nonFol = nonFol;
+  state.filtered = nonFol.slice();
+
+  // Banner
+  if (state.partial){
+    el.banner.innerHTML = '<strong>instagram throttled us at ' + state.followers.length.toLocaleString() + ' followers / ' + state.following.length.toLocaleString() + ' following.</strong> these are the ones we got. wait ~30 minutes, then click the bookmarklet again on instagram to resume.';
+    el.banner.classList.add('show');
+  }
+
+  doSort();
+  render();
+  el.res.classList.add('show');
+
+  // Animate count-ups.
+  anim(el.sf, state.followers.length);
+  anim(el.sg, state.following.length);
+  anim(el.sn, nonFol.length);
+  anim(el.sm, mutuals.length);
+
+  // Hide marketing sections when results are shown.
+  document.querySelectorAll('.how, .bm-section, .privacy, .faq').forEach(s => { s.style.display = 'none'; });
+
+  // Scroll into view.
+  setTimeout(() => el.res.scrollIntoView({behavior:'smooth', block:'start'}), 80);
+}
 
 function doSort(){
-  const a=state.filtered;
-  if(state.sort==='recent')a.sort((x,y)=>y.ts-x.ts);
-  else if(state.sort==='oldest')a.sort((x,y)=>x.ts-y.ts);
-  else a.sort((x,y)=>x.ul.localeCompare(y.ul));
+  const a = state.filtered;
+  if (state.sort === 'alpha') a.sort((x,y) => x.username.localeCompare(y.username));
+  else a.sort((x,y) => y.username.localeCompare(x.username));
 }
 
 function filter(){
-  const q=state.q.toLowerCase().trim();
-  state.filtered=q?state.nonFol.filter(u=>u.ul.includes(q)):[...state.nonFol];
-  doSort();render();
+  const q = state.q.toLowerCase().trim();
+  state.filtered = q
+    ? state.nonFol.filter(u => u.username.toLowerCase().includes(q) || (u.full_name || '').toLowerCase().includes(q))
+    : state.nonFol.slice();
+  doSort();
+  render();
 }
 
-function anim(e,t){const dur=1000,st=performance.now();function tick(n){const p=Math.min((n-st)/dur,1),ez=1-Math.pow(1-p,3);e.textContent=Math.round(t*ez).toLocaleString();if(p<1)requestAnimationFrame(tick)}requestAnimationFrame(tick)}
+function anim(e, target){
+  const dur = 1000, st = performance.now();
+  function tick(now){
+    const p = Math.min((now - st) / dur, 1);
+    const ez = 1 - Math.pow(1 - p, 3);
+    e.textContent = Math.round(target * ez).toLocaleString();
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
 
-const IH=64;const BUF=15;let lS=-1,lE=-1;
+const IH = 64, BUF = 15;
+let lS = -1, lE = -1;
 
 function render(){
-  const{filtered,nonFol}=state;
-  el.cnt.textContent='showing '+filtered.length.toLocaleString()+' of '+nonFol.length.toLocaleString();
-  if(nonFol.length===0){el.empty.style.display='block';el.list.style.display='none';el.cnt.parentElement.style.display='none';$('.controls').style.display='none';return}
-  el.empty.style.display='none';el.list.style.display='block';el.cnt.parentElement.style.display='';$('.controls').style.display='';
-  lS=-1;lE=-1;
-  if(filtered.length<=200){el.spT.style.height='0';el.spB.style.height='0';const f=document.createDocumentFragment();filtered.forEach((it,i)=>f.appendChild(mkCard(it,i)));el.inner.innerHTML='';el.inner.appendChild(f);return}
+  const {filtered, nonFol} = state;
+  el.cnt.textContent = 'showing ' + filtered.length.toLocaleString() + ' of ' + nonFol.length.toLocaleString();
+  if (nonFol.length === 0){
+    el.empty.style.display = 'block';
+    el.list.style.display = 'none';
+    el.cnt.parentElement.style.display = 'none';
+    document.querySelector('.controls').style.display = 'none';
+    return;
+  }
+  el.empty.style.display = 'none';
+  el.list.style.display = 'block';
+  el.cnt.parentElement.style.display = '';
+  document.querySelector('.controls').style.display = '';
+  lS = -1; lE = -1;
+  if (filtered.length <= 200){
+    el.spT.style.height = '0';
+    el.spB.style.height = '0';
+    const f = document.createDocumentFragment();
+    filtered.forEach((it, i) => f.appendChild(mkCard(it, i)));
+    el.inner.innerHTML = '';
+    el.inner.appendChild(f);
+    return;
+  }
   vRender();
 }
 
 function vRender(){
-  const{filtered}=state;if(filtered.length<=200)return;
-  const sT=el.list.scrollTop,vH=el.list.clientHeight;
-  const si=Math.max(0,Math.floor(sT/IH)-BUF),ei=Math.min(filtered.length,Math.ceil((sT+vH)/IH)+BUF);
-  if(si===lS&&ei===lE)return;lS=si;lE=ei;
-  el.spT.style.height=(si*IH)+'px';el.spB.style.height=(Math.max(0,(filtered.length-ei)*IH))+'px';
-  const f=document.createDocumentFragment();for(let i=si;i<ei;i++)f.appendChild(mkCard(filtered[i],i));
-  el.inner.innerHTML='';el.inner.appendChild(f);
+  const {filtered} = state;
+  if (filtered.length <= 200) return;
+  const sT = el.list.scrollTop, vH = el.list.clientHeight;
+  const si = Math.max(0, Math.floor(sT / IH) - BUF);
+  const ei = Math.min(filtered.length, Math.ceil((sT + vH) / IH) + BUF);
+  if (si === lS && ei === lE) return;
+  lS = si; lE = ei;
+  el.spT.style.height = (si * IH) + 'px';
+  el.spB.style.height = (Math.max(0, (filtered.length - ei) * IH)) + 'px';
+  const f = document.createDocumentFragment();
+  for (let i = si; i < ei; i++) f.appendChild(mkCard(filtered[i], i));
+  el.inner.innerHTML = '';
+  el.inner.appendChild(f);
 }
 
-function mkCard(it,idx){
-  const c=document.createElement('div');c.className='card';
-  const ini=(it.un[0]||'?').toUpperCase(),gi=Math.abs(hc(it.ul))%6;
-  const ds=it.ts>0?fmtD(it.ts):'unknown date',ag=it.ts>0?ago(it.ts):'';
-  c.innerHTML='<div class="av av-'+gi+'">'+esc(ini)+'</div><div class="card-info"><div class="card-user"><a href="'+escA(it.href)+'" target="_blank" rel="noopener">@'+esc(it.un)+'</a></div><div class="card-date">'+ds+(ag?' &middot; '+ag:'')+'</div></div><a class="card-link" href="'+escA(it.href)+'" target="_blank" rel="noopener" title="view on ig"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>';
+function mkCard(it){
+  const c = document.createElement('div');
+  c.className = 'card';
+  const ini = (it.username[0] || '?').toUpperCase();
+  const gi = Math.abs(hc(it.username)) % 6;
+  const fullNameLine = it.full_name ? '<div class="card-name">' + esc(it.full_name) + (it.is_private ? ' &middot; private' : '') + '</div>' : (it.is_private ? '<div class="card-name">private</div>' : '');
+  c.innerHTML = '<div class="av av-' + gi + '">' + esc(ini) + '</div>'
+    + '<div class="card-info"><div class="card-user"><a href="' + escA(it.href) + '" target="_blank" rel="noopener">@' + esc(it.username) + '</a></div>' + fullNameLine + '</div>'
+    + '<a class="card-link" href="' + escA(it.href) + '" target="_blank" rel="noopener" title="view on ig"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>';
   return c;
 }
 
 function hc(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0}return h}
-function fmtD(t){return new Date(t*1000).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}
-function ago(t){const d=Math.floor((Date.now()/1000-t)/86400);if(d<1)return'today';if(d===1)return'1 day ago';if(d<30)return d+' days ago';const m=Math.floor(d/30);if(m===1)return'1 month ago';if(m<12)return m+' months ago';const y=Math.floor(m/12);return y===1?'1 year ago':y+' years ago'}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
-function escA(s){return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function escA(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 
 function exportCSV(){
-  const{filtered}=state;if(!filtered.length)return;
-  const h='Username,Profile URL,Follow Date,Days Since Follow\n';
-  const r=filtered.map(i=>{const d=i.ts>0?fmtD(i.ts):'Unknown';const days=i.ts>0?Math.floor((Date.now()/1000-i.ts)/86400):'';return'"'+i.un.replace(/"/g,'""')+'","'+i.href+'","'+d+'","'+days+'"'}).join('\n');
-  const b=new Blob(['\uFEFF'+h+r],{type:'text/csv;charset=utf-8;'});
-  const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='unfollowers.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);
+  const {filtered} = state;
+  if (!filtered.length) return;
+  const h = 'Username,Profile URL\n';
+  const r = filtered.map(i => '"' + i.username.replace(/"/g,'""') + '","' + i.href + '"').join('\n');
+  const b = new Blob(['\uFEFF' + h + r], {type: 'text/csv;charset=utf-8;'});
+  const u = URL.createObjectURL(b);
+  const a = document.createElement('a');
+  a.href = u; a.download = 'unfollowers.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(u);
 }
 
-function debounce(fn,ms){let t;return()=>{clearTimeout(t);t=setTimeout(fn,ms)}}
+function debounce(fn, ms){let t;return()=>{clearTimeout(t);t=setTimeout(fn, ms)}}
 
-function init(){
-  const df=debounce(()=>{state.q=el.q.value;el.qx.classList.toggle('on',!!state.q);filter()},150);
-  el.q.addEventListener('input',df);
-  el.qx.addEventListener('click',()=>{el.q.value='';state.q='';el.qx.classList.remove('on');filter()});
-  el.srt.addEventListener('change',()=>{state.sort=el.srt.value;doSort();render()});
-  el.list.addEventListener('scroll',()=>{if(state.filtered.length>200)requestAnimationFrame(vRender)});
-  el.csv.addEventListener('click',exportCSV);
+async function init(){
+  // Wire up controls.
+  const df = debounce(() => { state.q = el.q.value; el.qx.classList.toggle('on', !!state.q); filter(); }, 150);
+  el.q.addEventListener('input', df);
+  el.qx.addEventListener('click', () => { el.q.value=''; state.q=''; el.qx.classList.remove('on'); filter(); });
+  el.srt.addEventListener('change', () => { state.sort = el.srt.value; doSort(); render(); });
+  el.list.addEventListener('scroll', () => { if (state.filtered.length > 200) requestAnimationFrame(vRender); });
+  el.csv.addEventListener('click', exportCSV);
+
+  // Read hash for payload or dev-mock.
+  const hash = window.location.hash || '';
+
+  if (hash === '#dev-mock'){
+    loadPayload(devMockPayload());
+    return;
+  }
+
+  if (hash.indexOf('#data=') === 0){
+    const encoded = hash.slice(6);
+    try {
+      const payload = await decodePayload(encoded);
+      // Clear hash from URL bar so it isn't sitting visible after landing.
+      try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch(e) {}
+      loadPayload(payload);
+    } catch (e) {
+      console.error('[follow radar] could not decode hash payload:', e);
+      alert('Could not read results from URL: ' + e.message);
+    }
+  }
 }
 
-document.addEventListener('DOMContentLoaded',init);
+document.addEventListener('DOMContentLoaded', init);
 })();
 </script>
 </body>
