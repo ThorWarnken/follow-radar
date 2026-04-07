@@ -165,6 +165,69 @@
     return classifyResponse(resp.status, body);
   }
 
+  // ─── Pagination ──────────────────────────────────────────────────
+
+  // fetchPageImpl is replaceable in tests so we don't need real fetch.
+  let fetchPageImpl = fetchPage;
+
+  function buildFollowersUrl(userId, cursor) {
+    let u = 'https://i.instagram.com/api/v1/friendships/' + userId + '/followers/?count=' + PAGE_SIZE;
+    if (cursor) u += '&max_id=' + encodeURIComponent(cursor);
+    return u;
+  }
+
+  function buildFollowingUrl(userId, cursor) {
+    let u = 'https://i.instagram.com/api/v1/friendships/' + userId + '/following/?count=' + PAGE_SIZE;
+    if (cursor) u += '&max_id=' + encodeURIComponent(cursor);
+    return u;
+  }
+
+  // Reduce IG's account shape to ours.
+  function trimUser(u) {
+    return {
+      username: u.username,
+      full_name: u.full_name || '',
+      is_private: !!u.is_private,
+    };
+  }
+
+  // Generic paginator. urlBuilder(cursor) -> url.
+  // initial: array of already-collected users (for resume).
+  // initialCursor: cursor to start from (for resume).
+  // onProgress(count): called after each page.
+  // If fetchPageImpl throws RateLimitError, we re-throw after attaching
+  // {cursor, partial} so main() can save resume state with exact progress.
+  async function paginate(urlBuilder, initial, initialCursor, onProgress) {
+    const all = (initial && initial.length) ? initial.slice() : [];
+    let cursor = initialCursor || null;
+    while (true) {
+      const url = urlBuilder(cursor);
+      let page;
+      try {
+        page = await fetchPageImpl(url);
+      } catch (e) {
+        if (e instanceof RateLimitError) {
+          e.cursor = cursor;    // cursor that was used for the failed request — resume uses this
+          e.partial = all;      // everything accumulated before the failure
+        }
+        throw e;
+      }
+      for (const u of page.users) all.push(trimUser(u));
+      if (onProgress) onProgress(all.length, cursor);
+      if (!page.nextCursor) break;
+      cursor = page.nextCursor;
+    }
+    return all;
+  }
+
+  async function scrapeFollowers(userId, initial, initialCursor, onProgress) {
+    return paginate(c => buildFollowersUrl(userId, c), initial, initialCursor, onProgress);
+  }
+
+  async function scrapeFollowing(userId, initial, initialCursor, onProgress) {
+    return paginate(c => buildFollowingUrl(userId, c), initial, initialCursor, onProgress);
+  }
+
   // Expose for tests. In real bookmarklet runs, window.__followRadarTest is undefined.
   if (typeof window !== 'undefined' && window.__followRadarTest) {
     window.__followRadarTest.RateLimitError = RateLimitError;
@@ -180,6 +243,12 @@
     window.__followRadarTest.classifyResponse = classifyResponse;
     window.__followRadarTest.fetchPage = fetchPage;
     window.__followRadarTest.setFetch = function (fn) { doFetch = fn; };
+    window.__followRadarTest.buildFollowersUrl = buildFollowersUrl;
+    window.__followRadarTest.buildFollowingUrl = buildFollowingUrl;
+    window.__followRadarTest.trimUser = trimUser;
+    window.__followRadarTest.scrapeFollowers = scrapeFollowers;
+    window.__followRadarTest.scrapeFollowing = scrapeFollowing;
+    window.__followRadarTest.setFetchPageImpl = function (fn) { fetchPageImpl = fn; };
     return; // skip main() in test mode
   }
 
