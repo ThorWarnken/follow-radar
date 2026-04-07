@@ -321,6 +321,46 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   }
 }
 
+/* ═══════════ FAQ ═══════════ */
+.faq{position:relative;z-index:3;max-width:760px;margin:0 auto;padding:5rem 1.5rem;text-align:center}
+.faq-head{margin-bottom:2.5rem}
+.faq-head .section-badge{margin-bottom:0.9rem}
+.faq-head h2{
+  font-family:var(--font);font-weight:900;
+  font-size:clamp(1.75rem,4.5vw,2.5rem);letter-spacing:-0.015em;
+}
+.faq-list{text-align:left}
+.faq-item{
+  background:rgba(255,255,255,0.7);
+  border:1px solid var(--border);border-radius:var(--radius-lg);
+  margin-bottom:0.75rem;overflow:hidden;
+  transition:border-color 0.3s ease,box-shadow 0.3s ease,background 0.3s ease;
+}
+.faq-item:hover{border-color:rgba(225,48,108,0.18);box-shadow:0 8px 28px rgba(225,48,108,0.06)}
+.faq-item[open]{background:#fff;border-color:rgba(225,48,108,0.22)}
+.faq-item summary{
+  list-style:none;cursor:pointer;
+  padding:1.25rem 1.5rem;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  font-family:var(--font);font-weight:800;font-size:1rem;
+  color:var(--text);letter-spacing:-0.005em;
+}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{
+  content:'';width:18px;height:18px;flex-shrink:0;
+  background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23555570' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>") no-repeat center / contain;
+  transition:transform 0.35s var(--ease);
+}
+.faq-item[open] summary::after{transform:rotate(180deg)}
+.faq-body-wrap{display:grid;grid-template-rows:0fr;transition:grid-template-rows 0.35s var(--ease)}
+.faq-item[open] .faq-body-wrap{grid-template-rows:1fr}
+.faq-body{overflow:hidden}
+.faq-body p{
+  padding:0 1.5rem 1.4rem;
+  color:var(--text-soft);font-size:0.92rem;line-height:1.75;
+}
+@media(max-width:760px){.faq{padding:3.5rem 1.25rem}}
+
 /* ═══════════ RESULTS ═══════════ */
 .results{display:none;position:relative;z-index:3}
 .results.show{display:block;animation:fadeUp 0.5s var(--ease)}
@@ -584,6 +624,47 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
       <h3>open source</h3>
       <p>the bookmarklet is a few hundred lines of javascript. read it before you run it.</p>
     </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+  <div class="faq-head">
+    <div class="section-badge badge-orange">questions</div>
+    <h2>things people ask.</h2>
+  </div>
+  <div class="faq-list">
+
+    <details class="faq-item">
+      <summary>is this safe?</summary>
+      <div class="faq-body-wrap"><div class="faq-body"><p>yes. the bookmarklet is javascript that runs in your own browser, on your own logged-in instagram session, the same way the instagram website does. it doesn't send your data anywhere except back to follow radar, in your url bar, where you can see it.</p></div></div>
+    </details>
+
+    <details class="faq-item">
+      <summary>will instagram ban me for using this?</summary>
+      <div class="faq-body-wrap"><div class="faq-body"><p>we don't think so, but we can't promise. the bookmarklet makes the same requests instagram's own web app makes, and it deliberately goes slowly (about one request every 1.5 seconds) to look like a real person browsing. if instagram throttles you, you might be temporarily blocked from viewing follower lists for half an hour. we don't know of anyone whose account has been banned for using a tool like this, but tools like this exist in a gray area. if you're worried, don't run it on an account that matters to you.</p></div></div>
+    </details>
+
+    <details class="faq-item">
+      <summary>it stopped halfway through. what happened?</summary>
+      <div class="faq-body-wrap"><div class="faq-body"><p>instagram throttled the requests. this is normal on big accounts. wait about 30 minutes, then click the bookmarklet again on instagram — it remembers where it left off and picks up from there. we saved your progress.</p></div></div>
+    </details>
+
+    <details class="faq-item">
+      <summary>why is there a 10,000 follower cap?</summary>
+      <div class="faq-body-wrap"><div class="faq-body"><p>above 10k, the scan takes long enough that instagram is much more likely to throttle you, and the wait is long enough that this stops feeling like a "one click" tool. if you really need it for a bigger account, the code is open source — fork it and remove the cap.</p></div></div>
+    </details>
+
+    <details class="faq-item">
+      <summary>does this work on private accounts?</summary>
+      <div class="faq-body-wrap"><div class="faq-body"><p>yes, for your own account and any private account you already follow. the bookmarklet uses your own logged-in session, so it sees exactly what you see when you're scrolling instagram normally.</p></div></div>
+    </details>
+
+    <details class="faq-item">
+      <summary>what about the official instagram data export?</summary>
+      <div class="faq-body-wrap"><div class="faq-body"><p>that still works and is more reliable, but it's slow (instagram emails it to you, can take a day) and the file format keeps changing. the bookmarklet is the fast version. if you'd rather use the export, it's in instagram's settings under "your activity → download your information".</p></div></div>
+    </details>
+
   </div>
 </section>
 
