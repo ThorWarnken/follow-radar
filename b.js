@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════
 // LOADER STUB (this is the bookmarklet href in index.html, not part of b.js):
 //
-// javascript:(()=>{if(!/(^|\.)instagram\.com$/.test(location.hostname)){alert('Open instagram.com first, then click this bookmarklet.');return}fetch('https://follow-radar.app/b.js?v='+Date.now()).then(r=>r.text()).then(eval).catch(e=>alert('Could not load follow radar: '+e.message))})()
+// javascript:(()=>{if(!/(^|\.)instagram\.com$/.test(location.hostname)){alert('Open instagram.com first, then click this bookmarklet.');return}fetch('https://thorwarnken.github.io/follow-radar/b.js?v='+Date.now()).then(r=>r.text()).then(eval).catch(e=>alert('Could not load follow radar: '+e.message))})()
 //
 // The stub fetches this file, evals it. We use fetch+eval rather than
 // <script src> injection because instagram.com's CSP is more likely to
@@ -23,7 +23,7 @@
   const PAGE_SIZE = 200;
   const IG_APP_ID = '936619743392459';
   const RESUME_MAX_AGE_MS = 24 * 60 * 60 * 1000;
-  const FOLLOW_RADAR_URL = 'https://follow-radar.app';
+  const FOLLOW_RADAR_URL = 'https://thorwarnken.github.io/follow-radar';
   const RESUME_KEY = 'follow-radar:resume';
 
   class RateLimitError extends Error {
