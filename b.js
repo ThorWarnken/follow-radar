@@ -251,7 +251,30 @@
       }
     } catch (e) { /* fall through */ }
 
-    // Try the modern in-page accounts info endpoint.
+    // Try ds_user_id cookie (set by Instagram on login, most reliable).
+    let cookieUserId = null;
+    try {
+      const m = document.cookie.match(/(?:^|;\s*)ds_user_id=(\d+)/);
+      if (m) cookieUserId = m[1];
+    } catch (e) { /* fall through */ }
+
+    // Try /api/v1/accounts/current_user/ endpoint.
+    if (cookieUserId) {
+      try {
+        const r = await doFetch('https://i.instagram.com/api/v1/accounts/current_user/?edit=true', {
+          credentials: 'include',
+          headers: { 'X-IG-App-ID': IG_APP_ID, 'Accept': 'application/json' },
+        });
+        if (r.ok) {
+          const j = await r.json();
+          if (j && j.user && j.user.pk && j.user.username) {
+            return { userId: String(j.user.pk), username: j.user.username };
+          }
+        }
+      } catch (e) { /* fall through */ }
+    }
+
+    // Try the web accounts info endpoint.
     try {
       const r = await doFetch('https://www.instagram.com/api/v1/web/accounts/login/ajax/info/', {
         credentials: 'include',
@@ -262,6 +285,23 @@
         if (j && j.user_id && j.username) return { userId: String(j.user_id), username: j.username };
       }
     } catch (e) { /* fall through */ }
+
+    // Last resort: use cookie userId + fetch username from web_profile_info by
+    // reading the current page's profile if we're on one.
+    if (cookieUserId) {
+      try {
+        const r = await doFetch('https://i.instagram.com/api/v1/users/' + cookieUserId + '/info/', {
+          credentials: 'include',
+          headers: { 'X-IG-App-ID': IG_APP_ID, 'Accept': 'application/json' },
+        });
+        if (r.ok) {
+          const j = await r.json();
+          if (j && j.user && j.user.username) {
+            return { userId: cookieUserId, username: j.user.username };
+          }
+        }
+      } catch (e) { /* fall through */ }
+    }
 
     throw new Error("Could not determine logged-in user. Make sure you're logged into instagram.com.");
   }
