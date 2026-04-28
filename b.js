@@ -557,7 +557,7 @@
     const followerSet = new Set(followers.map(u => u.username.toLowerCase()));
     let mutualCounts = new Map();
     try {
-      updateOverlay('Checking mutual connections\u2026 0/' + following.length, 0.85);
+      updateOverlay('Checking mutual connections\u2026', 0.85);
       mutualCounts = await fetchAllMutualCounts(followerSet, following, (done, total) => {
         updateOverlay('Checking mutual connections\u2026 ' + done + '/' + total, 0.85 + 0.15 * (done / total));
       });
@@ -572,7 +572,7 @@
     // Attach mutual_count to each following user
     const followingWithMutuals = following.map(u => {
       const mc = mutualCounts.get(u.username.toLowerCase()) || 0;
-      return { username: u.username, full_name: u.full_name || '', is_private: !!u.is_private, mutual_count: mc };
+      return trimUser(u, mc);
     });
 
     const payload = {
