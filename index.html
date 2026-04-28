@@ -99,6 +99,21 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   0%,100%{translate:0 0}
   50%{translate:0 -12px}
 }
+/* Core fill behind rounded faces to seal gaps */
+.cube-core{
+  position:absolute;width:130px;height:130px;top:15px;left:15px;
+  transform-style:preserve-3d;
+}
+.cube-core-face{position:absolute;width:130px;height:130px}
+.cube-core-face--fb{background:#b03070;width:130px;height:130px}
+.cube-core-face--fb.f{transform:translateZ(80px)}
+.cube-core-face--fb.b{transform:rotateY(180deg) translateZ(80px)}
+.cube-core-face--lr{background:#7030a0;width:160px;height:130px;left:-15px}
+.cube-core-face--lr.r{transform:rotateY(90deg) translateZ(80px)}
+.cube-core-face--lr.l{transform:rotateY(-90deg) translateZ(80px)}
+.cube-core-face--tb{background:#d06030;width:130px;height:160px;top:-15px}
+.cube-core-face--tb.t{transform:rotateX(90deg) translateZ(80px)}
+.cube-core-face--tb.bt{transform:rotateX(-90deg) translateZ(80px);background:#1a0830}
 .cube-face{
   position:absolute;width:160px;height:160px;
   border-radius:32px;
@@ -132,11 +147,11 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   animation:cube-float 6s ease-in-out infinite;
 }
 
-/* Glitter the cat - stylized pink sitting cat */
+/* Glitter the cat - flat pink silhouette style */
 .glitter{
   position:absolute;z-index:10;
-  bottom:-10px;right:-70px;
-  width:100px;height:100px;
+  bottom:-5px;right:-75px;
+  width:90px;height:90px;
   filter:drop-shadow(0 6px 20px rgba(225,48,108,0.4));
   animation:glitter-bob 3s ease-in-out infinite;
 }
@@ -147,8 +162,8 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .glitter svg{width:100%;height:100%}
 
 /* tail wag */
-.cat-tail{transform-origin:58px 52px;animation:tail-wag 1.2s ease-in-out infinite alternate}
-@keyframes tail-wag{0%{transform:rotate(-20deg)}100%{transform:rotate(20deg)}}
+.cat-tail{transform-origin:55px 65px;animation:tail-wag 1.5s ease-in-out infinite alternate}
+@keyframes tail-wag{0%{transform:rotate(-12deg)}100%{transform:rotate(12deg)}}
 
 .hero-tag{
   display:inline-flex;align-items:center;gap:7px;
@@ -565,7 +580,18 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   .cube-face--left{transform:rotateY(-90deg) translateZ(60px)}
   .cube-face--top{transform:rotateX(90deg) translateZ(60px)}
   .cube-face--bottom{transform:rotateX(-90deg) translateZ(60px)}
-  .glitter{width:70px;height:70px;right:-50px}
+  .cube-core-face{width:100px;height:100px}
+  .cube-core{width:100px;height:100px;top:10px;left:10px}
+  .cube-core-face--fb{width:100px;height:100px}
+  .cube-core-face--fb.f{transform:translateZ(60px)}
+  .cube-core-face--fb.b{transform:rotateY(180deg) translateZ(60px)}
+  .cube-core-face--lr{width:120px;height:100px;left:-10px}
+  .cube-core-face--lr.r{transform:rotateY(90deg) translateZ(60px)}
+  .cube-core-face--lr.l{transform:rotateY(-90deg) translateZ(60px)}
+  .cube-core-face--tb{width:100px;height:120px;top:-10px}
+  .cube-core-face--tb.t{transform:rotateX(90deg) translateZ(60px)}
+  .cube-core-face--tb.bt{transform:rotateX(-90deg) translateZ(60px)}
+  .glitter{width:65px;height:65px;right:-50px}
   .section{padding:3rem 1.25rem}
   .card{padding:0.85rem 1rem}
   .card-link{width:40px;height:40px}
@@ -601,50 +627,48 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 <!-- HERO -->
 <section class="hero">
   <div class="cube-scene">
-    <!-- Glitter the cat - stylized pink sitting cat -->
+    <!-- Glitter the cat - flat pink silhouette (matches 21st.dev reference) -->
     <div class="glitter">
       <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- tail (animated) -->
-        <path class="cat-tail" d="M62 55 Q78 48 82 35 Q84 26 78 22" stroke="#e84090" stroke-width="5" stroke-linecap="round" fill="none"/>
+        <!-- tail -->
+        <path class="cat-tail" d="M58 62 C72 55, 80 40, 75 25 C73 18, 68 16, 65 20" stroke="#e84090" stroke-width="6" stroke-linecap="round" fill="none"/>
         <!-- body -->
-        <ellipse cx="42" cy="68" rx="24" ry="20" fill="#e84090"/>
-        <!-- back highlight -->
-        <ellipse cx="38" cy="62" rx="14" ry="12" fill="#f050a0" opacity="0.5"/>
+        <path d="M25 88 C25 60, 30 55, 40 50 C50 55, 55 60, 55 88 Z" fill="#e84090"/>
         <!-- head -->
-        <circle cx="38" cy="36" r="18" fill="#e84090"/>
-        <!-- head highlight -->
-        <circle cx="34" cy="32" r="10" fill="#f050a0" opacity="0.4"/>
+        <circle cx="40" cy="40" r="18" fill="#e84090"/>
         <!-- left ear -->
-        <path d="M24 24L18 6l14 12z" fill="#e84090"/>
-        <path d="M26 22L22 10l10 8z" fill="#c03070" opacity="0.6"/>
+        <path d="M26 30 L20 12 L36 26 Z" fill="#e84090"/>
+        <path d="M28 28 L24 16 L34 26 Z" fill="#c03070"/>
         <!-- right ear -->
-        <path d="M52 24L58 6l-14 12z" fill="#e84090"/>
-        <path d="M50 22L54 10l-10 8z" fill="#c03070" opacity="0.6"/>
+        <path d="M54 30 L60 12 L44 26 Z" fill="#e84090"/>
+        <path d="M52 28 L56 16 L46 26 Z" fill="#c03070"/>
         <!-- eyes -->
-        <ellipse cx="32" cy="34" rx="3" ry="3.5" fill="#1a1a2e"/>
-        <ellipse cx="46" cy="34" rx="3" ry="3.5" fill="#1a1a2e"/>
-        <circle cx="33.2" cy="33" r="1.2" fill="#fff"/>
-        <circle cx="47.2" cy="33" r="1.2" fill="#fff"/>
-        <!-- nose -->
-        <ellipse cx="39" cy="40" rx="2" ry="1.5" fill="#c03070"/>
-        <!-- whiskers -->
-        <line x1="14" y1="37" x2="30" y2="38" stroke="#f5a0c0" stroke-width="0.8" opacity="0.6"/>
-        <line x1="14" y1="41" x2="30" y2="41" stroke="#f5a0c0" stroke-width="0.8" opacity="0.6"/>
-        <line x1="48" y1="38" x2="64" y2="37" stroke="#f5a0c0" stroke-width="0.8" opacity="0.6"/>
-        <line x1="48" y1="41" x2="64" y2="41" stroke="#f5a0c0" stroke-width="0.8" opacity="0.6"/>
+        <circle cx="33" cy="38" r="3" fill="#1a1020"/>
+        <circle cx="47" cy="38" r="3" fill="#1a1020"/>
+        <circle cx="34" cy="37" r="1.2" fill="#fff"/>
+        <circle cx="48" cy="37" r="1.2" fill="#fff"/>
         <!-- front paws -->
-        <ellipse cx="30" cy="84" rx="8" ry="5" fill="#e84090"/>
-        <ellipse cx="52" cy="84" rx="8" ry="5" fill="#e84090"/>
-        <!-- paw lines -->
-        <path d="M27 84v3M30 84v3M33 84v3" stroke="#c03070" stroke-width="0.8" stroke-linecap="round" opacity="0.4"/>
-        <path d="M49 84v3M52 84v3M55 84v3" stroke="#c03070" stroke-width="0.8" stroke-linecap="round" opacity="0.4"/>
-        <!-- belly highlight -->
-        <ellipse cx="40" cy="75" rx="10" ry="8" fill="#f070b0" opacity="0.35"/>
+        <ellipse cx="32" cy="88" rx="8" ry="4" fill="#e84090"/>
+        <ellipse cx="48" cy="88" rx="8" ry="4" fill="#e84090"/>
+        <!-- whiskers -->
+        <line x1="15" y1="42" x2="30" y2="42" stroke="#f5a0c0" stroke-width="0.7" opacity="0.5"/>
+        <line x1="15" y1="46" x2="30" y2="44" stroke="#f5a0c0" stroke-width="0.7" opacity="0.5"/>
+        <line x1="50" y1="42" x2="65" y2="42" stroke="#f5a0c0" stroke-width="0.7" opacity="0.5"/>
+        <line x1="50" y1="44" x2="65" y2="46" stroke="#f5a0c0" stroke-width="0.7" opacity="0.5"/>
       </svg>
     </div>
     <div class="cube-glow"></div>
     <!-- 3D cube -->
     <div class="cube">
+      <!-- Inner core panels to seal gaps between rounded faces -->
+      <div class="cube-core">
+        <div class="cube-core-face cube-core-face--fb f"></div>
+        <div class="cube-core-face cube-core-face--fb b"></div>
+        <div class="cube-core-face cube-core-face--lr r"></div>
+        <div class="cube-core-face cube-core-face--lr l"></div>
+        <div class="cube-core-face cube-core-face--tb t"></div>
+        <div class="cube-core-face cube-core-face--tb bt"></div>
+      </div>
       <div class="cube-face cube-face--front">
         <div class="ig-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="#fff" stroke="none"/></svg></div>
       </div>
