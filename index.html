@@ -541,6 +541,65 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .empty h3{font-family:var(--font);font-weight:700;font-size:1.2rem;margin-bottom:0.4rem}
 .empty p{color:var(--text-soft);font-size:0.9rem}
 
+/* Paywall */
+.paywall-overlay{
+  position:relative;margin-top:-32px;padding-top:48px;
+  background:linear-gradient(to bottom,transparent,var(--bg) 32px);
+}
+.paywall-blur{
+  filter:blur(8px);pointer-events:none;user-select:none;
+  max-height:200px;overflow:hidden;opacity:0.5;
+}
+.paywall-cta{
+  text-align:center;padding:2rem 1rem 1rem;
+}
+.paywall-cta h3{
+  font-family:var(--ff-display);font-size:1.3rem;font-weight:800;
+  margin-bottom:0.5rem;
+}
+.paywall-cta p{
+  color:var(--muted);font-size:0.9rem;margin-bottom:1.5rem;
+}
+.pricing-cards{
+  display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;
+  max-width:640px;margin:0 auto;
+}
+.pricing-card{
+  flex:1;min-width:160px;max-width:200px;padding:1.5rem 1rem;
+  border-radius:var(--radius);background:var(--card);
+  border:2px solid rgba(131,58,180,0.15);
+  text-align:center;text-decoration:none;color:inherit;
+  transition:border-color 0.2s,transform 0.2s;
+}
+.pricing-card:hover{
+  border-color:#e1306c;transform:translateY(-2px);
+}
+.pricing-card.featured{
+  border-color:#833ab4;
+  background:linear-gradient(135deg,rgba(131,58,180,0.06),rgba(225,48,108,0.06));
+}
+.pricing-card .price{
+  font-family:var(--ff-display);font-size:1.5rem;font-weight:900;
+  background:linear-gradient(135deg,#833ab4,#e1306c);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.pricing-card .plan-name{
+  font-weight:700;font-size:0.95rem;margin-bottom:0.25rem;
+}
+.pricing-card .plan-sub{
+  font-size:0.78rem;color:var(--muted);
+}
+.pricing-card .best-value{
+  display:inline-block;padding:2px 10px;border-radius:var(--radius-pill);
+  font-size:0.68rem;font-weight:800;text-transform:uppercase;
+  background:linear-gradient(135deg,#833ab4,#e1306c);color:#fff;
+  margin-bottom:0.5rem;
+}
+.lock-icon{
+  width:32px;height:32px;margin:0 auto 0.75rem;opacity:0.6;
+}
+
 /* ═══════════ FOOTER ═══════════ */
 .footer{
   position:relative;z-index:3;text-align:center;
@@ -837,6 +896,33 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
     <div id="sp-bot" style="width:100%"></div>
   </div>
 
+  <div class="paywall-overlay" id="paywall" style="display:none">
+    <div class="paywall-blur" id="paywall-blur"></div>
+    <div class="paywall-cta">
+      <svg class="lock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <h3 id="paywall-title">unlock all results</h3>
+      <p>you've seen your top 2 — upgrade to see everyone who doesn't follow you back.</p>
+      <div class="pricing-cards">
+        <a class="pricing-card" id="pay-scan" href="#" target="_blank" rel="noopener">
+          <div class="plan-name">this scan</div>
+          <div class="price">$4</div>
+          <div class="plan-sub">one-time</div>
+        </a>
+        <a class="pricing-card featured" id="pay-monthly" href="#" target="_blank" rel="noopener">
+          <div class="plan-name">monthly</div>
+          <div class="price">$6</div>
+          <div class="plan-sub">per month</div>
+        </a>
+        <a class="pricing-card" id="pay-yearly" href="#" target="_blank" rel="noopener">
+          <div class="best-value">best value</div>
+          <div class="plan-name">yearly</div>
+          <div class="price">$25</div>
+          <div class="plan-sub">per year</div>
+        </a>
+      </div>
+    </div>
+  </div>
+
   <div class="empty" id="empty">
     <div class="empty-icon"><svg viewBox="0 0 56 56" fill="none"><path class="shield-fill" d="M28 4L8 14v14c0 12.6 8.5 24.4 20 27 11.5-2.6 20-14.4 20-27V14L28 4z" fill="var(--green)" opacity="0.12" stroke="var(--green)" stroke-width="2.5" stroke-linejoin="round"/><path class="check-draw" d="M18 28l7 7 13-14" stroke="var(--green)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
     <h3>everyone follows you back!</h3>
@@ -914,6 +1000,9 @@ const el = {
   spT:    $('#sp-top'),
   spB:    $('#sp-bot'),
   empty:  $('#empty'),
+  paywall: $('#paywall'),
+  blurPreview: $('#paywall-blur'),
+  paywallTitle: $('#paywall-title'),
 };
 
 function base64ToBytes(b64){
@@ -967,6 +1056,24 @@ function devMockPayload(){
 }
 
 function profileUrl(u){return 'https://www.instagram.com/' + encodeURIComponent(u) + '/'}
+
+const UNLOCK_KEY = 'follow-radar:unlocked';
+const RESULTS_KEY = 'follow-radar:results';
+
+function isUnlocked() {
+  let u;
+  try { u = JSON.parse(localStorage.getItem(UNLOCK_KEY)); } catch(e) { return false; }
+  if (!u) return false;
+  const now = Date.now();
+  if (u.type === 'scan') return true;
+  if (u.type === 'monthly') return now - u.timestamp < 30 * 24 * 60 * 60 * 1000;
+  if (u.type === 'yearly') return now - u.timestamp < 365 * 24 * 60 * 60 * 1000;
+  return false;
+}
+
+function setUnlocked(type) {
+  localStorage.setItem(UNLOCK_KEY, JSON.stringify({ type: type, timestamp: Date.now() }));
+}
 
 function loadPayload(p){
   state.followers = Array.isArray(p.followers) ? p.followers : [];
@@ -1035,28 +1142,52 @@ let lS = -1, lE = -1;
 
 function render(){
   const {filtered, nonFol} = state;
+  const unlocked = isUnlocked();
+  const FREE_LIMIT = 2;
   el.cnt.textContent = 'showing ' + filtered.length.toLocaleString() + ' of ' + nonFol.length.toLocaleString();
   if (nonFol.length === 0){
     el.empty.style.display = 'block';
     el.list.style.display = 'none';
     el.cnt.parentElement.style.display = 'none';
     document.querySelector('.controls').style.display = 'none';
+    el.paywall.style.display = 'none';
     return;
   }
   el.empty.style.display = 'none';
   el.list.style.display = 'block';
   el.cnt.parentElement.style.display = '';
   document.querySelector('.controls').style.display = '';
-  lS = -1; lE = -1;
-  if (filtered.length <= 200){
+
+  if (unlocked || filtered.length <= FREE_LIMIT) {
+    // Full access
+    el.paywall.style.display = 'none';
+    el.csv.style.display = '';
+    lS = -1; lE = -1;
+    if (filtered.length <= 200){
+      el.spT.style.height = '0';
+      el.spB.style.height = '0';
+      const f = document.createDocumentFragment();
+      filtered.forEach((it, i) => f.appendChild(mkCard(it, i)));
+      el.inner.replaceChildren(f);
+      return;
+    }
+    vRender();
+  } else {
+    // Free: show first 2 + blurred preview + paywall
     el.spT.style.height = '0';
     el.spB.style.height = '0';
     const f = document.createDocumentFragment();
-    filtered.forEach((it, i) => f.appendChild(mkCard(it, i)));
+    for (let i = 0; i < FREE_LIMIT; i++) f.appendChild(mkCard(filtered[i], i));
     el.inner.replaceChildren(f);
-    return;
+    // Blurred preview of next few
+    const blurF = document.createDocumentFragment();
+    const previewCount = Math.min(4, filtered.length - FREE_LIMIT);
+    for (let i = FREE_LIMIT; i < FREE_LIMIT + previewCount; i++) blurF.appendChild(mkCard(filtered[i], i));
+    el.blurPreview.replaceChildren(blurF);
+    el.paywallTitle.textContent = 'unlock all ' + nonFol.length + ' results';
+    el.paywall.style.display = 'block';
+    el.csv.style.display = 'none';
   }
-  vRender();
 }
 
 function vRender(){
