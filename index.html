@@ -83,60 +83,72 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 
 /* 3D cube */
 .cube-scene{
-  perspective:800px;width:140px;height:140px;
+  perspective:1200px;width:160px;height:160px;
   margin:0 auto 2.5rem;position:relative;
 }
 .cube{
   width:100%;height:100%;position:relative;
   transform-style:preserve-3d;
-  animation:cube-spin 20s linear infinite;
+  animation:cube-float 6s ease-in-out infinite, cube-spin 20s linear infinite;
 }
 @keyframes cube-spin{
-  0%{transform:rotateX(-15deg) rotateY(0deg)}
-  100%{transform:rotateX(-15deg) rotateY(360deg)}
+  0%{transform:rotateX(-20deg) rotateY(0deg)}
+  100%{transform:rotateX(-20deg) rotateY(360deg)}
+}
+@keyframes cube-float{
+  0%,100%{translate:0 0}
+  50%{translate:0 -12px}
 }
 .cube-face{
-  position:absolute;width:140px;height:140px;
-  border-radius:28px;
+  position:absolute;width:160px;height:160px;
+  border-radius:32px;
   display:flex;align-items:center;justify-content:center;
-  backface-visibility:hidden;
-  border:1px solid rgba(255,255,255,0.08);
+  border:1.5px solid rgba(255,255,255,0.12);
+  box-shadow:inset 0 0 40px rgba(255,255,255,0.06);
 }
-.cube-face--front{background:linear-gradient(135deg,#833ab4,#e1306c,#f77737);transform:translateZ(70px)}
-.cube-face--back{background:linear-gradient(135deg,#f77737,#e1306c,#833ab4);transform:rotateY(180deg) translateZ(70px)}
-.cube-face--right{background:linear-gradient(135deg,#e1306c,#833ab4,#405de6);transform:rotateY(90deg) translateZ(70px)}
-.cube-face--left{background:linear-gradient(135deg,#405de6,#833ab4,#e1306c);transform:rotateY(-90deg) translateZ(70px)}
-.cube-face--top{background:linear-gradient(135deg,#f77737,#fcaf45,#f77737);transform:rotateX(90deg) translateZ(70px)}
-.cube-face--bottom{background:linear-gradient(135deg,#833ab4,#405de6,#833ab4);transform:rotateX(-90deg) translateZ(70px)}
-/* IG icon on front face */
-.ig-icon{width:60%;height:60%}
-.ig-icon svg{width:100%;height:100%;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.3))}
+.cube-face--front{
+  background:linear-gradient(135deg,#833ab4,#e1306c,#f77737);
+  transform:translateZ(80px);
+  box-shadow:inset 0 0 40px rgba(255,255,255,0.06), 0 0 60px rgba(225,48,108,0.3);
+}
+.cube-face--back{background:linear-gradient(135deg,#f77737,#e1306c,#833ab4);transform:rotateY(180deg) translateZ(80px)}
+.cube-face--right{background:linear-gradient(135deg,#c13584,#833ab4,#405de6);transform:rotateY(90deg) translateZ(80px)}
+.cube-face--left{background:linear-gradient(135deg,#405de6,#833ab4,#c13584);transform:rotateY(-90deg) translateZ(80px)}
+.cube-face--top{
+  background:linear-gradient(135deg,#f77737,#fcaf45,#f77737);
+  transform:rotateX(90deg) translateZ(80px);
+  border-color:rgba(255,255,255,0.18);
+}
+.cube-face--bottom{background:linear-gradient(135deg,#2a1050,#1a0830,#2a1050);transform:rotateX(-90deg) translateZ(80px);border-color:rgba(255,255,255,0.04)}
+/* IG icon on faces */
+.ig-icon{width:55%;height:55%}
+.ig-icon svg{width:100%;height:100%;filter:drop-shadow(0 2px 12px rgba(0,0,0,0.25))}
+/* Cube glow underneath */
+.cube-glow{
+  position:absolute;bottom:-30px;left:50%;transform:translateX(-50%);
+  width:120px;height:20px;
+  background:radial-gradient(ellipse,rgba(225,48,108,0.35),transparent 70%);
+  border-radius:50%;filter:blur(8px);
+  animation:cube-float 6s ease-in-out infinite;
+}
 
-/* Glitter the cat */
+/* Glitter the cat - stylized pink sitting cat */
 .glitter{
   position:absolute;z-index:10;
-  width:80px;height:80px;
-  animation:glitter-play 20s linear infinite;
-  filter:drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+  bottom:-10px;right:-70px;
+  width:100px;height:100px;
+  filter:drop-shadow(0 6px 20px rgba(225,48,108,0.4));
+  animation:glitter-bob 3s ease-in-out infinite;
 }
-@keyframes glitter-play{
-  0%{top:-60px;left:30px;transform:rotate(-5deg) scaleX(1)}
-  8%{top:-65px;left:90px;transform:rotate(8deg) scaleX(1)}
-  15%{top:-55px;left:140px;transform:rotate(-3deg) scaleX(-1)}
-  25%{top:10px;left:155px;transform:rotate(15deg) scaleX(-1)}
-  35%{top:80px;left:145px;transform:rotate(-10deg) scaleX(-1)}
-  45%{top:120px;left:80px;transform:rotate(5deg) scaleX(1)}
-  55%{top:110px;left:10px;transform:rotate(-8deg) scaleX(1)}
-  65%{top:60px;left:-30px;transform:rotate(12deg) scaleX(1)}
-  75%{top:-10px;left:-25px;transform:rotate(-5deg) scaleX(1)}
-  85%{top:-50px;left:0px;transform:rotate(3deg) scaleX(1)}
-  100%{top:-60px;left:30px;transform:rotate(-5deg) scaleX(1)}
+@keyframes glitter-bob{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-6px)}
 }
 .glitter svg{width:100%;height:100%}
 
 /* tail wag */
-.cat-tail{transform-origin:12px 35px;animation:tail-wag 0.8s ease-in-out infinite alternate}
-@keyframes tail-wag{0%{transform:rotate(-15deg)}100%{transform:rotate(15deg)}}
+.cat-tail{transform-origin:58px 52px;animation:tail-wag 1.2s ease-in-out infinite alternate}
+@keyframes tail-wag{0%{transform:rotate(-20deg)}100%{transform:rotate(20deg)}}
 
 .hero-tag{
   display:inline-flex;align-items:center;gap:7px;
@@ -545,15 +557,15 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 @media(max-width:768px){
   .hero{min-height:90vh;padding:1.5rem}
   .hero h1{font-size:clamp(2.2rem,10vw,3.5rem)}
-  .cube-scene{width:100px;height:100px}
-  .cube-face{width:100px;height:100px;border-radius:20px}
-  .cube-face--front{transform:translateZ(50px)}
-  .cube-face--back{transform:rotateY(180deg) translateZ(50px)}
-  .cube-face--right{transform:rotateY(90deg) translateZ(50px)}
-  .cube-face--left{transform:rotateY(-90deg) translateZ(50px)}
-  .cube-face--top{transform:rotateX(90deg) translateZ(50px)}
-  .cube-face--bottom{transform:rotateX(-90deg) translateZ(50px)}
-  .glitter{width:60px;height:60px}
+  .cube-scene{width:120px;height:120px}
+  .cube-face{width:120px;height:120px;border-radius:24px}
+  .cube-face--front{transform:translateZ(60px)}
+  .cube-face--back{transform:rotateY(180deg) translateZ(60px)}
+  .cube-face--right{transform:rotateY(90deg) translateZ(60px)}
+  .cube-face--left{transform:rotateY(-90deg) translateZ(60px)}
+  .cube-face--top{transform:rotateX(90deg) translateZ(60px)}
+  .cube-face--bottom{transform:rotateX(-90deg) translateZ(60px)}
+  .glitter{width:70px;height:70px;right:-50px}
   .section{padding:3rem 1.25rem}
   .card{padding:0.85rem 1rem}
   .card-link{width:40px;height:40px}
@@ -589,72 +601,61 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 <!-- HERO -->
 <section class="hero">
   <div class="cube-scene">
-    <!-- Glitter the cat -->
+    <!-- Glitter the cat - stylized pink sitting cat -->
     <div class="glitter">
-      <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- tail (animated) -->
+        <path class="cat-tail" d="M62 55 Q78 48 82 35 Q84 26 78 22" stroke="#e84090" stroke-width="5" stroke-linecap="round" fill="none"/>
         <!-- body -->
-        <ellipse cx="40" cy="48" rx="22" ry="16" fill="#f5f0e8"/>
-        <ellipse cx="40" cy="48" rx="22" ry="16" fill="url(#glitter-fur)" opacity="0.3"/>
+        <ellipse cx="42" cy="68" rx="24" ry="20" fill="#e84090"/>
+        <!-- back highlight -->
+        <ellipse cx="38" cy="62" rx="14" ry="12" fill="#f050a0" opacity="0.5"/>
         <!-- head -->
-        <circle cx="40" cy="28" r="16" fill="#f5f0e8"/>
-        <circle cx="40" cy="28" r="16" fill="url(#glitter-fur)" opacity="0.2"/>
-        <!-- ears -->
-        <path d="M28 18L24 6l10 8z" fill="#f5f0e8" stroke="#e8ddd0" stroke-width="0.5"/>
-        <path d="M30 16L27 8l7 5z" fill="#ffb5c5"/>
-        <path d="M52 18L56 6l-10 8z" fill="#f5f0e8" stroke="#e8ddd0" stroke-width="0.5"/>
-        <path d="M50 16L53 8l-7 5z" fill="#ffb5c5"/>
+        <circle cx="38" cy="36" r="18" fill="#e84090"/>
+        <!-- head highlight -->
+        <circle cx="34" cy="32" r="10" fill="#f050a0" opacity="0.4"/>
+        <!-- left ear -->
+        <path d="M24 24L18 6l14 12z" fill="#e84090"/>
+        <path d="M26 22L22 10l10 8z" fill="#c03070" opacity="0.6"/>
+        <!-- right ear -->
+        <path d="M52 24L58 6l-14 12z" fill="#e84090"/>
+        <path d="M50 22L54 10l-10 8z" fill="#c03070" opacity="0.6"/>
         <!-- eyes -->
-        <ellipse cx="34" cy="26" rx="3.5" ry="4" fill="#3a3a3a"/>
-        <ellipse cx="46" cy="26" rx="3.5" ry="4" fill="#3a3a3a"/>
-        <ellipse cx="34.8" cy="25" rx="1.5" ry="1.8" fill="#fff"/>
-        <ellipse cx="46.8" cy="25" rx="1.5" ry="1.8" fill="#fff"/>
+        <ellipse cx="32" cy="34" rx="3" ry="3.5" fill="#1a1a2e"/>
+        <ellipse cx="46" cy="34" rx="3" ry="3.5" fill="#1a1a2e"/>
+        <circle cx="33.2" cy="33" r="1.2" fill="#fff"/>
+        <circle cx="47.2" cy="33" r="1.2" fill="#fff"/>
         <!-- nose -->
-        <path d="M38.5 30.5L40 32l1.5-1.5" stroke="#e8a0b0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        <!-- mouth -->
-        <path d="M37 33.5q3 2 6 0" stroke="#d4a0a0" stroke-width="0.8" stroke-linecap="round" fill="none"/>
+        <ellipse cx="39" cy="40" rx="2" ry="1.5" fill="#c03070"/>
         <!-- whiskers -->
-        <line x1="20" y1="28" x2="32" y2="30" stroke="#d4c4b0" stroke-width="0.6"/>
-        <line x1="20" y1="32" x2="32" y2="32" stroke="#d4c4b0" stroke-width="0.6"/>
-        <line x1="48" y1="30" x2="60" y2="28" stroke="#d4c4b0" stroke-width="0.6"/>
-        <line x1="48" y1="32" x2="60" y2="32" stroke="#d4c4b0" stroke-width="0.6"/>
+        <line x1="14" y1="37" x2="30" y2="38" stroke="#f5a0c0" stroke-width="0.8" opacity="0.6"/>
+        <line x1="14" y1="41" x2="30" y2="41" stroke="#f5a0c0" stroke-width="0.8" opacity="0.6"/>
+        <line x1="48" y1="38" x2="64" y2="37" stroke="#f5a0c0" stroke-width="0.8" opacity="0.6"/>
+        <line x1="48" y1="41" x2="64" y2="41" stroke="#f5a0c0" stroke-width="0.8" opacity="0.6"/>
         <!-- front paws -->
-        <ellipse cx="28" cy="60" rx="6" ry="4" fill="#f5f0e8" stroke="#e8ddd0" stroke-width="0.5"/>
-        <ellipse cx="52" cy="60" rx="6" ry="4" fill="#f5f0e8" stroke="#e8ddd0" stroke-width="0.5"/>
-        <!-- tail -->
-        <path class="cat-tail" d="M16 44 Q4 38 8 26 Q10 20 14 22" stroke="#f5f0e8" stroke-width="5" stroke-linecap="round" fill="none"/>
-        <path class="cat-tail" d="M16 44 Q4 38 8 26 Q10 20 14 22" stroke="url(#glitter-fur)" stroke-width="5" stroke-linecap="round" fill="none" opacity="0.2"/>
-        <!-- sparkle/glitter effects -->
-        <circle cx="55" cy="12" r="1.5" fill="#fff" opacity="0.9">
-          <animate attributeName="opacity" values="0.9;0.2;0.9" dur="2s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="65" cy="22" r="1" fill="#f0c0d0" opacity="0.7">
-          <animate attributeName="opacity" values="0.7;0.1;0.7" dur="1.5s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="15" cy="14" r="1.2" fill="#fff" opacity="0.8">
-          <animate attributeName="opacity" values="0.8;0.15;0.8" dur="1.8s" repeatCount="indefinite"/>
-        </circle>
-        <defs>
-          <linearGradient id="glitter-fur" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#f0c0d0"/>
-            <stop offset="50%" stop-color="#e8d0c0"/>
-            <stop offset="100%" stop-color="#c0d0e8"/>
-          </linearGradient>
-        </defs>
+        <ellipse cx="30" cy="84" rx="8" ry="5" fill="#e84090"/>
+        <ellipse cx="52" cy="84" rx="8" ry="5" fill="#e84090"/>
+        <!-- paw lines -->
+        <path d="M27 84v3M30 84v3M33 84v3" stroke="#c03070" stroke-width="0.8" stroke-linecap="round" opacity="0.4"/>
+        <path d="M49 84v3M52 84v3M55 84v3" stroke="#c03070" stroke-width="0.8" stroke-linecap="round" opacity="0.4"/>
+        <!-- belly highlight -->
+        <ellipse cx="40" cy="75" rx="10" ry="8" fill="#f070b0" opacity="0.35"/>
       </svg>
     </div>
+    <div class="cube-glow"></div>
     <!-- 3D cube -->
     <div class="cube">
       <div class="cube-face cube-face--front">
-        <div class="ig-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="#fff" stroke="none"/></svg></div>
+        <div class="ig-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="#fff" stroke="none"/></svg></div>
       </div>
       <div class="cube-face cube-face--back">
-        <div class="ig-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></div>
+        <div class="ig-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="#fff" stroke="none"/></svg></div>
       </div>
       <div class="cube-face cube-face--right">
-        <div class="ig-icon"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.8"><circle cx="12" cy="12" r="5"/></svg></div>
+        <div class="ig-icon"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></div>
       </div>
       <div class="cube-face cube-face--left">
-        <div class="ig-icon"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.8"><circle cx="12" cy="12" r="5"/></svg></div>
+        <div class="ig-icon"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></div>
       </div>
       <div class="cube-face cube-face--top"></div>
       <div class="cube-face cube-face--bottom"></div>
