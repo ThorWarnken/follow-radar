@@ -1040,17 +1040,17 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
       <h3 id="paywall-title">unlock all results</h3>
       <p>you've seen your top 2 — upgrade to see everyone who doesn't follow you back.</p>
       <div class="pricing-cards">
-        <a class="pricing-card" id="pay-scan" href="#" target="_blank" rel="noopener">
+        <a class="pricing-card" id="pay-scan" href="javascript:void(0)" target="_blank" rel="noopener">
           <div class="plan-name">this scan</div>
           <div class="price">$4</div>
           <div class="plan-sub">one-time</div>
         </a>
-        <a class="pricing-card featured" id="pay-monthly" href="#" target="_blank" rel="noopener">
+        <a class="pricing-card featured" id="pay-monthly" href="javascript:void(0)" target="_blank" rel="noopener">
           <div class="plan-name">monthly</div>
           <div class="price">$6</div>
           <div class="plan-sub">per month</div>
         </a>
-        <a class="pricing-card" id="pay-yearly" href="#" target="_blank" rel="noopener">
+        <a class="pricing-card" id="pay-yearly" href="javascript:void(0)" target="_blank" rel="noopener">
           <div class="best-value">best value</div>
           <div class="plan-name">yearly</div>
           <div class="price">$25</div>
@@ -1123,6 +1123,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 (()=>{
   const el = document.getElementById('gradient-bg');
   if (!el) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const colors = ['#08070b','#e1306c','#f77737','#833ab4','#405de6','#34c759','#e1306c'];
   const stops = [35, 50, 60, 70, 80, 90, 100];
   const startGap = 125;
@@ -1556,7 +1557,8 @@ async function init(){
   }
 
   // No hash — try to restore saved results (e.g. after page reload)
-  if (isUnlocked()) {
+  // Works for both free users (paywall shows) and unlocked users (full results)
+  {
     let saved;
     try { saved = JSON.parse(localStorage.getItem(RESULTS_KEY)); } catch(e) {}
     if (saved && saved.followers && saved.following) {
