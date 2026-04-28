@@ -228,14 +228,19 @@
   function realPersonScore(u) {
     let score = 0;
     const name = u.username.toLowerCase();
+    const fullName = (u.full_name || '').toLowerCase();
     // Has a full name → likely real
     if (u.full_name && u.full_name.trim().length > 0) score += 3;
     // Full name has a space (first + last) → very likely real
     if (u.full_name && u.full_name.includes(' ')) score += 2;
     // Private accounts are usually real people
-    if (u.is_private) score += 1;
-    // Penalize brand/bot patterns
-    if (/official|shop|store|brand|news|daily|memes|clips|repost|fanpage|promo/.test(name)) score -= 4;
+    if (u.is_private) score += 2;
+    // Verified accounts are almost always pages/brands/celebs, not personal friends
+    if (u.is_verified) score -= 5;
+    // Penalize brand/bot/page patterns in username
+    if (/official|shop|store|brand|news|daily|memes|clips|repost|fanpage|promo|music|radio|podcast|media|studio|records|magazine|blog|tv|hq/.test(name)) score -= 4;
+    // Penalize brand/page patterns in full name
+    if (/music|records|studio|magazine|podcast|media|clothing|apparel|official|brand|inc\b|llc\b|co\b/.test(fullName)) score -= 3;
     // Penalize excessive digits (bot123456)
     const digitRatio = (name.match(/\d/g) || []).length / name.length;
     if (digitRatio > 0.3) score -= 3;
@@ -285,6 +290,7 @@
       full_name: u.full_name || '',
       is_private: !!u.is_private,
     };
+    if (u.is_verified) obj.is_verified = true;
     if (typeof mutualCount === 'number') obj.mutual_count = mutualCount;
     return obj;
   }
