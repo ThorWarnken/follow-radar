@@ -222,8 +222,32 @@
     return 0;
   }
 
-  // Sample up to sampleSize random non-followers and fetch their mutual counts.
-  // Returns a Map of username -> count (only for sampled users).
+  // Score how likely a username belongs to a real person (higher = more likely).
+  // Brands/bots tend to have: no full_name, lots of digits/underscores,
+  // keywords like "official", "shop", "store", "news", "daily", "memes".
+  function realPersonScore(u) {
+    let score = 0;
+    const name = u.username.toLowerCase();
+    // Has a full name → likely real
+    if (u.full_name && u.full_name.trim().length > 0) score += 3;
+    // Full name has a space (first + last) → very likely real
+    if (u.full_name && u.full_name.includes(' ')) score += 2;
+    // Private accounts are usually real people
+    if (u.is_private) score += 1;
+    // Penalize brand/bot patterns
+    if (/official|shop|store|brand|news|daily|memes|clips|repost|fanpage|promo/.test(name)) score -= 4;
+    // Penalize excessive digits (bot123456)
+    const digitRatio = (name.match(/\d/g) || []).length / name.length;
+    if (digitRatio > 0.3) score -= 3;
+    // Penalize excessive underscores (___brand___)
+    const underscores = (name.match(/_/g) || []).length;
+    if (underscores >= 3) score -= 2;
+    // Very short usernames are often brands
+    if (name.length <= 3) score -= 1;
+    return score;
+  }
+
+  // Sample non-followers, prioritizing real-looking people, and fetch mutual counts.
   async function fetchSampledMutualCounts(followerSet, following, sampleSize, onProgress) {
     const nonFollowers = [];
     for (const u of following) {
@@ -231,13 +255,16 @@
         nonFollowers.push(u);
       }
     }
-    // Shuffle and take a sample — Fisher-Yates on a copy
-    const shuffled = nonFollowers.slice();
-    for (let i = shuffled.length - 1; i > 0; i--) {
+    // Sort by real-person score descending, then shuffle within score tiers
+    // so we prioritize real people but still get variety
+    nonFollowers.sort((a, b) => realPersonScore(b) - realPersonScore(a));
+    // Take top candidates (2x sample size), then shuffle those for variety
+    const candidates = nonFollowers.slice(0, Math.min(sampleSize * 2, nonFollowers.length));
+    for (let i = candidates.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      const tmp = shuffled[i]; shuffled[i] = shuffled[j]; shuffled[j] = tmp;
+      const tmp = candidates[i]; candidates[i] = candidates[j]; candidates[j] = tmp;
     }
-    const sample = shuffled.slice(0, Math.min(sampleSize, shuffled.length));
+    const sample = candidates.slice(0, Math.min(sampleSize, candidates.length));
     let done = 0;
     const total = sample.length;
     const countMap = new Map();
