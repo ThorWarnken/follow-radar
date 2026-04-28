@@ -82,80 +82,76 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   text-align:center;padding:2rem;
 }
 
+/* 3D cube + cat wrapper */
+.cube-wrap{
+  display:flex;flex-direction:column;align-items:center;
+  margin:0 auto 2rem;position:relative;
+}
+/* Glitter the cat - sits above the cube */
+.glitter{
+  width:150px;height:120px;margin-bottom:-30px;position:relative;z-index:10;
+  filter:drop-shadow(0 8px 24px rgba(225,48,108,0.3));
+  animation:cat-bob 6s ease-in-out infinite;
+}
+@keyframes cat-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.glitter dotlottie-player{width:100%;height:100%}
 /* 3D cube */
 .cube-scene{
-  perspective:1200px;width:160px;height:160px;
-  margin:0 auto 2.5rem;position:relative;
-  padding-top:120px; /* space for cat sitting on top */
+  perspective:1200px;width:150px;height:150px;position:relative;
+  animation:cat-bob 6s ease-in-out infinite;
 }
 .cube{
   width:100%;height:100%;position:relative;
   transform-style:preserve-3d;
-  animation:cube-float 6s ease-in-out infinite, cube-spin 20s linear infinite;
+  animation:cube-spin 20s linear infinite;
 }
 @keyframes cube-spin{
   0%{transform:rotateX(-20deg) rotateY(0deg)}
   100%{transform:rotateX(-20deg) rotateY(360deg)}
 }
-@keyframes cube-float{
-  0%,100%{translate:0 0}
-  50%{translate:0 -12px}
-}
-/* Solid inner cube to seal corner gaps - no border-radius */
+/* Solid inner cube - fills ALL corner gaps */
 .cube-inner{
-  position:absolute;inset:6px;
+  position:absolute;width:148px;height:148px;top:1px;left:1px;
   transform-style:preserve-3d;
 }
-.cube-inner-face{position:absolute;inset:0}
-.cube-inner-face--front{background:#c03070;transform:translateZ(74px)}
-.cube-inner-face--back{background:#c06030;transform:rotateY(180deg) translateZ(74px)}
-.cube-inner-face--right{background:#8030a0;transform:rotateY(90deg) translateZ(74px)}
-.cube-inner-face--left{background:#5030b0;transform:rotateY(-90deg) translateZ(74px)}
-.cube-inner-face--top{background:#e08030;transform:rotateX(90deg) translateZ(74px)}
-.cube-inner-face--bottom{background:#1a0830;transform:rotateX(-90deg) translateZ(74px)}
+.cube-inner-face{position:absolute;width:148px;height:148px}
+.cube-inner-face--front{background:#b83070;transform:translateZ(75px)}
+.cube-inner-face--back{background:#b83070;transform:rotateY(180deg) translateZ(75px)}
+.cube-inner-face--right{background:#7030a0;transform:rotateY(90deg) translateZ(75px)}
+.cube-inner-face--left{background:#7030a0;transform:rotateY(-90deg) translateZ(75px)}
+.cube-inner-face--top{background:#d07030;transform:rotateX(90deg) translateZ(75px)}
+.cube-inner-face--bottom{background:#14081e;transform:rotateX(-90deg) translateZ(75px)}
 /* Outer rounded faces */
 .cube-face{
-  position:absolute;width:160px;height:160px;
-  border-radius:32px;
+  position:absolute;width:150px;height:150px;
+  border-radius:30px;
   display:flex;align-items:center;justify-content:center;
-  border:1.5px solid rgba(255,255,255,0.12);
-  box-shadow:inset 0 0 40px rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);
 }
 .cube-face--front{
   background:linear-gradient(135deg,#833ab4,#e1306c,#f77737);
-  transform:translateZ(80px);
-  box-shadow:inset 0 0 40px rgba(255,255,255,0.06), 0 0 60px rgba(225,48,108,0.3);
+  transform:translateZ(75px);
+  box-shadow:0 0 50px rgba(225,48,108,0.3);
 }
-.cube-face--back{background:linear-gradient(135deg,#f77737,#e1306c,#833ab4);transform:rotateY(180deg) translateZ(80px)}
-.cube-face--right{background:linear-gradient(135deg,#c13584,#833ab4,#405de6);transform:rotateY(90deg) translateZ(80px)}
-.cube-face--left{background:linear-gradient(135deg,#405de6,#833ab4,#c13584);transform:rotateY(-90deg) translateZ(80px)}
+.cube-face--back{background:linear-gradient(135deg,#f77737,#e1306c,#833ab4);transform:rotateY(180deg) translateZ(75px)}
+.cube-face--right{background:linear-gradient(135deg,#c13584,#833ab4,#405de6);transform:rotateY(90deg) translateZ(75px)}
+.cube-face--left{background:linear-gradient(135deg,#405de6,#833ab4,#c13584);transform:rotateY(-90deg) translateZ(75px)}
 .cube-face--top{
   background:linear-gradient(135deg,#f77737,#fcaf45,#f77737);
-  transform:rotateX(90deg) translateZ(80px);
-  border-color:rgba(255,255,255,0.18);
+  transform:rotateX(90deg) translateZ(75px);
+  border-color:rgba(255,255,255,0.15);
 }
-.cube-face--bottom{background:linear-gradient(135deg,#2a1050,#1a0830,#2a1050);transform:rotateX(-90deg) translateZ(80px);border-color:rgba(255,255,255,0.04)}
+.cube-face--bottom{background:linear-gradient(135deg,#1a0830,#14081e,#1a0830);transform:rotateX(-90deg) translateZ(75px);border-color:rgba(255,255,255,0.03)}
 /* IG icon on faces */
-.ig-icon{width:55%;height:55%}
-.ig-icon svg{width:100%;height:100%;filter:drop-shadow(0 2px 12px rgba(0,0,0,0.25))}
+.ig-icon{width:50%;height:50%}
+.ig-icon svg{width:100%;height:100%;filter:drop-shadow(0 2px 10px rgba(0,0,0,0.3))}
 /* Cube glow underneath */
 .cube-glow{
-  position:absolute;bottom:-30px;left:50%;transform:translateX(-50%);
-  width:120px;height:20px;
+  width:100px;height:16px;margin-top:-8px;
   background:radial-gradient(ellipse,rgba(225,48,108,0.35),transparent 70%);
   border-radius:50%;filter:blur(8px);
-  animation:cube-float 6s ease-in-out infinite;
+  animation:cat-bob 6s ease-in-out infinite;
 }
-
-/* Glitter the cat - sits on top of the cube */
-.glitter{
-  position:absolute;z-index:10;
-  top:-100px;left:50%;transform:translateX(-50%);
-  width:160px;height:140px;
-  filter:drop-shadow(0 8px 24px rgba(225,48,108,0.3));
-  animation:cube-float 6s ease-in-out infinite;
-}
-.glitter dotlottie-player{width:100%;height:100%}
 
 .hero-tag{
   display:inline-flex;align-items:center;gap:7px;
@@ -562,21 +558,16 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 @media(max-width:768px){
   .hero{min-height:90vh;padding:1.5rem}
   .hero h1{font-size:clamp(2.2rem,10vw,3.5rem)}
-  .cube-scene{width:120px;height:120px;padding-top:90px}
-  .cube-face{width:120px;height:120px;border-radius:24px}
-  .cube-face--front{transform:translateZ(60px)}
-  .cube-face--back{transform:rotateY(180deg) translateZ(60px)}
-  .cube-face--right{transform:rotateY(90deg) translateZ(60px)}
-  .cube-face--left{transform:rotateY(-90deg) translateZ(60px)}
-  .cube-face--top{transform:rotateX(90deg) translateZ(60px)}
-  .cube-face--bottom{transform:rotateX(-90deg) translateZ(60px)}
-  .cube-inner-face--front{transform:translateZ(54px)}
-  .cube-inner-face--back{transform:rotateY(180deg) translateZ(54px)}
-  .cube-inner-face--right{transform:rotateY(90deg) translateZ(54px)}
-  .cube-inner-face--left{transform:rotateY(-90deg) translateZ(54px)}
-  .cube-inner-face--top{transform:rotateX(90deg) translateZ(54px)}
-  .cube-inner-face--bottom{transform:rotateX(-90deg) translateZ(54px)}
-  .glitter{width:120px;height:110px;top:-80px}
+  .cube-scene{width:110px;height:110px}
+  .cube-face{width:110px;height:110px;border-radius:22px}
+  .cube-inner,.cube-inner-face{width:108px;height:108px}
+  .cube-face--front,.cube-inner-face--front{transform:translateZ(55px)}
+  .cube-face--back,.cube-inner-face--back{transform:rotateY(180deg) translateZ(55px)}
+  .cube-face--right,.cube-inner-face--right{transform:rotateY(90deg) translateZ(55px)}
+  .cube-face--left,.cube-inner-face--left{transform:rotateY(-90deg) translateZ(55px)}
+  .cube-face--top,.cube-inner-face--top{transform:rotateX(90deg) translateZ(55px)}
+  .cube-face--bottom,.cube-inner-face--bottom{transform:rotateX(-90deg) translateZ(55px)}
+  .glitter{width:110px;height:90px;margin-bottom:-20px}
   .section{padding:3rem 1.25rem}
   .card{padding:0.85rem 1rem}
   .card-link{width:40px;height:40px}
@@ -611,14 +602,13 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 
 <!-- HERO -->
 <section class="hero">
-  <div class="cube-scene">
-    <!-- Glitter the cat - Lottie animation from 21st.dev -->
+  <div class="cube-wrap">
+    <!-- Glitter the cat -->
     <div class="glitter">
       <dotlottie-player src="https://lottie.host/8cf4ba71-e5fb-44f3-8134-178c4d389417/0CCsdcgNIP.json" background="transparent" speed="1" loop autoplay></dotlottie-player>
     </div>
-    <div class="cube-glow"></div>
     <!-- 3D cube -->
-    <div class="cube">
+    <div class="cube-scene"><div class="cube">
       <!-- Solid inner cube to seal corner gaps -->
       <div class="cube-inner">
         <div class="cube-inner-face cube-inner-face--front"></div>
@@ -642,7 +632,8 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
       </div>
       <div class="cube-face cube-face--top"></div>
       <div class="cube-face cube-face--bottom"></div>
-    </div>
+    </div></div>
+    <div class="cube-glow"></div>
   </div>
 
   <div class="hero-tag">runs entirely in your browser</div>
