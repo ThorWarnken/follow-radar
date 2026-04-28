@@ -1215,6 +1215,7 @@ function loadPayload(p){
   }
   state.nonFol = nonFol;
   state.sort = 'mutuals';
+  if (el.srt) el.srt.value = 'mutuals';
   state.filtered = nonFol.slice();
 
   if (state.partial){
@@ -1387,7 +1388,8 @@ async function init(){
   if (payMonthly) payMonthly.href = 'https://buy.stripe.com/3cIcN5gNW1mwe518cb6AM02';
   if (payYearly) payYearly.href = 'https://buy.stripe.com/cNi14n55e4yI8KH1NN6AM03';
 
-  // Pricing link click handlers — save results and mark pending payment
+  // Pricing link click handlers — save results and delay-set pending payment
+  // The 30s delay makes it harder to exploit by quickly closing Stripe
   const planMap = {'pay-scan':'scan','pay-monthly':'monthly','pay-yearly':'yearly'};
   document.querySelectorAll('.pricing-card').forEach(card => {
     card.addEventListener('click', () => {
@@ -1397,8 +1399,11 @@ async function init(){
           following: state.following,
           partial: state.partial,
         }));
-        localStorage.setItem('follow-radar:pending-plan', planMap[card.id] || 'scan');
       } catch(e) {}
+      const plan = planMap[card.id] || 'scan';
+      setTimeout(() => {
+        try { localStorage.setItem('follow-radar:pending-plan', plan); } catch(e) {}
+      }, 30000);
     });
   });
 
@@ -1431,7 +1436,12 @@ async function init(){
   if (paidBtn) {
     paidBtn.addEventListener('click', () => {
       const pending = localStorage.getItem('follow-radar:pending-plan');
-      if (!pending) return; // only works if they clicked a pricing card first
+      if (!pending) {
+        paidBtn.textContent = 'click a plan above first, then come back here after paying';
+        paidBtn.style.color = 'var(--pink)';
+        setTimeout(() => { paidBtn.textContent = "i've already paid"; paidBtn.style.color = ''; }, 4000);
+        return;
+      }
       localStorage.removeItem('follow-radar:pending-plan');
       unlockAndRestore(pending);
     });
@@ -1454,6 +1464,14 @@ async function init(){
     try {
       const payload = await decodePayload(encoded);
       try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch(e) {}
+      // Persist results so they survive page reloads
+      try {
+        localStorage.setItem(RESULTS_KEY, JSON.stringify({
+          followers: payload.followers,
+          following: payload.following,
+          partial: !!payload.partial,
+        }));
+      } catch(e) {}
       loadPayload(payload);
     } catch (e) {
       console.error('[follow radar] could not decode hash payload:', e);
