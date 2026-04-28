@@ -554,16 +554,18 @@
     }
 
     // Phase 3: fetch mutual follower counts for non-followers
+    // Skip for large accounts (5k+ followers) to avoid long scan times
     const followerSet = new Set(followers.map(u => u.username.toLowerCase()));
     let mutualCounts = new Map();
-    try {
-      updateOverlay('Checking mutual connections\u2026', 0.85);
-      mutualCounts = await fetchAllMutualCounts(followerSet, following, (done, total) => {
-        updateOverlay('Checking mutual connections\u2026 ' + done + '/' + total, 0.85 + 0.15 * (done / total));
-      });
-    } catch (e) {
-      // If mutual fetching fails entirely, continue with zero counts
-      console.warn('[follow radar] mutual count fetch failed:', e);
+    if (followers.length < 5000) {
+      try {
+        updateOverlay('Checking mutual connections\u2026', 0.85);
+        mutualCounts = await fetchAllMutualCounts(followerSet, following, (done, total) => {
+          updateOverlay('Checking mutual connections\u2026 ' + done + '/' + total, 0.85 + 0.15 * (done / total));
+        });
+      } catch (e) {
+        console.warn('[follow radar] mutual count fetch failed:', e);
+      }
     }
 
     destroyOverlay();
