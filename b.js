@@ -194,13 +194,65 @@
     return u;
   }
 
+  function buildMutualUrl(userId) {
+    return 'https://i.instagram.com/api/v1/friendships/' + userId + '/mutual_followers/';
+  }
+
+  async function fetchMutualCount(userId) {
+    await throttle();
+    let resp;
+    try {
+      resp = await doFetch(buildMutualUrl(userId), {
+        credentials: 'include',
+        headers: { 'X-IG-App-ID': IG_APP_ID, 'Accept': 'application/json' },
+      });
+    } catch (e) {
+      return 0;
+    }
+    if (!resp.ok) return 0;
+    let body;
+    try {
+      body = await resp.json();
+    } catch (e) {
+      return 0;
+    }
+    // IG returns { users: [...], total_count: N } or similar
+    if (typeof body.total_count === 'number') return body.total_count;
+    if (Array.isArray(body.users)) return body.users.length;
+    return 0;
+  }
+
+  async function fetchAllMutualCounts(followerSet, following, onProgress) {
+    // Compute non-followers first (same logic index.html uses)
+    const nonFollowers = [];
+    for (const u of following) {
+      if (!followerSet.has(u.username.toLowerCase())) {
+        nonFollowers.push(u);
+      }
+    }
+    // Fetch mutual counts only for non-followers
+    let done = 0;
+    const total = nonFollowers.length;
+    const countMap = new Map();
+    for (const u of nonFollowers) {
+      const pk = u.pk || u.userId || u.username;
+      const count = await fetchMutualCount(pk);
+      countMap.set(u.username.toLowerCase(), count);
+      done++;
+      if (onProgress) onProgress(done, total);
+    }
+    return countMap;
+  }
+
   // Reduce IG's account shape to ours.
-  function trimUser(u) {
-    return {
+  function trimUser(u, mutualCount) {
+    const obj = {
       username: u.username,
       full_name: u.full_name || '',
       is_private: !!u.is_private,
     };
+    if (typeof mutualCount === 'number') obj.mutual_count = mutualCount;
+    return obj;
   }
 
   // Generic paginator. urlBuilder(cursor) -> url.
@@ -501,15 +553,34 @@
       return;
     }
 
+    // Phase 3: fetch mutual follower counts for non-followers
+    const followerSet = new Set(followers.map(u => u.username.toLowerCase()));
+    let mutualCounts = new Map();
+    try {
+      updateOverlay('Checking mutual connections\u2026 0/' + following.length, 0.85);
+      mutualCounts = await fetchAllMutualCounts(followerSet, following, (done, total) => {
+        updateOverlay('Checking mutual connections\u2026 ' + done + '/' + total, 0.85 + 0.15 * (done / total));
+      });
+    } catch (e) {
+      // If mutual fetching fails entirely, continue with zero counts
+      console.warn('[follow radar] mutual count fetch failed:', e);
+    }
+
     destroyOverlay();
     clearResumeState();
+
+    // Attach mutual_count to each following user
+    const followingWithMutuals = following.map(u => {
+      const mc = mutualCounts.get(u.username.toLowerCase()) || 0;
+      return { username: u.username, full_name: u.full_name || '', is_private: !!u.is_private, mutual_count: mc };
+    });
 
     const payload = {
       username: user.username,
       userId: user.userId,
       scrapedAt: new Date().toISOString(),
       followers: followers,
-      following: following,
+      following: followingWithMutuals,
     };
     try {
       await shipResults(payload);
@@ -535,6 +606,9 @@
     window.__followRadarTest.setFetch = function (fn) { doFetch = fn; };
     window.__followRadarTest.buildFollowersUrl = buildFollowersUrl;
     window.__followRadarTest.buildFollowingUrl = buildFollowingUrl;
+    window.__followRadarTest.buildMutualUrl = buildMutualUrl;
+    window.__followRadarTest.fetchMutualCount = fetchMutualCount;
+    window.__followRadarTest.fetchAllMutualCounts = fetchAllMutualCounts;
     window.__followRadarTest.trimUser = trimUser;
     window.__followRadarTest.scrapeFollowers = scrapeFollowers;
     window.__followRadarTest.scrapeFollowing = scrapeFollowing;
