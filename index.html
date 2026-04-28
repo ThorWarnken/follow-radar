@@ -1272,9 +1272,9 @@ async function init(){
   const payMonthly = document.getElementById('pay-monthly');
   const payYearly = document.getElementById('pay-yearly');
   const successBase = window.location.origin + window.location.pathname;
-  if (payScan) payScan.href = 'STRIPE_SCAN_PAYMENT_LINK_URL' + '?success_url=' + encodeURIComponent(successBase + '#paid=scan');
-  if (payMonthly) payMonthly.href = 'STRIPE_MONTHLY_PAYMENT_LINK_URL' + '?success_url=' + encodeURIComponent(successBase + '#paid=monthly');
-  if (payYearly) payYearly.href = 'STRIPE_YEARLY_PAYMENT_LINK_URL' + '?success_url=' + encodeURIComponent(successBase + '#paid=yearly');
+  if (payScan) payScan.href = 'https://buy.stripe.com/28E6oHcxG5CM7GDakj6AM01' + '?success_url=' + encodeURIComponent(successBase + '#paid=scan');
+  if (payMonthly) payMonthly.href = 'https://buy.stripe.com/3cIcN5gNW1mwe518cb6AM02' + '?success_url=' + encodeURIComponent(successBase + '#paid=monthly');
+  if (payYearly) payYearly.href = 'https://buy.stripe.com/cNi14n55e4yI8KH1NN6AM03' + '?success_url=' + encodeURIComponent(successBase + '#paid=yearly');
 
   const hash = window.location.hash || '';
 
@@ -1293,6 +1293,13 @@ async function init(){
       try { saved = JSON.parse(localStorage.getItem(RESULTS_KEY)); } catch(e) {}
       if (saved && saved.followers && saved.following) {
         loadPayload(saved);
+      }
+      // For one-time scans, clear unlock when user leaves so it can't be reused
+      if (type === 'scan') {
+        window.addEventListener('beforeunload', () => {
+          localStorage.removeItem(UNLOCK_KEY);
+          localStorage.removeItem(RESULTS_KEY);
+        });
       }
     }
     return;
