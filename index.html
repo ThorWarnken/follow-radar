@@ -1039,7 +1039,7 @@ function devMockPayload(){
   const following = [];
   const names = ['ada','grace','linus','margaret','dennis','ken','brian','rob','katherine','annie','bjarne','niklaus','donald','tony','barbara','john','larry','sergey','tim','vint','radia','jean','frances','steve','woz','susan','sheryl','marissa','melanie','reshma','kimberly','julia','alexandra','sara','whitney','arianna','jane','grace2','meg','indra','sophia','aileen','kirsten','susanne','padmasree','therese','ursula','lucy','aileen2'];
   for (let i = 0; i < names.length; i++){
-    following.push({username: names[i], full_name: names[i].replace(/^./, c => c.toUpperCase()), is_private: i % 9 === 0});
+    following.push({username: names[i], full_name: names[i].replace(/^./, c => c.toUpperCase()), is_private: i % 9 === 0, mutual_count: Math.max(0, names.length - i - 10)});
   }
   for (let i = 0; i < names.length; i += 2){
     followers.push({username: names[i], full_name: names[i].replace(/^./, c => c.toUpperCase()), is_private: false});
