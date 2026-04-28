@@ -90,10 +90,11 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   text-transform:lowercase;
 }
 
-/* ─── App Icon Hero ───────────────────────────────────────────────
- * Instagram-style app icon with 3D depth. Single squircle element
- * with CSS pseudo-elements for the side/bottom edges. No 6-face
- * cube, no corner gaps — just one solid rounded shape with depth.
+/* ─── Floating Instagram Cube ─────────────────────────────────────
+ * True 6-face 3D cube with sealed edges. Each face has a fill panel
+ * (slightly oversized, low border-radius) sitting just behind the
+ * rounded gradient face to close corner gaps. The cube is shallow
+ * (40px depth) so the rounded faces dominate visually.
  * ────────────────────────────────────────────────────────────────── */
 .cube-wrap{
   display:flex;flex-direction:column;align-items:center;
@@ -102,7 +103,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .glitter{
   width:150px;height:120px;margin-bottom:-30px;position:relative;z-index:10;
   filter:drop-shadow(0 8px 24px rgba(225,48,108,0.3));
-  animation:icon-float 6s ease-in-out infinite;
+  animation:cube-float 6s ease-in-out infinite;
 }
 .glitter dotlottie-player{width:100%;height:100%}
 
@@ -120,88 +121,96 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}
 }
 
-/* Float container */
 .cube-scene{
-  position:relative;width:160px;height:160px;
-  perspective:600px;
-  animation:icon-float 6s ease-in-out infinite;
+  perspective:800px;width:150px;height:150px;position:relative;
+  animation:cube-float 6s ease-in-out infinite;
 }
-@keyframes icon-float{
+@keyframes cube-float{
   0%,100%{transform:translateY(0)}
   50%{transform:translateY(-14px)}
 }
 
-/* The 3D app icon — a tilted squircle with thick depth edges */
-.app-icon{
-  position:relative;width:160px;height:160px;
+.cube{
+  width:100%;height:100%;position:relative;
   transform-style:preserve-3d;
-  animation:icon-rock 8s ease-in-out infinite;
+  animation:cube-rock 10s ease-in-out infinite;
 }
-@keyframes icon-rock{
-  0%{transform:rotateX(14deg) rotateY(-20deg) rotateZ(-2deg)}
-  25%{transform:rotateX(8deg) rotateY(8deg) rotateZ(1deg)}
-  50%{transform:rotateX(16deg) rotateY(22deg) rotateZ(-1deg)}
-  75%{transform:rotateX(10deg) rotateY(-8deg) rotateZ(2deg)}
-  100%{transform:rotateX(14deg) rotateY(-20deg) rotateZ(-2deg)}
+@keyframes cube-rock{
+  0%{transform:rotateX(-20deg) rotateY(-25deg)}
+  25%{transform:rotateX(-16deg) rotateY(5deg)}
+  50%{transform:rotateX(-22deg) rotateY(28deg)}
+  75%{transform:rotateX(-18deg) rotateY(-8deg)}
+  100%{transform:rotateX(-20deg) rotateY(-25deg)}
 }
 
-/* Front face — the main app icon surface */
-.app-icon-face{
-  position:absolute;inset:0;
-  border-radius:36px;
-  background:linear-gradient(135deg,#833ab4 0%,#e1306c 45%,#f77737 100%);
-  display:flex;align-items:center;justify-content:center;
-  transform:translateZ(28px);
-  box-shadow:
-    0 20px 60px rgba(225,48,108,0.3),
-    0 8px 24px rgba(0,0,0,0.4),
-    inset 0 1px 1px rgba(255,255,255,0.3),
-    inset 0 -1px 2px rgba(0,0,0,0.1);
-  border:1px solid rgba(255,255,255,0.15);
+/*
+ * Fill panels: sit 0.5px behind each face, slightly oversized,
+ * with small border-radius. They seal the corner gaps where
+ * the large-radius face edges meet.
+ */
+.cube-fill{
+  position:absolute;width:156px;height:156px;top:-3px;left:-3px;
+  border-radius:10px;
 }
-/* Glossy highlight */
-.app-icon-face::after{
+.cube-fill--front{background:#c0406a;transform:translateZ(39.5px)}
+.cube-fill--back{background:#80305a;transform:rotateY(180deg) translateZ(39.5px)}
+.cube-fill--right{background:#7030a0;transform:rotateY(90deg) translateZ(74.5px)}
+.cube-fill--left{background:#5838b0;transform:rotateY(-90deg) translateZ(74.5px)}
+.cube-fill--top{background:#d07030;transform:rotateX(90deg) translateZ(74.5px)}
+.cube-fill--bottom{background:#0d0515;transform:rotateX(-90deg) translateZ(74.5px)}
+
+/* Rounded gradient faces */
+.cube-face{
+  position:absolute;width:150px;height:150px;
+  border-radius:34px;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid rgba(255,255,255,0.12);
+  overflow:hidden;
+}
+/* Glossy highlight on every face */
+.cube-face::after{
   content:'';position:absolute;inset:0;border-radius:inherit;
-  background:linear-gradient(165deg,rgba(255,255,255,0.35) 0%,rgba(255,255,255,0.08) 35%,transparent 55%);
+  background:linear-gradient(160deg,rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.06) 35%,transparent 55%);
   pointer-events:none;
 }
-
-/* Back face — closes the cube volume */
-.app-icon-back{
-  position:absolute;inset:0;
-  border-radius:36px;
-  background:linear-gradient(135deg,#5a1880 0%,#801848 50%,#a03828 100%);
-  transform:translateZ(0px);
+.cube-face--front{
+  background:linear-gradient(135deg,#833ab4 0%,#e1306c 45%,#f77737 100%);
+  transform:translateZ(40px);
+  box-shadow:
+    0 20px 60px rgba(225,48,108,0.3),
+    inset 0 1px 1px rgba(255,255,255,0.3),
+    inset 0 -1px 2px rgba(0,0,0,0.1);
+}
+.cube-face--back{
+  background:linear-gradient(135deg,#f77737,#e1306c,#833ab4);
+  transform:rotateY(180deg) translateZ(40px);
+}
+.cube-face--right{
+  background:linear-gradient(180deg,#6228d7 0%,#833ab4 40%,#c13584 100%);
+  transform:rotateY(90deg) translateZ(75px);
+}
+.cube-face--left{
+  background:linear-gradient(180deg,#405de6 0%,#833ab4 40%,#6228d7 100%);
+  transform:rotateY(-90deg) translateZ(75px);
+}
+.cube-face--top{
+  background:linear-gradient(135deg,#f77737 0%,#fcaf45 50%,#f9d423 100%);
+  transform:rotateX(90deg) translateZ(75px);
+  border-color:rgba(255,255,255,0.2);
+}
+.cube-face--bottom{
+  background:#0d0515;
+  transform:rotateX(-90deg) translateZ(75px);
+  border-color:rgba(255,255,255,0.02);
 }
 
-/* Side edge — thick for cube feel */
-.app-icon-side{
-  position:absolute;top:0;bottom:0;right:0;width:28px;
-  background:linear-gradient(180deg,#6a1a8a 0%,#a02060 50%,#c05030 100%);
-  border-radius:0 36px 36px 0;
-  transform:rotateY(90deg);
-  transform-origin:right center;
-  border-top:1px solid rgba(255,255,255,0.08);
-  border-bottom:1px solid rgba(0,0,0,0.2);
-}
-/* Bottom edge — thick for cube feel */
-.app-icon-bottom{
-  position:absolute;left:0;right:0;bottom:0;height:28px;
-  background:linear-gradient(90deg,#4a1070 0%,#781440 50%,#a03020 100%);
-  border-radius:0 0 36px 36px;
-  transform:rotateX(-90deg);
-  transform-origin:bottom center;
-  border-left:1px solid rgba(255,255,255,0.05);
-  border-right:1px solid rgba(0,0,0,0.2);
-}
-
-/* IG camera icon on the face */
-.app-icon-ig{width:52%;height:52%}
-.app-icon-ig svg{width:100%;height:100%;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.3))}
+/* IG icon on front face */
+.ig-icon{width:48%;height:48%}
+.ig-icon svg{width:100%;height:100%;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.3))}
 
 /* Floor shadow */
 .cube-shadow{
-  width:130px;height:20px;margin-top:8px;
+  width:130px;height:20px;margin-top:4px;
   background:radial-gradient(ellipse,rgba(225,48,108,0.35) 0%,rgba(131,58,180,0.15) 40%,transparent 70%);
   border-radius:50%;filter:blur(12px);
   animation:shadow-pulse 6s ease-in-out infinite;
@@ -702,12 +711,21 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 @media(max-width:768px){
   .hero{min-height:90vh;padding:1.5rem}
   .hero h1{font-size:clamp(2.2rem,10vw,3.5rem)}
-  .cube-scene{width:120px;height:120px}
-  .app-icon{width:120px;height:120px}
-  .app-icon-face{border-radius:28px;transform:translateZ(22px)}
-  .app-icon-back{border-radius:28px}
-  .app-icon-side{width:22px;border-radius:0 28px 28px 0}
-  .app-icon-bottom{height:22px;border-radius:0 0 28px 28px}
+  .cube-scene{width:110px;height:110px}
+  .cube-face{width:110px;height:110px;border-radius:26px}
+  .cube-fill{width:116px;height:116px;top:-3px;left:-3px;border-radius:8px}
+  .cube-face--front{transform:translateZ(30px)}
+  .cube-face--back{transform:rotateY(180deg) translateZ(30px)}
+  .cube-face--right{transform:rotateY(90deg) translateZ(55px)}
+  .cube-face--left{transform:rotateY(-90deg) translateZ(55px)}
+  .cube-face--top{transform:rotateX(90deg) translateZ(55px)}
+  .cube-face--bottom{transform:rotateX(-90deg) translateZ(55px)}
+  .cube-fill--front{transform:translateZ(29.5px)}
+  .cube-fill--back{transform:rotateY(180deg) translateZ(29.5px)}
+  .cube-fill--right{transform:rotateY(90deg) translateZ(54.5px)}
+  .cube-fill--left{transform:rotateY(-90deg) translateZ(54.5px)}
+  .cube-fill--top{transform:rotateX(90deg) translateZ(54.5px)}
+  .cube-fill--bottom{transform:rotateX(-90deg) translateZ(54.5px)}
   .cube-aura{width:170px;height:170px}
   .cube-shadow{width:100px}
   .glitter{width:110px;height:90px;margin-bottom:-20px}
@@ -751,16 +769,26 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
     <div class="glitter">
       <dotlottie-player src="https://lottie.host/8cf4ba71-e5fb-44f3-8134-178c4d389417/0CCsdcgNIP.json" background="transparent" speed="1" loop autoplay></dotlottie-player>
     </div>
-    <!-- 3D App Icon -->
+    <!-- Floating 3D Cube -->
     <div class="cube-scene">
       <div class="cube-aura"></div>
-      <div class="app-icon">
-        <div class="app-icon-back"></div>
-        <div class="app-icon-side"></div>
-        <div class="app-icon-bottom"></div>
-        <div class="app-icon-face">
-          <div class="app-icon-ig"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="#fff" stroke="none"/></svg></div>
+      <div class="cube">
+        <!-- Fill panels seal corner gaps -->
+        <div class="cube-fill cube-fill--front"></div>
+        <div class="cube-fill cube-fill--back"></div>
+        <div class="cube-fill cube-fill--right"></div>
+        <div class="cube-fill cube-fill--left"></div>
+        <div class="cube-fill cube-fill--top"></div>
+        <div class="cube-fill cube-fill--bottom"></div>
+        <!-- Rounded gradient faces -->
+        <div class="cube-face cube-face--front">
+          <div class="ig-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="#fff" stroke="none"/></svg></div>
         </div>
+        <div class="cube-face cube-face--back"></div>
+        <div class="cube-face cube-face--right"></div>
+        <div class="cube-face cube-face--left"></div>
+        <div class="cube-face cube-face--top"></div>
+        <div class="cube-face cube-face--bottom"></div>
       </div>
     </div>
     <div class="cube-shadow"></div>
