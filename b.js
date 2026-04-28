@@ -585,7 +585,7 @@
     try {
       await shipResults(payload);
     } catch (e) {
-      alert("Could not redirect to follow radar: " + e.message);
+      alert("Could not redirect to Only Followers: " + e.message);
     }
   }
 
