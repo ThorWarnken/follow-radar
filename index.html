@@ -151,19 +151,34 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   position:absolute;width:160px;height:160px;
   border-radius:36px;
   display:flex;align-items:center;justify-content:center;
-  /* Soft bevel: inset highlight top-left, inset shadow bottom-right */
   box-shadow:
     inset 0 1px 1px rgba(255,255,255,0.25),
     inset 0 -1px 2px rgba(0,0,0,0.15);
   border:1px solid rgba(255,255,255,0.12);
   overflow:hidden;
 }
-/* Glossy highlight overlay — pseudo-element on every face */
+/* Glossy highlight overlay */
 .cube-face::after{
   content:'';position:absolute;inset:0;border-radius:inherit;
   background:linear-gradient(160deg,rgba(255,255,255,0.28) 0%,rgba(255,255,255,0.05) 40%,transparent 60%);
   pointer-events:none;
 }
+
+/*
+ * Edge fills: flat panels with NO border-radius that sit 0.5px behind
+ * each face, sized slightly larger to cover the corner gaps where
+ * rounded faces meet. Color-matched to each face's average edge tone.
+ */
+.cube-edge{
+  position:absolute;width:164px;height:164px;top:-2px;left:-2px;
+  border-radius:8px;
+}
+.cube-edge--front{background:#c0406a;transform:translateZ(79.5px)}
+.cube-edge--back{background:#c0606a;transform:rotateY(180deg) translateZ(79.5px)}
+.cube-edge--right{background:#7030b0;transform:rotateY(90deg) translateZ(79.5px)}
+.cube-edge--left{background:#5838b0;transform:rotateY(-90deg) translateZ(79.5px)}
+.cube-edge--top{background:#e89040;transform:rotateX(90deg) translateZ(79.5px)}
+.cube-edge--bottom{background:#0d0515;transform:rotateX(-90deg) translateZ(79.5px)}
 
 /* ── Front face ─ warm pink/orange IG gradient ── */
 .cube-face--front{
@@ -175,7 +190,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
     inset 0 -1px 2px rgba(0,0,0,0.12);
 }
 
-/* ── Back face ─ hidden most of the time ── */
+/* ── Back face ── */
 .cube-face--back{
   background:linear-gradient(135deg,#f77737,#e1306c,#833ab4);
   transform:rotateY(180deg) translateZ(80px);
@@ -193,14 +208,14 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   transform:rotateY(-90deg) translateZ(80px);
 }
 
-/* ── Top face ─ warm glow, radar pulse rises from it ── */
+/* ── Top face ─ warm glow ── */
 .cube-face--top{
   background:linear-gradient(135deg,#f77737 0%,#fcaf45 50%,#f9d423 100%);
   transform:rotateX(90deg) translateZ(80px);
   border-color:rgba(255,255,255,0.2);
 }
 
-/* ── Bottom face ─ deep shadow ── */
+/* ── Bottom face ── */
 .cube-face--bottom{
   background:#0d0515;
   transform:rotateX(-90deg) translateZ(80px);
@@ -326,10 +341,11 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;position:relative}
 .how-card{
   position:relative;padding:2.25rem 1.75rem 2rem;
-  background:rgba(255,255,255,0.06);
-  border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-lg);
+  background:rgba(255,255,255,0.09);
+  border:1px solid rgba(255,255,255,0.15);border-radius:var(--radius-lg);
   text-align:left;overflow:hidden;
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  box-shadow:0 4px 24px rgba(0,0,0,0.3);
   transition:transform 0.4s var(--bounce),box-shadow 0.4s ease,border-color 0.3s ease;
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
 }
@@ -366,8 +382,9 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   position:relative;
   padding:4rem 3rem;
   border-radius:var(--radius-xl);
-  background:rgba(255,255,255,0.07);
+  background:rgba(255,255,255,0.09);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  box-shadow:0 8px 40px rgba(0,0,0,0.35);
   box-shadow:0 20px 80px rgba(225,48,108,0.06);
 }
 .bm-card::before{
@@ -445,8 +462,9 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .privacy-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.75rem;text-align:left}
 .privacy-item{
   padding:1.5rem;border-radius:var(--radius-lg);
-  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  background:rgba(255,255,255,0.09);border:1px solid rgba(255,255,255,0.15);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  box-shadow:0 4px 24px rgba(0,0,0,0.3);
   transition:border-color 0.3s ease,transform 0.4s var(--bounce);
 }
 .privacy-item:hover{border-color:rgba(225,48,108,0.2);transform:translateY(-4px)}
@@ -478,8 +496,9 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 }
 .faq-list{text-align:left}
 .faq-item{
-  background:rgba(255,255,255,0.06);
-  border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-lg);
+  background:rgba(255,255,255,0.09);
+  border:1px solid rgba(255,255,255,0.15);border-radius:var(--radius-lg);
+  box-shadow:0 4px 24px rgba(0,0,0,0.3);
   margin-bottom:0.75rem;overflow:hidden;
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   transition:border-color 0.3s ease,box-shadow 0.3s ease;
@@ -757,6 +776,13 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   .cube-face--left{transform:rotateY(-90deg) translateZ(60px)}
   .cube-face--top{transform:rotateX(90deg) translateZ(60px)}
   .cube-face--bottom{transform:rotateX(-90deg) translateZ(60px)}
+  .cube-edge{width:124px;height:124px;top:-2px;left:-2px}
+  .cube-edge--front{transform:translateZ(59.5px)}
+  .cube-edge--back{transform:rotateY(180deg) translateZ(59.5px)}
+  .cube-edge--right{transform:rotateY(90deg) translateZ(59.5px)}
+  .cube-edge--left{transform:rotateY(-90deg) translateZ(59.5px)}
+  .cube-edge--top{transform:rotateX(90deg) translateZ(59.5px)}
+  .cube-edge--bottom{transform:rotateX(-90deg) translateZ(59.5px)}
   .cube-aura{width:160px;height:160px}
   .cube-shadow{width:90px}
   .cube-text{font-size:1rem}
@@ -806,6 +832,13 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
     <div class="cube-scene">
       <div class="cube-aura"></div>
       <div class="cube">
+        <!-- Edge fills — sit behind faces to close corner gaps -->
+        <div class="cube-edge cube-edge--front"></div>
+        <div class="cube-edge cube-edge--back"></div>
+        <div class="cube-edge cube-edge--right"></div>
+        <div class="cube-edge cube-edge--left"></div>
+        <div class="cube-edge cube-edge--top"></div>
+        <div class="cube-edge cube-edge--bottom"></div>
         <!-- Front: social/follow icon -->
         <div class="cube-face cube-face--front">
           <div class="face-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-3.87 3.13-7 7-7s7 3.13 7 7"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 20c0-2.76-1.5-5.15-3.72-6.44"/></svg></div>
