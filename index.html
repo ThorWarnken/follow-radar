@@ -1456,7 +1456,7 @@ async function init(){
       const plan = planMap[card.id] || 'scan';
       setTimeout(() => {
         try { localStorage.setItem('follow-radar:pending-plan', plan); } catch(e) {}
-      }, 30000);
+      }, 10000);
     });
   });
 
