@@ -90,191 +90,114 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   text-transform:lowercase;
 }
 
-/* ─── Rounded 3D Cube ─────────────────────────────────────────────
- * Three visible faces (front, right, top) with heavy border-radius,
- * glossy highlight overlays, and layered glow/shadow for depth.
- * The cube gentle-rocks instead of full-spinning so you always
- * see the rounded volume rather than sharp back edges.
+/* ─── App Icon Hero ───────────────────────────────────────────────
+ * Instagram-style app icon with 3D depth. Single squircle element
+ * with CSS pseudo-elements for the side/bottom edges. No 6-face
+ * cube, no corner gaps — just one solid rounded shape with depth.
  * ────────────────────────────────────────────────────────────────── */
 .cube-wrap{
   display:flex;flex-direction:column;align-items:center;
   margin:0 auto 2rem;position:relative;
 }
-/* Glitter the cat - sits above the cube */
 .glitter{
   width:150px;height:120px;margin-bottom:-30px;position:relative;z-index:10;
   filter:drop-shadow(0 8px 24px rgba(225,48,108,0.3));
-  animation:cube-float 6s ease-in-out infinite;
+  animation:icon-float 6s ease-in-out infinite;
 }
 .glitter dotlottie-player{width:100%;height:100%}
 
-/* Ambient glow behind the entire cube */
+/* Ambient glow */
 .cube-aura{
-  position:absolute;width:220px;height:220px;top:50%;left:50%;
+  position:absolute;width:240px;height:240px;top:50%;left:50%;
   transform:translate(-50%,-50%);
-  background:radial-gradient(circle,rgba(225,48,108,0.25) 0%,rgba(131,58,180,0.15) 40%,transparent 70%);
+  background:radial-gradient(circle,rgba(225,48,108,0.3) 0%,rgba(131,58,180,0.18) 40%,transparent 70%);
   border-radius:50%;filter:blur(30px);
   animation:aura-breathe 4s ease-in-out infinite;
   pointer-events:none;
 }
 @keyframes aura-breathe{
   0%,100%{opacity:0.7;transform:translate(-50%,-50%) scale(1)}
-  50%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}
+  50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}
 }
 
-/* Scene container — perspective + float */
+/* Float container */
 .cube-scene{
-  perspective:900px;width:160px;height:160px;position:relative;
-  animation:cube-float 6s ease-in-out infinite;
+  position:relative;width:160px;height:160px;
+  perspective:600px;
+  animation:icon-float 6s ease-in-out infinite;
 }
-@keyframes cube-float{
+@keyframes icon-float{
   0%,100%{transform:translateY(0)}
   50%{transform:translateY(-14px)}
 }
 
-/* Cube body — gentle rock, never full-spin */
-.cube{
-  width:100%;height:100%;position:relative;
+/* The 3D app icon — a tilted squircle with depth edges */
+.app-icon{
+  position:relative;width:160px;height:160px;
   transform-style:preserve-3d;
-  animation:cube-rock 8s ease-in-out infinite;
+  animation:icon-rock 8s ease-in-out infinite;
 }
-@keyframes cube-rock{
-  0%{transform:rotateX(-22deg) rotateY(-18deg)}
-  25%{transform:rotateX(-18deg) rotateY(8deg)}
-  50%{transform:rotateX(-24deg) rotateY(22deg)}
-  75%{transform:rotateX(-20deg) rotateY(-6deg)}
-  100%{transform:rotateX(-22deg) rotateY(-18deg)}
+@keyframes icon-rock{
+  0%{transform:rotateX(8deg) rotateY(-12deg) rotateZ(-2deg)}
+  25%{transform:rotateX(4deg) rotateY(6deg) rotateZ(1deg)}
+  50%{transform:rotateX(10deg) rotateY(14deg) rotateZ(-1deg)}
+  75%{transform:rotateX(6deg) rotateY(-4deg) rotateZ(2deg)}
+  100%{transform:rotateX(8deg) rotateY(-12deg) rotateZ(-2deg)}
 }
 
-/* ── Shared face styles ─────────────────────────── */
-.cube-face{
-  position:absolute;width:160px;height:160px;
+/* Front face — the main app icon surface */
+.app-icon-face{
+  position:absolute;inset:0;
   border-radius:36px;
+  background:linear-gradient(135deg,#833ab4 0%,#e1306c 45%,#f77737 100%);
   display:flex;align-items:center;justify-content:center;
+  transform:translateZ(14px);
   box-shadow:
-    inset 0 1px 1px rgba(255,255,255,0.25),
-    inset 0 -1px 2px rgba(0,0,0,0.15);
-  border:1px solid rgba(255,255,255,0.12);
-  overflow:hidden;
-}
-/* Glossy highlight overlay */
-.cube-face::after{
-  content:'';position:absolute;inset:0;border-radius:inherit;
-  background:linear-gradient(160deg,rgba(255,255,255,0.28) 0%,rgba(255,255,255,0.05) 40%,transparent 60%);
-  pointer-events:none;
-}
-
-/*
- * Edge fills: flat panels with NO border-radius that sit 0.5px behind
- * each face, sized slightly larger to cover the corner gaps where
- * rounded faces meet. Color-matched to each face's average edge tone.
- */
-.cube-edge{
-  position:absolute;width:164px;height:164px;top:-2px;left:-2px;
-  border-radius:8px;
-}
-.cube-edge--front{background:#c0406a;transform:translateZ(79.5px)}
-.cube-edge--back{background:#c0606a;transform:rotateY(180deg) translateZ(79.5px)}
-.cube-edge--right{background:#7030b0;transform:rotateY(90deg) translateZ(79.5px)}
-.cube-edge--left{background:#5838b0;transform:rotateY(-90deg) translateZ(79.5px)}
-.cube-edge--top{background:#e89040;transform:rotateX(90deg) translateZ(79.5px)}
-.cube-edge--bottom{background:#0d0515;transform:rotateX(-90deg) translateZ(79.5px)}
-
-/* ── Front face ─ warm pink/orange IG gradient ── */
-.cube-face--front{
-  background:linear-gradient(135deg,#833ab4 0%,#e1306c 50%,#f77737 100%);
-  transform:translateZ(80px);
-  box-shadow:
-    0 0 60px rgba(225,48,108,0.35),
+    0 20px 60px rgba(225,48,108,0.3),
+    0 8px 24px rgba(0,0,0,0.4),
     inset 0 1px 1px rgba(255,255,255,0.3),
-    inset 0 -1px 2px rgba(0,0,0,0.12);
+    inset 0 -1px 2px rgba(0,0,0,0.1);
+  border:1px solid rgba(255,255,255,0.15);
 }
-
-/* ── Back face ── */
-.cube-face--back{
-  background:linear-gradient(135deg,#f77737,#e1306c,#833ab4);
-  transform:rotateY(180deg) translateZ(80px);
-}
-
-/* ── Right face ─ purple/blue ── */
-.cube-face--right{
-  background:linear-gradient(160deg,#6228d7 0%,#833ab4 50%,#405de6 100%);
-  transform:rotateY(90deg) translateZ(80px);
-}
-
-/* ── Left face ─ blue/purple mirror ── */
-.cube-face--left{
-  background:linear-gradient(160deg,#405de6 0%,#833ab4 50%,#6228d7 100%);
-  transform:rotateY(-90deg) translateZ(80px);
-}
-
-/* ── Top face ─ warm glow ── */
-.cube-face--top{
-  background:linear-gradient(135deg,#f77737 0%,#fcaf45 50%,#f9d423 100%);
-  transform:rotateX(90deg) translateZ(80px);
-  border-color:rgba(255,255,255,0.2);
-}
-
-/* ── Bottom face ── */
-.cube-face--bottom{
-  background:#0d0515;
-  transform:rotateX(-90deg) translateZ(80px);
-  border-color:rgba(255,255,255,0.02);
-}
-
-/* ── Face icons ── */
-.face-icon{width:46%;height:46%;opacity:0.95}
-.face-icon svg{width:100%;height:100%;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.25))}
-
-/* ── Radar pulse on top face ── */
-.radar-pulse{
-  position:absolute;width:50px;height:50px;
-  top:50%;left:50%;transform:translate(-50%,-50%);
+/* Glossy highlight */
+.app-icon-face::after{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(165deg,rgba(255,255,255,0.35) 0%,rgba(255,255,255,0.08) 35%,transparent 55%);
   pointer-events:none;
 }
-.radar-pulse .ring{
-  position:absolute;inset:0;border:2px solid rgba(255,255,255,0.5);
-  border-radius:50%;
-  animation:pulse-expand 3s ease-out infinite;
+
+/* Side edge — creates the 3D depth on right */
+.app-icon-side{
+  position:absolute;top:4px;bottom:4px;right:-13px;width:14px;
+  background:linear-gradient(180deg,#6a1a8a 0%,#a02060 50%,#c05030 100%);
+  border-radius:0 8px 8px 0;
+  transform:rotateY(90deg);
+  transform-origin:left center;
 }
-.radar-pulse .ring:nth-child(2){animation-delay:1s}
-.radar-pulse .ring:nth-child(3){animation-delay:2s}
-@keyframes pulse-expand{
-  0%{transform:scale(0.3);opacity:0.8}
-  100%{transform:scale(2.2);opacity:0}
+/* Bottom edge — creates depth below */
+.app-icon-bottom{
+  position:absolute;left:4px;right:4px;bottom:-13px;height:14px;
+  background:linear-gradient(90deg,#5a1880 0%,#901850 50%,#b04028 100%);
+  border-radius:0 0 8px 8px;
+  transform:rotateX(-90deg);
+  transform-origin:top center;
 }
 
-/* ── Floor shadow — compresses/expands with float ── */
+/* IG camera icon on the face */
+.app-icon-ig{width:52%;height:52%}
+.app-icon-ig svg{width:100%;height:100%;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.3))}
+
+/* Floor shadow */
 .cube-shadow{
-  width:120px;height:18px;margin-top:2px;
-  background:radial-gradient(ellipse,rgba(225,48,108,0.3) 0%,rgba(131,58,180,0.15) 40%,transparent 70%);
-  border-radius:50%;filter:blur(10px);
+  width:130px;height:20px;margin-top:8px;
+  background:radial-gradient(ellipse,rgba(225,48,108,0.35) 0%,rgba(131,58,180,0.15) 40%,transparent 70%);
+  border-radius:50%;filter:blur(12px);
   animation:shadow-pulse 6s ease-in-out infinite;
 }
 @keyframes shadow-pulse{
   0%,100%{transform:scaleX(1);opacity:0.8}
-  50%{transform:scaleX(0.7);opacity:0.5}
+  50%{transform:scaleX(0.65);opacity:0.45}
 }
-
-/* "Only Followers" text on front face */
-.cube-text{
-  font-family:var(--font);font-weight:900;font-size:1.35rem;
-  line-height:1.1;text-align:center;color:#fff;letter-spacing:-0.02em;
-  text-shadow:0 2px 8px rgba(0,0,0,0.3);
-  pointer-events:none;
-}
-/* Wordmark below cube */
-.cube-wordmark{
-  font-family:var(--font);font-weight:900;font-size:1.1rem;
-  letter-spacing:-0.01em;margin-top:0.75rem;
-  background:linear-gradient(135deg,#f77737,#e1306c,#833ab4);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  background-clip:text;
-  text-align:center;
-}
-
-/* Fill panels hidden — rounded faces only */
-.cube-fill{display:none}
 
 .hero-tag{
   display:inline-flex;align-items:center;gap:7px;
@@ -341,11 +264,10 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;position:relative}
 .how-card{
   position:relative;padding:2.25rem 1.75rem 2rem;
-  background:rgba(255,255,255,0.09);
-  border:1px solid rgba(255,255,255,0.15);border-radius:var(--radius-lg);
+  background:var(--bg-card-solid);
+  border:1px solid rgba(255,255,255,0.08);border-radius:var(--radius-lg);
   text-align:left;overflow:hidden;
-  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  box-shadow:0 4px 24px rgba(0,0,0,0.3);
+  box-shadow:0 4px 24px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.04);
   transition:transform 0.4s var(--bounce),box-shadow 0.4s ease,border-color 0.3s ease;
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
 }
@@ -382,9 +304,8 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   position:relative;
   padding:4rem 3rem;
   border-radius:var(--radius-xl);
-  background:rgba(255,255,255,0.09);
-  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  box-shadow:0 8px 40px rgba(0,0,0,0.35);
+  background:var(--bg-card-solid);
+  box-shadow:0 8px 40px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.04);
   box-shadow:0 20px 80px rgba(225,48,108,0.06);
 }
 .bm-card::before{
@@ -462,9 +383,8 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .privacy-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.75rem;text-align:left}
 .privacy-item{
   padding:1.5rem;border-radius:var(--radius-lg);
-  background:rgba(255,255,255,0.09);border:1px solid rgba(255,255,255,0.15);
-  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  box-shadow:0 4px 24px rgba(0,0,0,0.3);
+  background:var(--bg-card-solid);border:1px solid rgba(255,255,255,0.08);
+  box-shadow:0 4px 24px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.04);
   transition:border-color 0.3s ease,transform 0.4s var(--bounce);
 }
 .privacy-item:hover{border-color:rgba(225,48,108,0.2);transform:translateY(-4px)}
@@ -496,9 +416,9 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 }
 .faq-list{text-align:left}
 .faq-item{
-  background:rgba(255,255,255,0.09);
-  border:1px solid rgba(255,255,255,0.15);border-radius:var(--radius-lg);
-  box-shadow:0 4px 24px rgba(0,0,0,0.3);
+  background:var(--bg-card-solid);
+  border:1px solid rgba(255,255,255,0.08);border-radius:var(--radius-lg);
+  box-shadow:0 4px 24px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.04);
   margin-bottom:0.75rem;overflow:hidden;
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   transition:border-color 0.3s ease,box-shadow 0.3s ease;
@@ -769,24 +689,12 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   .hero{min-height:90vh;padding:1.5rem}
   .hero h1{font-size:clamp(2.2rem,10vw,3.5rem)}
   .cube-scene{width:120px;height:120px}
-  .cube-face{width:120px;height:120px;border-radius:26px}
-  .cube-face--front{transform:translateZ(60px)}
-  .cube-face--back{transform:rotateY(180deg) translateZ(60px)}
-  .cube-face--right{transform:rotateY(90deg) translateZ(60px)}
-  .cube-face--left{transform:rotateY(-90deg) translateZ(60px)}
-  .cube-face--top{transform:rotateX(90deg) translateZ(60px)}
-  .cube-face--bottom{transform:rotateX(-90deg) translateZ(60px)}
-  .cube-edge{width:124px;height:124px;top:-2px;left:-2px}
-  .cube-edge--front{transform:translateZ(59.5px)}
-  .cube-edge--back{transform:rotateY(180deg) translateZ(59.5px)}
-  .cube-edge--right{transform:rotateY(90deg) translateZ(59.5px)}
-  .cube-edge--left{transform:rotateY(-90deg) translateZ(59.5px)}
-  .cube-edge--top{transform:rotateX(90deg) translateZ(59.5px)}
-  .cube-edge--bottom{transform:rotateX(-90deg) translateZ(59.5px)}
-  .cube-aura{width:160px;height:160px}
-  .cube-shadow{width:90px}
-  .cube-text{font-size:1rem}
-  .cube-wordmark{font-size:0.95rem}
+  .app-icon{width:120px;height:120px}
+  .app-icon-face{border-radius:28px}
+  .app-icon-side{top:3px;bottom:3px;right:-10px;width:11px}
+  .app-icon-bottom{left:3px;right:3px;bottom:-10px;height:11px}
+  .cube-aura{width:170px;height:170px}
+  .cube-shadow{width:100px}
   .glitter{width:110px;height:90px;margin-bottom:-20px}
   .section{padding:3rem 1.25rem}
   .card{padding:0.85rem 1rem}
@@ -828,38 +736,18 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
     <div class="glitter">
       <dotlottie-player src="https://lottie.host/8cf4ba71-e5fb-44f3-8134-178c4d389417/0CCsdcgNIP.json" background="transparent" speed="1" loop autoplay></dotlottie-player>
     </div>
-    <!-- Rounded 3D cube -->
+    <!-- 3D App Icon -->
     <div class="cube-scene">
       <div class="cube-aura"></div>
-      <div class="cube">
-        <!-- Edge fills — sit behind faces to close corner gaps -->
-        <div class="cube-edge cube-edge--front"></div>
-        <div class="cube-edge cube-edge--back"></div>
-        <div class="cube-edge cube-edge--right"></div>
-        <div class="cube-edge cube-edge--left"></div>
-        <div class="cube-edge cube-edge--top"></div>
-        <div class="cube-edge cube-edge--bottom"></div>
-        <!-- Front: social/follow icon -->
-        <div class="cube-face cube-face--front">
-          <div class="face-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-3.87 3.13-7 7-7s7 3.13 7 7"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 20c0-2.76-1.5-5.15-3.72-6.44"/></svg></div>
+      <div class="app-icon">
+        <div class="app-icon-face">
+          <div class="app-icon-ig"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="#fff" stroke="none"/></svg></div>
         </div>
-        <div class="cube-face cube-face--back"></div>
-        <!-- Right: radar rings -->
-        <div class="cube-face cube-face--right">
-          <div class="face-icon"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7" opacity="0.6"/><circle cx="12" cy="12" r="10.5" opacity="0.3"/></svg></div>
-        </div>
-        <div class="cube-face cube-face--left">
-          <div class="face-icon"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7" opacity="0.6"/><circle cx="12" cy="12" r="10.5" opacity="0.3"/></svg></div>
-        </div>
-        <!-- Top: radar pulse rings -->
-        <div class="cube-face cube-face--top">
-          <div class="radar-pulse"><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
-        </div>
-        <div class="cube-face cube-face--bottom"></div>
+        <div class="app-icon-side"></div>
+        <div class="app-icon-bottom"></div>
       </div>
     </div>
     <div class="cube-shadow"></div>
-    <div class="cube-wordmark"></div>
   </div>
 
   <div class="hero-tag">runs entirely in your browser</div>
