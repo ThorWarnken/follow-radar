@@ -1076,6 +1076,12 @@ function setUnlocked(type) {
 }
 
 function loadPayload(p){
+  // Clear per-scan unlock when new data arrives
+  try {
+    const u = JSON.parse(localStorage.getItem(UNLOCK_KEY));
+    if (u && u.type === 'scan') localStorage.removeItem(UNLOCK_KEY);
+  } catch(e) {}
+
   state.followers = Array.isArray(p.followers) ? p.followers : [];
   state.following = Array.isArray(p.following) ? p.following : [];
   state.partial = !!p.partial;
@@ -1246,10 +1252,49 @@ async function init(){
   el.list.addEventListener('scroll', () => { if (state.filtered.length > 200) requestAnimationFrame(vRender); });
   el.csv.addEventListener('click', exportCSV);
 
+  // Pricing link click handlers — save results before redirect
+  document.querySelectorAll('.pricing-card').forEach(card => {
+    card.addEventListener('click', () => {
+      try {
+        localStorage.setItem(RESULTS_KEY, JSON.stringify({
+          followers: state.followers,
+          following: state.following,
+          partial: state.partial,
+        }));
+      } catch(e) {
+        console.warn('[follow radar] could not save results:', e);
+      }
+    });
+  });
+
+  // Stripe Payment Link URLs — replace with actual links
+  const payScan = document.getElementById('pay-scan');
+  const payMonthly = document.getElementById('pay-monthly');
+  const payYearly = document.getElementById('pay-yearly');
+  const successBase = window.location.origin + window.location.pathname;
+  if (payScan) payScan.href = 'STRIPE_SCAN_PAYMENT_LINK_URL' + '?success_url=' + encodeURIComponent(successBase + '#paid=scan');
+  if (payMonthly) payMonthly.href = 'STRIPE_MONTHLY_PAYMENT_LINK_URL' + '?success_url=' + encodeURIComponent(successBase + '#paid=monthly');
+  if (payYearly) payYearly.href = 'STRIPE_YEARLY_PAYMENT_LINK_URL' + '?success_url=' + encodeURIComponent(successBase + '#paid=yearly');
+
   const hash = window.location.hash || '';
 
   if (hash === '#dev-mock'){
     loadPayload(devMockPayload());
+    return;
+  }
+
+  if (hash.indexOf('#paid=') === 0) {
+    const type = hash.slice(6); // 'scan', 'monthly', or 'yearly'
+    if (['scan', 'monthly', 'yearly'].includes(type)) {
+      setUnlocked(type);
+      try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch(e) {}
+      // Restore saved results
+      let saved;
+      try { saved = JSON.parse(localStorage.getItem(RESULTS_KEY)); } catch(e) {}
+      if (saved && saved.followers && saved.following) {
+        loadPayload(saved);
+      }
+    }
     return;
   }
 
