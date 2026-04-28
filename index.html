@@ -325,9 +325,10 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;position:relative}
 .how-card{
   position:relative;padding:2.25rem 1.75rem 2rem;
-  background:var(--bg-card);
-  border:1px solid var(--border);border-radius:var(--radius-lg);
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-lg);
   text-align:left;overflow:hidden;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
   transition:transform 0.4s var(--bounce),box-shadow 0.4s ease,border-color 0.3s ease;
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
 }
@@ -443,8 +444,8 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .privacy-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.75rem;text-align:left}
 .privacy-item{
   padding:1.5rem;border-radius:var(--radius-lg);
-  background:var(--bg-card);border:1px solid var(--border);
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
   transition:border-color 0.3s ease,transform 0.4s var(--bounce);
 }
 .privacy-item:hover{border-color:rgba(225,48,108,0.2);transform:translateY(-4px)}
@@ -476,8 +477,8 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 }
 .faq-list{text-align:left}
 .faq-item{
-  background:var(--bg-card);
-  border:1px solid var(--border);border-radius:var(--radius-lg);
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-lg);
   margin-bottom:0.75rem;overflow:hidden;
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   transition:border-color 0.3s ease,box-shadow 0.3s ease;
@@ -837,7 +838,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
       <div class="num">01</div>
       <div class="icon"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h20v28l-10-6-10 6V4z"/></svg></div>
       <h3>drag the button to your bookmarks bar</h3>
-      <p>it's a tiny piece of code. costs nothing, does nothing until you click it.</p>
+      <p>it's a tiny piece of code. does nothing until you click it.</p>
     </div>
     <svg class="how-arrow a1" viewBox="0 0 32 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h26"/><path d="M22 1l6 5-6 5"/></svg>
     <div class="how-card">
