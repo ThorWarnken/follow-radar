@@ -109,22 +109,26 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   0%{transform:rotateX(-20deg) rotateY(0deg)}
   100%{transform:rotateX(-20deg) rotateY(360deg)}
 }
-/* Solid inner cube - fills ALL corner gaps */
-.cube-inner{
-  position:absolute;width:148px;height:148px;top:1px;left:1px;
-  transform-style:preserve-3d;
+/*
+ * Sealed cube technique: each face is actually TWO layers —
+ * a full-size square fill (no radius) sitting 0.5px behind,
+ * and the rounded gradient face on top. The fill uses the
+ * average edge color of its face so the corners blend.
+ */
+.cube-fill{
+  position:absolute;width:150px;height:150px;
+  /* no border-radius — fills the corner gaps */
 }
-.cube-inner-face{position:absolute;width:148px;height:148px}
-.cube-inner-face--front{background:#b83070;transform:translateZ(75px)}
-.cube-inner-face--back{background:#b83070;transform:rotateY(180deg) translateZ(75px)}
-.cube-inner-face--right{background:#7030a0;transform:rotateY(90deg) translateZ(75px)}
-.cube-inner-face--left{background:#7030a0;transform:rotateY(-90deg) translateZ(75px)}
-.cube-inner-face--top{background:#d07030;transform:rotateX(90deg) translateZ(75px)}
-.cube-inner-face--bottom{background:#14081e;transform:rotateX(-90deg) translateZ(75px)}
+.cube-fill--front{background:#c0406a;transform:translateZ(74.5px)}
+.cube-fill--back{background:#c0606a;transform:rotateY(180deg) translateZ(74.5px)}
+.cube-fill--right{background:#9030a0;transform:rotateY(90deg) translateZ(74.5px)}
+.cube-fill--left{background:#5838b0;transform:rotateY(-90deg) translateZ(74.5px)}
+.cube-fill--top{background:#e8903a;transform:rotateX(90deg) translateZ(74.5px)}
+.cube-fill--bottom{background:#14081e;transform:rotateX(-90deg) translateZ(74.5px)}
 /* Outer rounded faces */
 .cube-face{
   position:absolute;width:150px;height:150px;
-  border-radius:38px;
+  border-radius:24px;
   display:flex;align-items:center;justify-content:center;
   border:1px solid rgba(255,255,255,0.1);
 }
@@ -559,14 +563,20 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   .hero{min-height:90vh;padding:1.5rem}
   .hero h1{font-size:clamp(2.2rem,10vw,3.5rem)}
   .cube-scene{width:110px;height:110px}
-  .cube-face{width:110px;height:110px;border-radius:22px}
-  .cube-inner,.cube-inner-face{width:108px;height:108px}
-  .cube-face--front,.cube-inner-face--front{transform:translateZ(55px)}
-  .cube-face--back,.cube-inner-face--back{transform:rotateY(180deg) translateZ(55px)}
-  .cube-face--right,.cube-inner-face--right{transform:rotateY(90deg) translateZ(55px)}
-  .cube-face--left,.cube-inner-face--left{transform:rotateY(-90deg) translateZ(55px)}
-  .cube-face--top,.cube-inner-face--top{transform:rotateX(90deg) translateZ(55px)}
-  .cube-face--bottom,.cube-inner-face--bottom{transform:rotateX(-90deg) translateZ(55px)}
+  .cube-face,.cube-fill{width:110px;height:110px}
+  .cube-face{border-radius:18px}
+  .cube-face--front{transform:translateZ(55px)}
+  .cube-face--back{transform:rotateY(180deg) translateZ(55px)}
+  .cube-face--right{transform:rotateY(90deg) translateZ(55px)}
+  .cube-face--left{transform:rotateY(-90deg) translateZ(55px)}
+  .cube-face--top{transform:rotateX(90deg) translateZ(55px)}
+  .cube-face--bottom{transform:rotateX(-90deg) translateZ(55px)}
+  .cube-fill--front{transform:translateZ(54.5px)}
+  .cube-fill--back{transform:rotateY(180deg) translateZ(54.5px)}
+  .cube-fill--right{transform:rotateY(90deg) translateZ(54.5px)}
+  .cube-fill--left{transform:rotateY(-90deg) translateZ(54.5px)}
+  .cube-fill--top{transform:rotateX(90deg) translateZ(54.5px)}
+  .cube-fill--bottom{transform:rotateX(-90deg) translateZ(54.5px)}
   .glitter{width:110px;height:90px;margin-bottom:-20px}
   .section{padding:3rem 1.25rem}
   .card{padding:0.85rem 1rem}
@@ -609,15 +619,14 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
     </div>
     <!-- 3D cube -->
     <div class="cube-scene"><div class="cube">
-      <!-- Solid inner cube to seal corner gaps -->
-      <div class="cube-inner">
-        <div class="cube-inner-face cube-inner-face--front"></div>
-        <div class="cube-inner-face cube-inner-face--back"></div>
-        <div class="cube-inner-face cube-inner-face--right"></div>
-        <div class="cube-inner-face cube-inner-face--left"></div>
-        <div class="cube-inner-face cube-inner-face--top"></div>
-        <div class="cube-inner-face cube-inner-face--bottom"></div>
-      </div>
+      <!-- Fill panels (no border-radius, sit 0.5px behind faces) -->
+      <div class="cube-fill cube-fill--front"></div>
+      <div class="cube-fill cube-fill--back"></div>
+      <div class="cube-fill cube-fill--right"></div>
+      <div class="cube-fill cube-fill--left"></div>
+      <div class="cube-fill cube-fill--top"></div>
+      <div class="cube-fill cube-fill--bottom"></div>
+      <!-- Rounded gradient faces -->
       <div class="cube-face cube-face--front">
         <div class="ig-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="#fff" stroke="none"/></svg></div>
       </div>
