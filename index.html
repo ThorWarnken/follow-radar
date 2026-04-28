@@ -994,8 +994,13 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 
 <!-- RESULTS -->
 <section class="section results" id="results">
-  <div class="section-badge badge-orange">results</div>
-  <h2 class="section-title">here's what we found.</h2>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem">
+    <div>
+      <div class="section-badge badge-orange">results</div>
+      <h2 class="section-title">here's what we found.</h2>
+    </div>
+    <button id="new-scan" type="button" style="padding:8px 18px;border-radius:100px;background:none;border:1px solid rgba(255,255,255,0.1);color:#5a5474;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:inherit">new scan</button>
+  </div>
 
   <div class="results-banner" id="banner"></div>
 
@@ -1425,6 +1430,17 @@ async function init(){
   el.srt.addEventListener('change', () => { state.sort = el.srt.value; doSort(); render(); });
   el.list.addEventListener('scroll', () => { if (state.filtered.length > 200) requestAnimationFrame(vRender); });
   el.csv.addEventListener('click', exportCSV);
+
+  // New scan button — clears saved data and reloads to landing page
+  const newScanBtn = document.getElementById('new-scan');
+  if (newScanBtn) {
+    newScanBtn.addEventListener('click', () => {
+      localStorage.removeItem(RESULTS_KEY);
+      localStorage.removeItem(UNLOCK_KEY);
+      localStorage.removeItem('follow-radar:pending-plan');
+      window.location.href = window.location.pathname;
+    });
+  }
 
   // Privacy policy toggle
   document.querySelector('a[href="#privacy-policy"]').addEventListener('click', (e) => {
