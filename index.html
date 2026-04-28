@@ -9,7 +9,7 @@
 <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700&family=Sora:wght@700;800&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -82,11 +82,12 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   text-align:center;padding:2rem;
 }
 .site-name{
-  font-family:var(--font);font-weight:900;font-size:1.4rem;
-  letter-spacing:-0.02em;margin-bottom:1.5rem;
-  background:linear-gradient(135deg,#f77737,#e1306c,#833ab4);
+  font-family:'Sora',var(--font),sans-serif;font-weight:800;font-size:1.6rem;
+  letter-spacing:-0.03em;margin-bottom:1.5rem;
+  background:linear-gradient(135deg,#f77737 0%,#e1306c 50%,#833ab4 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   background-clip:text;
+  text-transform:lowercase;
 }
 
 /* ─── Rounded 3D Cube ─────────────────────────────────────────────
@@ -365,8 +366,8 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   position:relative;
   padding:4rem 3rem;
   border-radius:var(--radius-xl);
-  background:rgba(255,255,255,0.03);
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  background:rgba(255,255,255,0.07);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   box-shadow:0 20px 80px rgba(225,48,108,0.06);
 }
 .bm-card::before{
@@ -805,9 +806,9 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
     <div class="cube-scene">
       <div class="cube-aura"></div>
       <div class="cube">
-        <!-- Front: "Only Followers" text -->
+        <!-- Front: social/follow icon -->
         <div class="cube-face cube-face--front">
-          <span class="cube-text">Only<br>Followers</span>
+          <div class="face-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-3.87 3.13-7 7-7s7 3.13 7 7"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 20c0-2.76-1.5-5.15-3.72-6.44"/></svg></div>
         </div>
         <div class="cube-face cube-face--back"></div>
         <!-- Right: radar rings -->
@@ -825,7 +826,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
       </div>
     </div>
     <div class="cube-shadow"></div>
-    <div class="cube-wordmark">Only Followers</div>
+    <div class="cube-wordmark"></div>
   </div>
 
   <div class="hero-tag">runs entirely in your browser</div>
@@ -891,9 +892,9 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
         <rect x="76" y="54" width="48" height="8" rx="2" fill="currentColor" opacity="0.18"/>
         <rect x="130" y="54" width="32" height="8" rx="2" fill="currentColor" opacity="0.18"/>
         <rect x="170" y="52" width="62" height="12" rx="6" fill="url(#bm-grad)" opacity="0.4"/>
-        <text x="201" y="61" text-anchor="middle" font-family="Outfit,sans-serif" font-size="7" font-weight="900" fill="#fff">Only Followers</text>
+        <text x="201" y="61" text-anchor="middle" font-family="Outfit,sans-serif" font-size="7" font-weight="900" fill="#fff">&#9733; OF</text>
         <rect x="160" y="120" width="100" height="28" rx="14" fill="url(#bm-grad)"/>
-        <text x="210" y="138" text-anchor="middle" font-family="Outfit,sans-serif" font-size="11" font-weight="900" fill="#fff">Only Followers</text>
+        <text x="210" y="138" text-anchor="middle" font-family="Outfit,sans-serif" font-size="11" font-weight="900" fill="#fff">&#9733; OF</text>
         <path class="arrow-path" d="M210 116 C 210 90, 200 80, 200 65" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/>
         <path d="M196 70 L 200 64 L 204 70" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
         <defs>
