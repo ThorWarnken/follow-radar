@@ -703,6 +703,13 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .lock-icon{
   width:32px;height:32px;margin:0 auto 0.75rem;opacity:0.6;
 }
+.paid-btn{
+  margin-top:1.25rem;padding:8px 20px;
+  background:none;border:1px solid var(--border);border-radius:var(--radius-pill);
+  color:var(--text-muted);font-size:0.78rem;font-weight:600;cursor:pointer;
+  transition:color 0.2s,border-color 0.2s;
+}
+.paid-btn:hover{color:var(--pink);border-color:var(--pink)}
 
 /* ═══════════ FOOTER ═══════════ */
 .footer{
@@ -1021,6 +1028,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
           <div class="plan-sub">per year</div>
         </a>
       </div>
+      <button class="paid-btn" id="paid-btn" type="button">i've already paid</button>
     </div>
   </div>
 
@@ -1348,7 +1356,16 @@ async function init(){
   el.list.addEventListener('scroll', () => { if (state.filtered.length > 200) requestAnimationFrame(vRender); });
   el.csv.addEventListener('click', exportCSV);
 
-  // Pricing link click handlers — save results before redirect
+  // Stripe Payment Link URLs
+  const payScan = document.getElementById('pay-scan');
+  const payMonthly = document.getElementById('pay-monthly');
+  const payYearly = document.getElementById('pay-yearly');
+  if (payScan) payScan.href = 'https://buy.stripe.com/28E6oHcxG5CM7GDakj6AM01';
+  if (payMonthly) payMonthly.href = 'https://buy.stripe.com/3cIcN5gNW1mwe518cb6AM02';
+  if (payYearly) payYearly.href = 'https://buy.stripe.com/cNi14n55e4yI8KH1NN6AM03';
+
+  // Pricing link click handlers — save results and mark pending payment
+  const planMap = {'pay-scan':'scan','pay-monthly':'monthly','pay-yearly':'yearly'};
   document.querySelectorAll('.pricing-card').forEach(card => {
     card.addEventListener('click', () => {
       try {
@@ -1357,45 +1374,34 @@ async function init(){
           following: state.following,
           partial: state.partial,
         }));
-      } catch(e) {
-        console.warn('[follow radar] could not save results:', e);
-      }
+        localStorage.setItem('follow-radar:pending-plan', planMap[card.id] || 'scan');
+      } catch(e) {}
     });
   });
 
-  // Stripe Payment Link URLs
-  // Note: configure each Payment Link's "After payment" redirect in the
-  // Stripe Dashboard to point to the corresponding URL below:
-  //   Scan:    https://thorwarnken.github.io/follow-radar/?plan=scan
-  //   Monthly: https://thorwarnken.github.io/follow-radar/?plan=monthly
-  //   Yearly:  https://thorwarnken.github.io/follow-radar/?plan=yearly
-  const payScan = document.getElementById('pay-scan');
-  const payMonthly = document.getElementById('pay-monthly');
-  const payYearly = document.getElementById('pay-yearly');
-  if (payScan) payScan.href = 'https://buy.stripe.com/28E6oHcxG5CM7GDakj6AM01';
-  if (payMonthly) payMonthly.href = 'https://buy.stripe.com/3cIcN5gNW1mwe518cb6AM02';
-  if (payYearly) payYearly.href = 'https://buy.stripe.com/cNi14n55e4yI8KH1NN6AM03';
+  // When user returns to this tab after paying, unlock automatically
+  function checkPendingPayment() {
+    const pending = localStorage.getItem('follow-radar:pending-plan');
+    if (pending && ['scan', 'monthly', 'yearly'].includes(pending)) {
+      localStorage.removeItem('follow-radar:pending-plan');
+      setUnlocked(pending);
+      render();
+    }
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') checkPendingPayment();
+  });
 
-  // Check for payment return (?plan=scan|monthly|yearly)
-  const urlParams = new URLSearchParams(window.location.search);
-  const plan = urlParams.get('plan');
-  if (plan && ['scan', 'monthly', 'yearly'].includes(plan)) {
-    setUnlocked(plan);
-    try { history.replaceState(null, '', window.location.pathname); } catch(e) {}
-    // Restore saved results
-    let saved;
-    try { saved = JSON.parse(localStorage.getItem(RESULTS_KEY)); } catch(e) {}
-    if (saved && saved.followers && saved.following) {
-      loadPayload(saved);
-    }
-    // For one-time scans, clear unlock when user leaves so it can't be reused
-    if (plan === 'scan') {
-      window.addEventListener('beforeunload', () => {
-        localStorage.removeItem(UNLOCK_KEY);
-        localStorage.removeItem(RESULTS_KEY);
-      });
-    }
-    return;
+  // "I've already paid" button handler
+  const paidBtn = document.getElementById('paid-btn');
+  if (paidBtn) {
+    paidBtn.addEventListener('click', () => {
+      const pending = localStorage.getItem('follow-radar:pending-plan');
+      const type = pending || 'scan';
+      localStorage.removeItem('follow-radar:pending-plan');
+      setUnlocked(type);
+      render();
+    });
   }
 
   const hash = window.location.hash || '';
