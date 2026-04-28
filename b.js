@@ -222,19 +222,26 @@
     return 0;
   }
 
-  async function fetchAllMutualCounts(followerSet, following, onProgress) {
-    // Compute non-followers first (same logic index.html uses)
+  // Sample up to sampleSize random non-followers and fetch their mutual counts.
+  // Returns a Map of username -> count (only for sampled users).
+  async function fetchSampledMutualCounts(followerSet, following, sampleSize, onProgress) {
     const nonFollowers = [];
     for (const u of following) {
       if (!followerSet.has(u.username.toLowerCase())) {
         nonFollowers.push(u);
       }
     }
-    // Fetch mutual counts only for non-followers
+    // Shuffle and take a sample — Fisher-Yates on a copy
+    const shuffled = nonFollowers.slice();
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = shuffled[i]; shuffled[i] = shuffled[j]; shuffled[j] = tmp;
+    }
+    const sample = shuffled.slice(0, Math.min(sampleSize, shuffled.length));
     let done = 0;
-    const total = nonFollowers.length;
+    const total = sample.length;
     const countMap = new Map();
-    for (const u of nonFollowers) {
+    for (const u of sample) {
       const pk = u.pk || u.userId || u.username;
       const count = await fetchMutualCount(pk);
       countMap.set(u.username.toLowerCase(), count);
@@ -553,19 +560,17 @@
       return;
     }
 
-    // Phase 3: fetch mutual follower counts for non-followers
-    // Skip for large accounts (5k+ followers) to avoid long scan times
+    // Phase 3: sample mutual follower counts for non-followers
+    // Check 25 random non-followers to find the most connected ones quickly
     const followerSet = new Set(followers.map(u => u.username.toLowerCase()));
     let mutualCounts = new Map();
-    if (followers.length < 5000) {
-      try {
-        updateOverlay('Checking mutual connections\u2026', 0.85);
-        mutualCounts = await fetchAllMutualCounts(followerSet, following, (done, total) => {
-          updateOverlay('Checking mutual connections\u2026 ' + done + '/' + total, 0.85 + 0.15 * (done / total));
-        });
-      } catch (e) {
-        console.warn('[follow radar] mutual count fetch failed:', e);
-      }
+    try {
+      updateOverlay('Checking mutual connections\u2026', 0.85);
+      mutualCounts = await fetchSampledMutualCounts(followerSet, following, 25, (done, total) => {
+        updateOverlay('Checking mutual connections\u2026 ' + done + '/' + total, 0.85 + 0.15 * (done / total));
+      });
+    } catch (e) {
+      console.warn('[follow radar] mutual count fetch failed:', e);
     }
 
     destroyOverlay();
@@ -610,7 +615,7 @@
     window.__followRadarTest.buildFollowingUrl = buildFollowingUrl;
     window.__followRadarTest.buildMutualUrl = buildMutualUrl;
     window.__followRadarTest.fetchMutualCount = fetchMutualCount;
-    window.__followRadarTest.fetchAllMutualCounts = fetchAllMutualCounts;
+    window.__followRadarTest.fetchSampledMutualCounts = fetchSampledMutualCounts;
     window.__followRadarTest.trimUser = trimUser;
     window.__followRadarTest.scrapeFollowers = scrapeFollowers;
     window.__followRadarTest.scrapeFollowing = scrapeFollowing;
