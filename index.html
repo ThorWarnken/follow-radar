@@ -712,6 +712,16 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 }
 .paid-btn:hover{color:var(--pink);border-color:var(--pink)}
 
+/* Privacy policy */
+.privacy-policy{max-width:680px;margin:0 auto}
+.policy-text{text-align:left;line-height:1.8;color:var(--text-soft);font-size:0.9rem}
+.policy-text h3{font-family:var(--font);font-weight:700;font-size:1rem;color:var(--text);margin:1.5rem 0 0.5rem}
+.policy-text p{margin-bottom:0.75rem}
+.policy-text ul{margin:0 0 0.75rem 1.25rem;padding:0}
+.policy-text li{margin-bottom:0.4rem}
+.policy-text a{color:var(--pink);text-decoration:none}
+.policy-text a:hover{text-decoration:underline}
+
 /* ═══════════ FOOTER ═══════════ */
 .footer{
   position:relative;z-index:3;text-align:center;
@@ -1045,11 +1055,49 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   <div class="footer-links">
     <a href="#">github</a>
     <span class="sep">&middot;</span>
-    <a href="#privacy">privacy is the whole point</a>
+    <a href="#privacy-policy">privacy policy</a>
     <span class="sep">&middot;</span>
     <span>2026</span>
   </div>
 </footer>
+
+<section class="section privacy-policy" id="privacy-policy" style="display:none">
+  <h2 class="section-title">privacy policy</h2>
+  <div class="policy-text">
+    <p><strong>Last updated:</strong> April 28, 2026</p>
+
+    <h3>what we collect</h3>
+    <p>nothing. Only Followers runs entirely in your browser. your instagram data (followers, following lists) is processed locally on your device and is never sent to any server.</p>
+
+    <h3>how the bookmarklet works</h3>
+    <p>the bookmarklet runs javascript in your browser on instagram.com, using your own logged-in session. it reads your followers and following lists from instagram's web API — the same endpoints instagram's own website uses. the data is compressed and passed back to this site via the URL hash, which never leaves your browser.</p>
+
+    <h3>data storage</h3>
+    <p>your scan results may be temporarily stored in your browser's localStorage to preserve them during the payment flow. this data stays on your device and is never transmitted. you can clear it at any time by clearing your browser data.</p>
+
+    <h3>payments</h3>
+    <p>payments are processed by <a href="https://stripe.com/privacy" target="_blank" rel="noopener">Stripe</a>. when you click a pricing option, you are redirected to Stripe's hosted checkout page. we never see, handle, or store your payment information (credit card numbers, billing address, etc.). Stripe's privacy policy governs how they handle your payment data.</p>
+
+    <h3>cookies and tracking</h3>
+    <p>we do not use cookies, analytics, tracking pixels, or any third-party scripts beyond the fonts loaded from Google Fonts. we do not run Google Analytics, Facebook Pixel, or any similar service.</p>
+
+    <h3>third-party services</h3>
+    <ul>
+      <li><strong>Google Fonts</strong> — loads the Outfit and DM Sans typefaces. subject to <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a>.</li>
+      <li><strong>Stripe</strong> — processes payments. subject to <a href="https://stripe.com/privacy" target="_blank" rel="noopener">Stripe's privacy policy</a>.</li>
+      <li><strong>GitHub Pages</strong> — hosts this website. subject to <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">GitHub's privacy statement</a>.</li>
+    </ul>
+
+    <h3>children</h3>
+    <p>Only Followers is not intended for use by anyone under 13 years of age.</p>
+
+    <h3>changes</h3>
+    <p>if this policy changes, the updated version will be posted here with a new date.</p>
+
+    <h3>contact</h3>
+    <p>questions? open an issue on <a href="https://github.com/ThorWarnken/follow-radar" target="_blank" rel="noopener">GitHub</a>.</p>
+  </div>
+</section>
 
 <!-- Animated gradient background (ported from React AnimatedGradientBackground) -->
 <script>
@@ -1356,6 +1404,14 @@ async function init(){
   el.srt.addEventListener('change', () => { state.sort = el.srt.value; doSort(); render(); });
   el.list.addEventListener('scroll', () => { if (state.filtered.length > 200) requestAnimationFrame(vRender); });
   el.csv.addEventListener('click', exportCSV);
+
+  // Privacy policy toggle
+  document.querySelector('a[href="#privacy-policy"]').addEventListener('click', (e) => {
+    e.preventDefault();
+    const pp = document.getElementById('privacy-policy');
+    pp.style.display = pp.style.display === 'none' ? '' : 'none';
+    if (pp.style.display !== 'none') pp.scrollIntoView({behavior:'smooth', block:'start'});
+  });
 
   // Stripe Payment Link URLs
   const payScan = document.getElementById('pay-scan');
