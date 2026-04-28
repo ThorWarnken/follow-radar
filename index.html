@@ -233,6 +233,23 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   50%{transform:scaleX(0.7);opacity:0.5}
 }
 
+/* "Only Followers" text on front face */
+.cube-text{
+  font-family:var(--ff-display);font-weight:900;font-size:1.35rem;
+  line-height:1.1;text-align:center;color:#fff;letter-spacing:-0.02em;
+  text-shadow:0 2px 8px rgba(0,0,0,0.3);
+  pointer-events:none;
+}
+/* Wordmark below cube */
+.cube-wordmark{
+  font-family:var(--ff-display);font-weight:900;font-size:1.1rem;
+  letter-spacing:-0.01em;margin-top:0.75rem;
+  background:linear-gradient(135deg,#f77737,#e1306c,#833ab4);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  text-align:center;
+}
+
 /* Fill panels hidden — rounded faces only */
 .cube-fill{display:none}
 
@@ -716,6 +733,8 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   .cube-face--bottom{transform:rotateX(-90deg) translateZ(60px)}
   .cube-aura{width:160px;height:160px}
   .cube-shadow{width:90px}
+  .cube-text{font-size:1rem}
+  .cube-wordmark{font-size:0.95rem}
   .glitter{width:110px;height:90px;margin-bottom:-20px}
   .section{padding:3rem 1.25rem}
   .card{padding:0.85rem 1rem}
@@ -760,9 +779,9 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
     <div class="cube-scene">
       <div class="cube-aura"></div>
       <div class="cube">
-        <!-- Front: social/follow icon -->
+        <!-- Front: "Only Followers" text -->
         <div class="cube-face cube-face--front">
-          <div class="face-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-3.87 3.13-7 7-7s7 3.13 7 7"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 20c0-2.76-1.5-5.15-3.72-6.44"/></svg></div>
+          <span class="cube-text">Only<br>Followers</span>
         </div>
         <div class="cube-face cube-face--back"></div>
         <!-- Right: radar rings -->
@@ -780,6 +799,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
       </div>
     </div>
     <div class="cube-shadow"></div>
+    <div class="cube-wordmark">Only Followers</div>
   </div>
 
   <div class="hero-tag">runs entirely in your browser</div>
