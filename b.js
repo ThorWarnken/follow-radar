@@ -229,24 +229,25 @@
     let score = 0;
     const name = u.username.toLowerCase();
     const fullName = (u.full_name || '').toLowerCase();
-    // Has a full name → likely real
-    if (u.full_name && u.full_name.trim().length > 0) score += 3;
-    // Full name has a space (first + last) → very likely real
+    // Private accounts are the strongest real-person signal
+    if (u.is_private) score += 4;
+    // Full name with first + last (space) is a good sign
     if (u.full_name && u.full_name.includes(' ')) score += 2;
-    // Private accounts are usually real people
-    if (u.is_private) score += 2;
-    // Verified accounts are almost always pages/brands/celebs, not personal friends
-    if (u.is_verified) score -= 5;
-    // Penalize brand/bot/page patterns in username
-    if (/official|shop|store|brand|news|daily|memes|clips|repost|fanpage|promo|music|radio|podcast|media|studio|records|magazine|blog|tv|hq/.test(name)) score -= 4;
-    // Penalize brand/page patterns in full name
-    if (/music|records|studio|magazine|podcast|media|clothing|apparel|official|brand|inc\b|llc\b|co\b/.test(fullName)) score -= 3;
-    // Penalize excessive digits (bot123456)
+    // Has any full name
+    if (u.full_name && u.full_name.trim().length > 0) score += 1;
+    // Verified accounts are almost always pages/brands/celebs
+    if (u.is_verified) score -= 6;
+    // Brand/bot/page patterns in username — strong penalty
+    if (/official|shop|store|brand|news|daily|memes|clips|repost|fanpage|promo|music|radio|podcast|media|studio|records|magazine|blog|tv|hq|worldwide|global|network|entertainment|production/.test(name)) score -= 5;
+    // Brand/page patterns in full name — strong penalty
+    if (/music|records|studio|magazine|podcast|media|clothing|apparel|official|brand|inc\b|llc\b|co\b|entertainment|production|worldwide|gallery|collective|agency|management/.test(fullName)) score -= 5;
+    // Username starts with digits — page/bot pattern
+    if (/^\d/.test(name)) score -= 3;
+    // Excessive digits
     const digitRatio = (name.match(/\d/g) || []).length / name.length;
     if (digitRatio > 0.3) score -= 3;
-    // Penalize excessive underscores (___brand___)
-    const underscores = (name.match(/_/g) || []).length;
-    if (underscores >= 3) score -= 2;
+    // Excessive underscores
+    if ((name.match(/_/g) || []).length >= 3) score -= 2;
     // Very short usernames are often brands
     if (name.length <= 3) score -= 1;
     return score;
