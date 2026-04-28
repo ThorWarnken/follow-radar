@@ -131,18 +131,18 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   50%{transform:translateY(-14px)}
 }
 
-/* The 3D app icon — a tilted squircle with depth edges */
+/* The 3D app icon — a tilted squircle with thick depth edges */
 .app-icon{
   position:relative;width:160px;height:160px;
   transform-style:preserve-3d;
   animation:icon-rock 8s ease-in-out infinite;
 }
 @keyframes icon-rock{
-  0%{transform:rotateX(8deg) rotateY(-12deg) rotateZ(-2deg)}
-  25%{transform:rotateX(4deg) rotateY(6deg) rotateZ(1deg)}
-  50%{transform:rotateX(10deg) rotateY(14deg) rotateZ(-1deg)}
-  75%{transform:rotateX(6deg) rotateY(-4deg) rotateZ(2deg)}
-  100%{transform:rotateX(8deg) rotateY(-12deg) rotateZ(-2deg)}
+  0%{transform:rotateX(14deg) rotateY(-20deg) rotateZ(-2deg)}
+  25%{transform:rotateX(8deg) rotateY(8deg) rotateZ(1deg)}
+  50%{transform:rotateX(16deg) rotateY(22deg) rotateZ(-1deg)}
+  75%{transform:rotateX(10deg) rotateY(-8deg) rotateZ(2deg)}
+  100%{transform:rotateX(14deg) rotateY(-20deg) rotateZ(-2deg)}
 }
 
 /* Front face — the main app icon surface */
@@ -151,7 +151,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   border-radius:36px;
   background:linear-gradient(135deg,#833ab4 0%,#e1306c 45%,#f77737 100%);
   display:flex;align-items:center;justify-content:center;
-  transform:translateZ(14px);
+  transform:translateZ(28px);
   box-shadow:
     0 20px 60px rgba(225,48,108,0.3),
     0 8px 24px rgba(0,0,0,0.4),
@@ -166,21 +166,33 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   pointer-events:none;
 }
 
-/* Side edge — creates the 3D depth on right */
-.app-icon-side{
-  position:absolute;top:4px;bottom:4px;right:-13px;width:14px;
-  background:linear-gradient(180deg,#6a1a8a 0%,#a02060 50%,#c05030 100%);
-  border-radius:0 8px 8px 0;
-  transform:rotateY(90deg);
-  transform-origin:left center;
+/* Back face — closes the cube volume */
+.app-icon-back{
+  position:absolute;inset:0;
+  border-radius:36px;
+  background:linear-gradient(135deg,#5a1880 0%,#801848 50%,#a03828 100%);
+  transform:translateZ(0px);
 }
-/* Bottom edge — creates depth below */
+
+/* Side edge — thick for cube feel */
+.app-icon-side{
+  position:absolute;top:0;bottom:0;right:0;width:28px;
+  background:linear-gradient(180deg,#6a1a8a 0%,#a02060 50%,#c05030 100%);
+  border-radius:0 36px 36px 0;
+  transform:rotateY(90deg);
+  transform-origin:right center;
+  border-top:1px solid rgba(255,255,255,0.08);
+  border-bottom:1px solid rgba(0,0,0,0.2);
+}
+/* Bottom edge — thick for cube feel */
 .app-icon-bottom{
-  position:absolute;left:4px;right:4px;bottom:-13px;height:14px;
-  background:linear-gradient(90deg,#5a1880 0%,#901850 50%,#b04028 100%);
-  border-radius:0 0 8px 8px;
+  position:absolute;left:0;right:0;bottom:0;height:28px;
+  background:linear-gradient(90deg,#4a1070 0%,#781440 50%,#a03020 100%);
+  border-radius:0 0 36px 36px;
   transform:rotateX(-90deg);
-  transform-origin:top center;
+  transform-origin:bottom center;
+  border-left:1px solid rgba(255,255,255,0.05);
+  border-right:1px solid rgba(0,0,0,0.2);
 }
 
 /* IG camera icon on the face */
@@ -264,10 +276,11 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;position:relative}
 .how-card{
   position:relative;padding:2.25rem 1.75rem 2rem;
-  background:var(--bg-card-solid);
-  border:1px solid rgba(255,255,255,0.08);border-radius:var(--radius-lg);
+  background:#161420;
+  border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-lg);
   text-align:left;overflow:hidden;
-  box-shadow:0 4px 24px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.04);
+  box-shadow:0 4px 24px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.05);
+  border-top:2px solid;border-image:linear-gradient(90deg,#f77737,#e1306c,#833ab4) 1;
   transition:transform 0.4s var(--bounce),box-shadow 0.4s ease,border-color 0.3s ease;
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
 }
@@ -304,8 +317,8 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   position:relative;
   padding:4rem 3rem;
   border-radius:var(--radius-xl);
-  background:var(--bg-card-solid);
-  box-shadow:0 8px 40px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.04);
+  background:#161420;
+  box-shadow:0 8px 40px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.05);
   box-shadow:0 20px 80px rgba(225,48,108,0.06);
 }
 .bm-card::before{
@@ -383,8 +396,9 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .privacy-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.75rem;text-align:left}
 .privacy-item{
   padding:1.5rem;border-radius:var(--radius-lg);
-  background:var(--bg-card-solid);border:1px solid rgba(255,255,255,0.08);
-  box-shadow:0 4px 24px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.04);
+  background:#161420;border:1px solid rgba(255,255,255,0.1);
+  box-shadow:0 4px 24px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.05);
+  border-top:2px solid;border-image:linear-gradient(90deg,#f77737,#e1306c,#833ab4) 1;
   transition:border-color 0.3s ease,transform 0.4s var(--bounce);
 }
 .privacy-item:hover{border-color:rgba(225,48,108,0.2);transform:translateY(-4px)}
@@ -416,9 +430,9 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 }
 .faq-list{text-align:left}
 .faq-item{
-  background:var(--bg-card-solid);
-  border:1px solid rgba(255,255,255,0.08);border-radius:var(--radius-lg);
-  box-shadow:0 4px 24px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.04);
+  background:#161420;
+  border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-lg);
+  box-shadow:0 4px 24px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.05);
   margin-bottom:0.75rem;overflow:hidden;
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   transition:border-color 0.3s ease,box-shadow 0.3s ease;
@@ -690,9 +704,10 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   .hero h1{font-size:clamp(2.2rem,10vw,3.5rem)}
   .cube-scene{width:120px;height:120px}
   .app-icon{width:120px;height:120px}
-  .app-icon-face{border-radius:28px}
-  .app-icon-side{top:3px;bottom:3px;right:-10px;width:11px}
-  .app-icon-bottom{left:3px;right:3px;bottom:-10px;height:11px}
+  .app-icon-face{border-radius:28px;transform:translateZ(22px)}
+  .app-icon-back{border-radius:28px}
+  .app-icon-side{width:22px;border-radius:0 28px 28px 0}
+  .app-icon-bottom{height:22px;border-radius:0 0 28px 28px}
   .cube-aura{width:170px;height:170px}
   .cube-shadow{width:100px}
   .glitter{width:110px;height:90px;margin-bottom:-20px}
@@ -740,11 +755,12 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
     <div class="cube-scene">
       <div class="cube-aura"></div>
       <div class="app-icon">
+        <div class="app-icon-back"></div>
+        <div class="app-icon-side"></div>
+        <div class="app-icon-bottom"></div>
         <div class="app-icon-face">
           <div class="app-icon-ig"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="#fff" stroke="none"/></svg></div>
         </div>
-        <div class="app-icon-side"></div>
-        <div class="app-icon-bottom"></div>
       </div>
     </div>
     <div class="cube-shadow"></div>
