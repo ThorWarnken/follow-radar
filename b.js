@@ -404,7 +404,7 @@
     icon.innerHTML = '<svg width="28" height="28" viewBox="0 0 100 100"><defs><linearGradient id="fg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f77737"/><stop offset="50%" stop-color="#e1306c"/><stop offset="100%" stop-color="#833ab4"/></linearGradient></defs><circle cx="50" cy="50" r="45" fill="url(#fg)"/><circle cx="50" cy="50" r="8" fill="white"/><circle cx="50" cy="50" r="22" fill="none" stroke="white" stroke-width="4" opacity="0.7"/><circle cx="50" cy="50" r="36" fill="none" stroke="white" stroke-width="3" opacity="0.4"/></svg>';
     const title = document.createElement('div');
     title.setAttribute('style', 'font-weight:900;font-size:14px;letter-spacing:-0.01em');
-    title.textContent = 'follow radar';
+    title.textContent = 'Only Followers';
     header.appendChild(icon);
     header.appendChild(title);
     inner.appendChild(header);
@@ -486,7 +486,7 @@
         const sizes = await checkAccountSize(user.username);
         if (sizes.followers > MAX_ACCOUNT_SIZE || sizes.following > MAX_ACCOUNT_SIZE) {
           alert(
-            "follow radar is built for accounts under " + MAX_ACCOUNT_SIZE.toLocaleString() + " followers/following.\n\n" +
+            "Only Followers is built for accounts under " + MAX_ACCOUNT_SIZE.toLocaleString() + " followers/following.\n\n" +
             "Yours has " + sizes.followers.toLocaleString() + " followers and " + sizes.following.toLocaleString() + " following.\n\n" +
             "If you really need this for a bigger account, the code is open source — fork it and remove the cap."
           );
