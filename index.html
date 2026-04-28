@@ -82,7 +82,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   text-align:center;padding:2rem;
 }
 .site-name{
-  font-family:var(--ff-display);font-weight:900;font-size:1.4rem;
+  font-family:var(--font);font-weight:900;font-size:1.4rem;
   letter-spacing:-0.02em;margin-bottom:1.5rem;
   background:linear-gradient(135deg,#f77737,#e1306c,#833ab4);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
@@ -242,14 +242,14 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 
 /* "Only Followers" text on front face */
 .cube-text{
-  font-family:var(--ff-display);font-weight:900;font-size:1.35rem;
+  font-family:var(--font);font-weight:900;font-size:1.35rem;
   line-height:1.1;text-align:center;color:#fff;letter-spacing:-0.02em;
   text-shadow:0 2px 8px rgba(0,0,0,0.3);
   pointer-events:none;
 }
 /* Wordmark below cube */
 .cube-wordmark{
-  font-family:var(--ff-display);font-weight:900;font-size:1.1rem;
+  font-family:var(--font);font-weight:900;font-size:1.1rem;
   letter-spacing:-0.01em;margin-top:0.75rem;
   background:linear-gradient(135deg,#f77737,#e1306c,#833ab4);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
@@ -658,11 +658,11 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   text-align:center;padding:2rem 1rem 1rem;
 }
 .paywall-cta h3{
-  font-family:var(--ff-display);font-size:1.3rem;font-weight:800;
+  font-family:var(--font);font-size:1.3rem;font-weight:800;
   margin-bottom:0.5rem;
 }
 .paywall-cta p{
-  color:var(--muted);font-size:0.9rem;margin-bottom:1.5rem;
+  color:var(--text-muted);font-size:0.9rem;margin-bottom:1.5rem;
 }
 .pricing-cards{
   display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;
@@ -670,7 +670,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 }
 .pricing-card{
   flex:1;min-width:160px;max-width:200px;padding:1.5rem 1rem;
-  border-radius:var(--radius);background:var(--card);
+  border-radius:var(--radius);background:var(--bg-card);
   border:2px solid rgba(131,58,180,0.15);
   text-align:center;text-decoration:none;color:inherit;
   transition:border-color 0.2s,transform 0.2s;
@@ -683,7 +683,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   background:linear-gradient(135deg,rgba(131,58,180,0.06),rgba(225,48,108,0.06));
 }
 .pricing-card .price{
-  font-family:var(--ff-display);font-size:1.5rem;font-weight:900;
+  font-family:var(--font);font-size:1.5rem;font-weight:900;
   background:linear-gradient(135deg,#833ab4,#e1306c);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   background-clip:text;
@@ -692,7 +692,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   font-weight:700;font-size:0.95rem;margin-bottom:0.25rem;
 }
 .pricing-card .plan-sub{
-  font-size:0.78rem;color:var(--muted);
+  font-size:0.78rem;color:var(--text-muted);
 }
 .pricing-card .best-value{
   display:inline-block;padding:2px 10px;border-radius:var(--radius-pill);
@@ -1166,7 +1166,7 @@ function isUnlocked() {
   try { u = JSON.parse(localStorage.getItem(UNLOCK_KEY)); } catch(e) { return false; }
   if (!u) return false;
   const now = Date.now();
-  if (u.type === 'scan') return true;
+  if (u.type === 'scan') return now - u.timestamp < 60 * 60 * 1000; // 1 hour max
   if (u.type === 'monthly') return now - u.timestamp < 30 * 24 * 60 * 60 * 1000;
   if (u.type === 'yearly') return now - u.timestamp < 365 * 24 * 60 * 60 * 1000;
   return false;
@@ -1177,11 +1177,6 @@ function setUnlocked(type) {
 }
 
 function loadPayload(p){
-  // Clear per-scan unlock when new data arrives
-  try {
-    const u = JSON.parse(localStorage.getItem(UNLOCK_KEY));
-    if (u && u.type === 'scan') localStorage.removeItem(UNLOCK_KEY);
-  } catch(e) {}
 
   state.followers = Array.isArray(p.followers) ? p.followers : [];
   state.following = Array.isArray(p.following) ? p.following : [];
@@ -1411,6 +1406,11 @@ async function init(){
   }
 
   if (hash.indexOf('#data=') === 0){
+    // New scan data — clear any per-scan unlock so user must pay again
+    try {
+      const u = JSON.parse(localStorage.getItem(UNLOCK_KEY));
+      if (u && u.type === 'scan') localStorage.removeItem(UNLOCK_KEY);
+    } catch(e) {}
     const encoded = hash.slice(6);
     try {
       const payload = await decodePayload(encoded);
