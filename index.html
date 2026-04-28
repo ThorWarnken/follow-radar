@@ -82,7 +82,12 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   text-align:center;padding:2rem;
 }
 
-/* 3D cube + cat wrapper */
+/* ─── Rounded 3D Cube ─────────────────────────────────────────────
+ * Three visible faces (front, right, top) with heavy border-radius,
+ * glossy highlight overlays, and layered glow/shadow for depth.
+ * The cube gentle-rocks instead of full-spinning so you always
+ * see the rounded volume rather than sharp back edges.
+ * ────────────────────────────────────────────────────────────────── */
 .cube-wrap{
   display:flex;flex-direction:column;align-items:center;
   margin:0 auto 2rem;position:relative;
@@ -91,70 +96,145 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .glitter{
   width:150px;height:120px;margin-bottom:-30px;position:relative;z-index:10;
   filter:drop-shadow(0 8px 24px rgba(225,48,108,0.3));
-  animation:cat-bob 6s ease-in-out infinite;
+  animation:cube-float 6s ease-in-out infinite;
 }
-@keyframes cat-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 .glitter dotlottie-player{width:100%;height:100%}
-/* 3D cube */
-.cube-scene{
-  perspective:1200px;width:150px;height:150px;position:relative;
-  animation:cat-bob 6s ease-in-out infinite;
+
+/* Ambient glow behind the entire cube */
+.cube-aura{
+  position:absolute;width:220px;height:220px;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  background:radial-gradient(circle,rgba(225,48,108,0.25) 0%,rgba(131,58,180,0.15) 40%,transparent 70%);
+  border-radius:50%;filter:blur(30px);
+  animation:aura-breathe 4s ease-in-out infinite;
+  pointer-events:none;
 }
+@keyframes aura-breathe{
+  0%,100%{opacity:0.7;transform:translate(-50%,-50%) scale(1)}
+  50%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}
+}
+
+/* Scene container — perspective + float */
+.cube-scene{
+  perspective:900px;width:160px;height:160px;position:relative;
+  animation:cube-float 6s ease-in-out infinite;
+}
+@keyframes cube-float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-14px)}
+}
+
+/* Cube body — gentle rock, never full-spin */
 .cube{
   width:100%;height:100%;position:relative;
   transform-style:preserve-3d;
-  animation:cube-spin 20s linear infinite;
+  animation:cube-rock 8s ease-in-out infinite;
 }
-@keyframes cube-spin{
-  0%{transform:rotateX(-20deg) rotateY(0deg)}
-  100%{transform:rotateX(-20deg) rotateY(360deg)}
+@keyframes cube-rock{
+  0%{transform:rotateX(-22deg) rotateY(-18deg)}
+  25%{transform:rotateX(-18deg) rotateY(8deg)}
+  50%{transform:rotateX(-24deg) rotateY(22deg)}
+  75%{transform:rotateX(-20deg) rotateY(-6deg)}
+  100%{transform:rotateX(-22deg) rotateY(-18deg)}
 }
-/*
- * Sealed cube technique: each face is actually TWO layers —
- * a full-size square fill (no radius) sitting 0.5px behind,
- * and the rounded gradient face on top. The fill uses the
- * average edge color of its face so the corners blend.
- */
-.cube-fill{
-  display:none;
-}
-.cube-fill--front{background:#c0406a;transform:translateZ(74.5px)}
-.cube-fill--back{background:#c0606a;transform:rotateY(180deg) translateZ(74.5px)}
-.cube-fill--right{background:#9030a0;transform:rotateY(90deg) translateZ(74.5px)}
-.cube-fill--left{background:#5838b0;transform:rotateY(-90deg) translateZ(74.5px)}
-.cube-fill--top{background:#e8903a;transform:rotateX(90deg) translateZ(74.5px)}
-.cube-fill--bottom{background:#14081e;transform:rotateX(-90deg) translateZ(74.5px)}
-/* Outer rounded faces */
+
+/* ── Shared face styles ─────────────────────────── */
 .cube-face{
-  position:absolute;width:150px;height:150px;
+  position:absolute;width:160px;height:160px;
   border-radius:36px;
   display:flex;align-items:center;justify-content:center;
-  border:1px solid rgba(255,255,255,0.1);
+  /* Soft bevel: inset highlight top-left, inset shadow bottom-right */
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.25),
+    inset 0 -1px 2px rgba(0,0,0,0.15);
+  border:1px solid rgba(255,255,255,0.12);
+  overflow:hidden;
 }
+/* Glossy highlight overlay — pseudo-element on every face */
+.cube-face::after{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(160deg,rgba(255,255,255,0.28) 0%,rgba(255,255,255,0.05) 40%,transparent 60%);
+  pointer-events:none;
+}
+
+/* ── Front face ─ warm pink/orange IG gradient ── */
 .cube-face--front{
-  background:linear-gradient(135deg,#833ab4,#e1306c,#f77737);
-  transform:translateZ(75px);
-  box-shadow:0 0 50px rgba(225,48,108,0.3);
+  background:linear-gradient(135deg,#833ab4 0%,#e1306c 50%,#f77737 100%);
+  transform:translateZ(80px);
+  box-shadow:
+    0 0 60px rgba(225,48,108,0.35),
+    inset 0 1px 1px rgba(255,255,255,0.3),
+    inset 0 -1px 2px rgba(0,0,0,0.12);
 }
-.cube-face--back{background:linear-gradient(135deg,#f77737,#e1306c,#833ab4);transform:rotateY(180deg) translateZ(75px)}
-.cube-face--right{background:linear-gradient(135deg,#c13584,#833ab4,#405de6);transform:rotateY(90deg) translateZ(75px)}
-.cube-face--left{background:linear-gradient(135deg,#405de6,#833ab4,#c13584);transform:rotateY(-90deg) translateZ(75px)}
+
+/* ── Back face ─ hidden most of the time ── */
+.cube-face--back{
+  background:linear-gradient(135deg,#f77737,#e1306c,#833ab4);
+  transform:rotateY(180deg) translateZ(80px);
+}
+
+/* ── Right face ─ purple/blue ── */
+.cube-face--right{
+  background:linear-gradient(160deg,#6228d7 0%,#833ab4 50%,#405de6 100%);
+  transform:rotateY(90deg) translateZ(80px);
+}
+
+/* ── Left face ─ blue/purple mirror ── */
+.cube-face--left{
+  background:linear-gradient(160deg,#405de6 0%,#833ab4 50%,#6228d7 100%);
+  transform:rotateY(-90deg) translateZ(80px);
+}
+
+/* ── Top face ─ warm glow, radar pulse rises from it ── */
 .cube-face--top{
-  background:linear-gradient(135deg,#f77737,#fcaf45,#f77737);
-  transform:rotateX(90deg) translateZ(75px);
-  border-color:rgba(255,255,255,0.15);
+  background:linear-gradient(135deg,#f77737 0%,#fcaf45 50%,#f9d423 100%);
+  transform:rotateX(90deg) translateZ(80px);
+  border-color:rgba(255,255,255,0.2);
 }
-.cube-face--bottom{background:linear-gradient(135deg,#1a0830,#14081e,#1a0830);transform:rotateX(-90deg) translateZ(75px);border-color:rgba(255,255,255,0.03)}
-/* IG icon on faces */
-.ig-icon{width:50%;height:50%}
-.ig-icon svg{width:100%;height:100%;filter:drop-shadow(0 2px 10px rgba(0,0,0,0.3))}
-/* Cube glow underneath */
-.cube-glow{
-  width:100px;height:16px;margin-top:-8px;
-  background:radial-gradient(ellipse,rgba(225,48,108,0.35),transparent 70%);
-  border-radius:50%;filter:blur(8px);
-  animation:cat-bob 6s ease-in-out infinite;
+
+/* ── Bottom face ─ deep shadow ── */
+.cube-face--bottom{
+  background:#0d0515;
+  transform:rotateX(-90deg) translateZ(80px);
+  border-color:rgba(255,255,255,0.02);
 }
+
+/* ── Face icons ── */
+.face-icon{width:46%;height:46%;opacity:0.95}
+.face-icon svg{width:100%;height:100%;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.25))}
+
+/* ── Radar pulse on top face ── */
+.radar-pulse{
+  position:absolute;width:50px;height:50px;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  pointer-events:none;
+}
+.radar-pulse .ring{
+  position:absolute;inset:0;border:2px solid rgba(255,255,255,0.5);
+  border-radius:50%;
+  animation:pulse-expand 3s ease-out infinite;
+}
+.radar-pulse .ring:nth-child(2){animation-delay:1s}
+.radar-pulse .ring:nth-child(3){animation-delay:2s}
+@keyframes pulse-expand{
+  0%{transform:scale(0.3);opacity:0.8}
+  100%{transform:scale(2.2);opacity:0}
+}
+
+/* ── Floor shadow — compresses/expands with float ── */
+.cube-shadow{
+  width:120px;height:18px;margin-top:2px;
+  background:radial-gradient(ellipse,rgba(225,48,108,0.3) 0%,rgba(131,58,180,0.15) 40%,transparent 70%);
+  border-radius:50%;filter:blur(10px);
+  animation:shadow-pulse 6s ease-in-out infinite;
+}
+@keyframes shadow-pulse{
+  0%,100%{transform:scaleX(1);opacity:0.8}
+  50%{transform:scaleX(0.7);opacity:0.5}
+}
+
+/* Fill panels hidden — rounded faces only */
+.cube-fill{display:none}
 
 .hero-tag{
   display:inline-flex;align-items:center;gap:7px;
@@ -626,21 +706,16 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 @media(max-width:768px){
   .hero{min-height:90vh;padding:1.5rem}
   .hero h1{font-size:clamp(2.2rem,10vw,3.5rem)}
-  .cube-scene{width:110px;height:110px}
-  .cube-face{width:110px;height:110px;border-radius:20px}
-  .cube-fill{width:118px;height:118px;top:-4px;left:-4px}
-  .cube-face--front{transform:translateZ(55px)}
-  .cube-face--back{transform:rotateY(180deg) translateZ(55px)}
-  .cube-face--right{transform:rotateY(90deg) translateZ(55px)}
-  .cube-face--left{transform:rotateY(-90deg) translateZ(55px)}
-  .cube-face--top{transform:rotateX(90deg) translateZ(55px)}
-  .cube-face--bottom{transform:rotateX(-90deg) translateZ(55px)}
-  .cube-fill--front{transform:translateZ(54.5px)}
-  .cube-fill--back{transform:rotateY(180deg) translateZ(54.5px)}
-  .cube-fill--right{transform:rotateY(90deg) translateZ(54.5px)}
-  .cube-fill--left{transform:rotateY(-90deg) translateZ(54.5px)}
-  .cube-fill--top{transform:rotateX(90deg) translateZ(54.5px)}
-  .cube-fill--bottom{transform:rotateX(-90deg) translateZ(54.5px)}
+  .cube-scene{width:120px;height:120px}
+  .cube-face{width:120px;height:120px;border-radius:26px}
+  .cube-face--front{transform:translateZ(60px)}
+  .cube-face--back{transform:rotateY(180deg) translateZ(60px)}
+  .cube-face--right{transform:rotateY(90deg) translateZ(60px)}
+  .cube-face--left{transform:rotateY(-90deg) translateZ(60px)}
+  .cube-face--top{transform:rotateX(90deg) translateZ(60px)}
+  .cube-face--bottom{transform:rotateX(-90deg) translateZ(60px)}
+  .cube-aura{width:160px;height:160px}
+  .cube-shadow{width:90px}
   .glitter{width:110px;height:90px;margin-bottom:-20px}
   .section{padding:3rem 1.25rem}
   .card{padding:0.85rem 1rem}
@@ -681,32 +756,30 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
     <div class="glitter">
       <dotlottie-player src="https://lottie.host/8cf4ba71-e5fb-44f3-8134-178c4d389417/0CCsdcgNIP.json" background="transparent" speed="1" loop autoplay></dotlottie-player>
     </div>
-    <!-- 3D cube -->
-    <div class="cube-scene"><div class="cube">
-      <!-- Fill panels (no border-radius, sit 0.5px behind faces) -->
-      <div class="cube-fill cube-fill--front"></div>
-      <div class="cube-fill cube-fill--back"></div>
-      <div class="cube-fill cube-fill--right"></div>
-      <div class="cube-fill cube-fill--left"></div>
-      <div class="cube-fill cube-fill--top"></div>
-      <div class="cube-fill cube-fill--bottom"></div>
-      <!-- Rounded gradient faces -->
-      <div class="cube-face cube-face--front">
-        <div class="ig-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="#fff" stroke="none"/></svg></div>
+    <!-- Rounded 3D cube -->
+    <div class="cube-scene">
+      <div class="cube-aura"></div>
+      <div class="cube">
+        <!-- Front: social/follow icon -->
+        <div class="cube-face cube-face--front">
+          <div class="face-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-3.87 3.13-7 7-7s7 3.13 7 7"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 20c0-2.76-1.5-5.15-3.72-6.44"/></svg></div>
+        </div>
+        <div class="cube-face cube-face--back"></div>
+        <!-- Right: radar rings -->
+        <div class="cube-face cube-face--right">
+          <div class="face-icon"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7" opacity="0.6"/><circle cx="12" cy="12" r="10.5" opacity="0.3"/></svg></div>
+        </div>
+        <div class="cube-face cube-face--left">
+          <div class="face-icon"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7" opacity="0.6"/><circle cx="12" cy="12" r="10.5" opacity="0.3"/></svg></div>
+        </div>
+        <!-- Top: radar pulse rings -->
+        <div class="cube-face cube-face--top">
+          <div class="radar-pulse"><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
+        </div>
+        <div class="cube-face cube-face--bottom"></div>
       </div>
-      <div class="cube-face cube-face--back">
-        <div class="ig-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="#fff" stroke="none"/></svg></div>
-      </div>
-      <div class="cube-face cube-face--right">
-        <div class="ig-icon"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></div>
-      </div>
-      <div class="cube-face cube-face--left">
-        <div class="ig-icon"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></div>
-      </div>
-      <div class="cube-face cube-face--top"></div>
-      <div class="cube-face cube-face--bottom"></div>
-    </div></div>
-    <div class="cube-glow"></div>
+    </div>
+    <div class="cube-shadow"></div>
   </div>
 
   <div class="hero-tag">runs entirely in your browser</div>
