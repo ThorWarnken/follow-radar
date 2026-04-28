@@ -26,14 +26,17 @@
   const out=document.getElementById('out');
   const sum=document.getElementById('summary');
   let passed=0,failed=0;
+  let _q=Promise.resolve();
   window.test=function(name,fn){
-    try{
-      const r=fn();
-      if(r&&typeof r.then==='function'){
-        return r.then(()=>{passed++;render(name,true)},e=>{failed++;render(name,false,e)});
-      }
-      passed++;render(name,true);
-    }catch(e){failed++;render(name,false,e)}
+    _q=_q.then(()=>{
+      try{
+        const r=fn();
+        if(r&&typeof r.then==='function'){
+          return r.then(()=>{passed++;render(name,true)},e=>{failed++;render(name,false,e)});
+        }
+        passed++;render(name,true);
+      }catch(e){failed++;render(name,false,e)}
+    });
   };
   window.assert=function(cond,msg){if(!cond)throw new Error(msg||'assertion failed')};
   window.assertEq=function(a,b,msg){
@@ -47,11 +50,11 @@
     out.appendChild(d);
   }
   window.addEventListener('load',()=>{
-    setTimeout(()=>{
+    _q.then(()=>{
       const total=passed+failed;
       sum.textContent=`${passed}/${total} passed`;
       sum.className='summary '+(failed===0?'ok':'bad');
-    },200);
+    });
   });
 })();
 </script>
