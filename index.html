@@ -4,78 +4,75 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>follow radar - who's not following you back?</title>
-<meta name="description" content="Find out who doesn't follow you back on Instagram. Private, cute, and runs entirely in your browser.">
+<meta name="description" content="Find out who doesn't follow you back on Instagram. Private, runs entirely in your browser.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%25' stop-color='%23f77737'/><stop offset='50%25' stop-color='%23e1306c'/><stop offset='100%25' stop-color='%23833ab4'/></linearGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23g)'/><circle cx='50' cy='50' r='8' fill='white'/><circle cx='50' cy='50' r='22' fill='none' stroke='white' stroke-width='4' opacity='0.7'/><circle cx='50' cy='50' r='36' fill='none' stroke='white' stroke-width='3' opacity='0.4'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#f5f5f7;
-  --bg-card:#fff;
-  --bg-card-hover:#f8f8fa;
-  --border:rgba(0,0,0,0.06);
-  --border-hover:rgba(0,0,0,0.1);
-  --text:#1a1a2e;
-  --text-soft:#555570;
-  --text-muted:#8e8ea0;
+  --bg:#08070b;
+  --bg-card:rgba(255,255,255,0.04);
+  --bg-card-hover:rgba(255,255,255,0.07);
+  --bg-card-solid:#111017;
+  --border:rgba(255,255,255,0.06);
+  --border-hover:rgba(255,255,255,0.12);
+  --text:#f0eef5;
+  --text-soft:#a09bb0;
+  --text-muted:#605b70;
   --pink:#e1306c;
   --pink-soft:#f0829e;
-  --pink-bg:#fdf2f5;
+  --pink-bg:rgba(225,48,108,0.12);
   --purple:#833ab4;
   --purple-soft:#b080d0;
-  --purple-bg:#f3eef8;
+  --purple-bg:rgba(131,58,180,0.12);
   --orange:#f77737;
-  --orange-bg:#fef4ee;
+  --orange-bg:rgba(247,119,55,0.12);
   --green:#34c759;
-  --green-bg:#eafbef;
+  --green-bg:rgba(52,199,89,0.12);
   --gradient-candy:linear-gradient(135deg,#f77737,#e1306c,#833ab4);
   --gradient-sunset:linear-gradient(135deg,#f77737,#e1306c,#c13584);
   --gradient-ig:linear-gradient(135deg,#833ab4,#e1306c,#f77737);
-  --radius:16px;
-  --radius-lg:24px;
-  --radius-xl:32px;
+  --radius:14px;
+  --radius-lg:20px;
+  --radius-xl:28px;
   --radius-pill:100px;
-  --shadow-sm:0 2px 8px rgba(0,0,0,0.04);
-  --shadow-md:0 4px 20px rgba(0,0,0,0.06);
-  --shadow-lg:0 8px 40px rgba(0,0,0,0.08);
-  --shadow-glow:0 4px 24px rgba(225,48,108,0.18);
-  --font:'Nunito',sans-serif;
-  --font-body:'Quicksand',sans-serif;
+  --shadow-sm:0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md:0 4px 20px rgba(0,0,0,0.4);
+  --shadow-lg:0 8px 40px rgba(0,0,0,0.5);
+  --shadow-glow:0 4px 24px rgba(225,48,108,0.25);
+  --font:'Outfit',sans-serif;
+  --font-body:'DM Sans',sans-serif;
   --ease:cubic-bezier(0.16,1,0.3,1);
   --bounce:cubic-bezier(0.34,1.56,0.64,1);
 }
-html{scroll-behavior:smooth;background:#f5f3ee}
+html{scroll-behavior:smooth;background:var(--bg)}
 body{
-  font-family:var(--font-body);font-weight:500;color:var(--text);
+  font-family:var(--font-body);font-weight:400;color:var(--text);
   line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased;
-  background:radial-gradient(ellipse at 50% 30%, #fbf7f2 0%, #f5f3ee 45%, #eeece7 100%);
-  background-attachment:fixed;
-  position:relative;
+  background:var(--bg);position:relative;
 }
+
+/* ═══════════ ANIMATED GRADIENT BG ═══════════ */
+#gradient-bg{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity 2s cubic-bezier(0.25,0.1,0.25,1)}
+#gradient-bg.visible{opacity:1}
+@media(prefers-reduced-motion:reduce){#gradient-bg{display:none}}
+
+/* noise overlay */
 body::before{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:2;
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:1;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-  opacity:0.035;mix-blend-mode:multiply;
+  opacity:0.04;mix-blend-mode:soft-light;
 }
-.orb{
-  position:fixed;top:-200px;right:-200px;width:600px;height:600px;
-  border-radius:50%;pointer-events:none;z-index:1;
-  background:radial-gradient(circle, rgba(225,48,108,0.22), rgba(131,58,180,0.12) 40%, transparent 70%);
-  filter:blur(80px);
-}
+
 a{color:inherit;text-decoration:none}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
 input{font-family:inherit;border:none;background:none;color:inherit;outline:none}
 
-::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar{width:6px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--purple-soft);border-radius:4px}
-
-/* ═══════════ SHADER BG ═══════════ */
-#shader-bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.18}
-@media(prefers-reduced-motion:reduce){#shader-bg{display:none}}
+::-webkit-scrollbar-thumb{background:rgba(225,48,108,0.3);border-radius:3px}
 
 /* ═══════════ HERO ═══════════ */
 .hero{
@@ -83,25 +80,78 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;padding:2rem;
 }
-.hero-icon{width:72px;height:72px;margin:0 auto 1.25rem;position:relative}
-.hero-icon svg{width:100%;height:100%}
-.hero-icon .radar-ping{animation:radar-ping 3s ease-out infinite}
-@keyframes radar-ping{0%{opacity:0.7;r:8}70%{opacity:0;r:28}100%{opacity:0;r:28}}
+
+/* 3D cube */
+.cube-scene{
+  perspective:800px;width:140px;height:140px;
+  margin:0 auto 2.5rem;position:relative;
+}
+.cube{
+  width:100%;height:100%;position:relative;
+  transform-style:preserve-3d;
+  animation:cube-spin 20s linear infinite;
+}
+@keyframes cube-spin{
+  0%{transform:rotateX(-15deg) rotateY(0deg)}
+  100%{transform:rotateX(-15deg) rotateY(360deg)}
+}
+.cube-face{
+  position:absolute;width:140px;height:140px;
+  border-radius:28px;
+  display:flex;align-items:center;justify-content:center;
+  backface-visibility:hidden;
+  border:1px solid rgba(255,255,255,0.08);
+}
+.cube-face--front{background:linear-gradient(135deg,#833ab4,#e1306c,#f77737);transform:translateZ(70px)}
+.cube-face--back{background:linear-gradient(135deg,#f77737,#e1306c,#833ab4);transform:rotateY(180deg) translateZ(70px)}
+.cube-face--right{background:linear-gradient(135deg,#e1306c,#833ab4,#405de6);transform:rotateY(90deg) translateZ(70px)}
+.cube-face--left{background:linear-gradient(135deg,#405de6,#833ab4,#e1306c);transform:rotateY(-90deg) translateZ(70px)}
+.cube-face--top{background:linear-gradient(135deg,#f77737,#fcaf45,#f77737);transform:rotateX(90deg) translateZ(70px)}
+.cube-face--bottom{background:linear-gradient(135deg,#833ab4,#405de6,#833ab4);transform:rotateX(-90deg) translateZ(70px)}
+/* IG icon on front face */
+.ig-icon{width:60%;height:60%}
+.ig-icon svg{width:100%;height:100%;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.3))}
+
+/* Glitter the cat */
+.glitter{
+  position:absolute;z-index:10;
+  width:80px;height:80px;
+  animation:glitter-play 20s linear infinite;
+  filter:drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+}
+@keyframes glitter-play{
+  0%{top:-60px;left:30px;transform:rotate(-5deg) scaleX(1)}
+  8%{top:-65px;left:90px;transform:rotate(8deg) scaleX(1)}
+  15%{top:-55px;left:140px;transform:rotate(-3deg) scaleX(-1)}
+  25%{top:10px;left:155px;transform:rotate(15deg) scaleX(-1)}
+  35%{top:80px;left:145px;transform:rotate(-10deg) scaleX(-1)}
+  45%{top:120px;left:80px;transform:rotate(5deg) scaleX(1)}
+  55%{top:110px;left:10px;transform:rotate(-8deg) scaleX(1)}
+  65%{top:60px;left:-30px;transform:rotate(12deg) scaleX(1)}
+  75%{top:-10px;left:-25px;transform:rotate(-5deg) scaleX(1)}
+  85%{top:-50px;left:0px;transform:rotate(3deg) scaleX(1)}
+  100%{top:-60px;left:30px;transform:rotate(-5deg) scaleX(1)}
+}
+.glitter svg{width:100%;height:100%}
+
+/* tail wag */
+.cat-tail{transform-origin:12px 35px;animation:tail-wag 0.8s ease-in-out infinite alternate}
+@keyframes tail-wag{0%{transform:rotate(-15deg)}100%{transform:rotate(15deg)}}
 
 .hero-tag{
   display:inline-flex;align-items:center;gap:7px;
   padding:7px 18px;border-radius:var(--radius-pill);
   background:var(--green-bg);color:var(--green);
   font-size:0.78rem;font-weight:700;margin-bottom:1.75rem;
-  border:1px solid rgba(92,214,123,0.2);letter-spacing:0.01em;
+  border:1px solid rgba(52,199,89,0.15);letter-spacing:0.02em;
 }
 .hero-tag::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse-dot 2s ease infinite}
 @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.7)}}
 
 .hero h1{
   font-family:var(--font);font-weight:900;
-  font-size:clamp(3rem,8vw,6rem);line-height:1.02;
-  letter-spacing:-0.03em;margin-bottom:1.5rem;
+  font-size:clamp(3rem,8vw,5.5rem);line-height:1.02;
+  letter-spacing:-0.04em;margin-bottom:1.5rem;
   max-width:14ch;
 }
 .hero h1 .gradient{
@@ -114,18 +164,30 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 
 .hero p.subtitle{
   font-size:clamp(1rem,2vw,1.15rem);color:var(--text-soft);
-  max-width:520px;margin:0 auto;line-height:1.7;font-weight:500;
+  max-width:520px;margin:0 auto;line-height:1.7;font-weight:400;
 }
 
 .scroll-hint{
   position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);
   display:flex;flex-direction:column;align-items:center;gap:8px;
-  color:var(--text-muted);font-size:0.72rem;font-weight:700;
+  color:var(--text-muted);font-size:0.72rem;font-weight:600;
   letter-spacing:0.1em;text-transform:uppercase;
 }
 .scroll-bounce{animation:scroll-b 2s ease-in-out infinite}
 .scroll-bounce svg{width:18px;height:18px;color:var(--text-muted)}
 @keyframes scroll-b{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+
+/* ═══════════ SECTION BADGES ═══════════ */
+.section-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 14px;border-radius:var(--radius-pill);
+  font-family:var(--font);font-weight:700;font-size:0.7rem;
+  letter-spacing:0.1em;text-transform:uppercase;
+  margin-bottom:0.75rem;
+}
+.badge-pink{background:var(--pink-bg);color:var(--pink)}
+.badge-purple{background:var(--purple-bg);color:var(--purple)}
+.badge-orange{background:var(--orange-bg);color:var(--orange)}
 
 /* ═══════════ HOW IT WORKS ═══════════ */
 .how{
@@ -134,41 +196,36 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   text-align:center;
 }
 .how-head{margin-bottom:3rem}
-.how-head .section-badge{margin-bottom:0.9rem}
 .how-head h2{
-  font-family:var(--font);font-weight:900;
-  font-size:clamp(2rem,5vw,3rem);letter-spacing:-0.015em;line-height:1.15;
+  font-family:var(--font);font-weight:800;
+  font-size:clamp(2rem,5vw,3rem);letter-spacing:-0.02em;line-height:1.15;
 }
-.how-grid{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;
-  position:relative;
-}
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;position:relative}
 .how-card{
   position:relative;padding:2.25rem 1.75rem 2rem;
-  background:rgba(255,255,255,0.7);
+  background:var(--bg-card);
   border:1px solid var(--border);border-radius:var(--radius-lg);
-  box-shadow:var(--shadow-sm);
   text-align:left;overflow:hidden;
   transition:transform 0.4s var(--bounce),box-shadow 0.4s ease,border-color 0.3s ease;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
 }
 .how-card:hover{
   transform:translateY(-6px);
-  box-shadow:0 12px 40px rgba(225,48,108,0.08);
-  border-color:rgba(225,48,108,0.18);
+  box-shadow:0 12px 40px rgba(225,48,108,0.1);
+  border-color:rgba(225,48,108,0.2);
 }
 .how-card .num{
   position:absolute;top:0.75rem;right:1.25rem;
   font-family:var(--font);font-weight:900;
-  font-size:3rem;line-height:1;color:rgba(0,0,0,0.06);
-  letter-spacing:-0.02em;
+  font-size:3rem;line-height:1;color:rgba(255,255,255,0.04);
 }
 .how-card .icon{width:36px;height:36px;color:var(--pink);margin-bottom:1rem}
 .how-card .icon svg{width:100%;height:100%}
-.how-card h3{font-family:var(--font);font-weight:800;font-size:1.05rem;margin-bottom:0.5rem;letter-spacing:-0.005em}
+.how-card h3{font-family:var(--font);font-weight:700;font-size:1.05rem;margin-bottom:0.5rem}
 .how-card p{color:var(--text-soft);font-size:0.9rem;line-height:1.65}
 .how-arrow{
   position:absolute;top:50%;transform:translateY(-50%);
-  width:32px;height:12px;color:rgba(225,48,108,0.35);
+  width:32px;height:12px;color:rgba(225,48,108,0.3);
 }
 .how-arrow.a1{left:calc(33.33% - 16px)}
 .how-arrow.a2{left:calc(66.66% - 16px)}
@@ -179,37 +236,16 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   .how{padding:4rem 1.25rem}
 }
 
-/* ═══════════ SECTION (results wrapper) ═══════════ */
-.section{position:relative;z-index:3;padding:6rem 1.5rem;max-width:800px;margin:0 auto}
-@media(max-width:760px){.section{padding:4rem 1.25rem}}
-.section-badge{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:5px 14px;border-radius:var(--radius-pill);
-  font-family:var(--font);font-weight:800;font-size:0.7rem;
-  letter-spacing:0.1em;text-transform:uppercase;
-  margin-bottom:0.75rem;
-}
-.badge-pink{background:var(--pink-bg);color:var(--pink)}
-.badge-purple{background:var(--purple-bg);color:var(--purple)}
-.badge-orange{background:var(--orange-bg);color:var(--orange)}
-
-.section-title{
-  font-family:var(--font);font-weight:900;
-  font-size:clamp(2rem,5vw,3rem);letter-spacing:-0.015em;
-  margin-bottom:0.5rem;line-height:1.15;
-}
-.section-desc{color:var(--text-soft);max-width:520px;margin-bottom:2rem;font-size:1rem;line-height:1.7}
-
 /* ═══════════ BOOKMARKLET CARD ═══════════ */
 .bm-section{position:relative;z-index:3;max-width:1000px;margin:0 auto;padding:2rem 1.5rem 6rem;text-align:center}
 .bm-card{
   position:relative;
   padding:4rem 3rem;
   border-radius:var(--radius-xl);
-  background:var(--bg-card);
-  box-shadow:0 20px 80px rgba(225,48,108,0.08), 0 4px 20px rgba(0,0,0,0.04);
+  background:rgba(255,255,255,0.03);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  box-shadow:0 20px 80px rgba(225,48,108,0.06);
 }
-/* Gradient border via padding-box / border-box double-background trick */
 .bm-card::before{
   content:'';position:absolute;inset:0;border-radius:var(--radius-xl);
   padding:1px;
@@ -218,10 +254,9 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   -webkit-mask-composite:xor;mask-composite:exclude;
   pointer-events:none;
 }
-.bm-card .section-badge{margin-bottom:1rem}
 .bm-card h2{
-  font-family:var(--font);font-weight:900;
-  font-size:clamp(2rem,4.5vw,2.75rem);letter-spacing:-0.015em;
+  font-family:var(--font);font-weight:800;
+  font-size:clamp(2rem,4.5vw,2.75rem);letter-spacing:-0.02em;
   margin-bottom:0.6rem;
 }
 .bm-card .bm-sub{
@@ -233,7 +268,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   display:inline-flex;align-items:center;gap:10px;
   padding:18px 44px;border-radius:var(--radius-pill);
   background:linear-gradient(135deg,#f77737,#e1306c,#833ab4);
-  color:#fff;font-family:var(--font);font-weight:900;font-size:1.1rem;
+  color:#fff;font-family:var(--font);font-weight:800;font-size:1.1rem;
   letter-spacing:0.005em;
   box-shadow:var(--shadow-glow);
   text-decoration:none;
@@ -244,31 +279,24 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .bm-button:active{cursor:grabbing}
 .bm-button:hover{
   transform:scale(1.06);
-  box-shadow:0 12px 48px rgba(225,48,108,0.4);
+  box-shadow:0 12px 48px rgba(225,48,108,0.45);
   animation-play-state:paused;
 }
 .bm-button svg{width:18px;height:18px}
 @keyframes bm-pulse{
   0%,100%{transform:scale(1);box-shadow:var(--shadow-glow)}
-  50%{transform:scale(1.02);box-shadow:0 6px 28px rgba(225,48,108,0.28)}
+  50%{transform:scale(1.02);box-shadow:0 6px 28px rgba(225,48,108,0.35)}
 }
 
-.bm-diagram{
-  margin:3rem auto 1rem;max-width:420px;color:var(--text-muted);
-}
+.bm-diagram{margin:3rem auto 1rem;max-width:420px;color:var(--text-muted)}
 .bm-diagram svg{width:100%;height:auto;display:block}
-.bm-diagram .arrow-path{
-  stroke-dasharray:4 4;
-  animation:dash-flow 4s linear infinite;
-}
+.bm-diagram .arrow-path{stroke-dasharray:4 4;animation:dash-flow 4s linear infinite}
 @keyframes dash-flow{to{stroke-dashoffset:-32}}
 
-.bm-helper{
-  margin-top:1rem;color:var(--text-muted);font-size:0.85rem;font-weight:600;
-}
+.bm-helper{margin-top:1rem;color:var(--text-muted);font-size:0.85rem;font-weight:500}
 .bm-helper kbd{
   display:inline-block;padding:2px 8px;
-  background:rgba(0,0,0,0.05);border:1px solid var(--border);
+  background:rgba(255,255,255,0.06);border:1px solid var(--border);
   border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:0.78rem;
   color:var(--text-soft);
 }
@@ -277,28 +305,32 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   .bm-card{padding:2.5rem 1.5rem}
   .bm-section{padding:1rem 1rem 4rem}
 }
-
 @media(prefers-reduced-motion:reduce){
   .bm-button{animation:none}
   .bm-diagram .arrow-path{animation:none}
+  .cube{animation:none;transform:rotateX(-15deg) rotateY(-25deg)}
+  .glitter{animation:none;top:-60px;left:30px}
+  .cat-tail{animation:none}
 }
 
 /* ═══════════ PRIVACY ═══════════ */
 .privacy{position:relative;z-index:3;max-width:1080px;margin:0 auto;padding:5rem 1.5rem;text-align:center}
 .privacy-head{margin-bottom:2.5rem}
-.privacy-head .section-badge{margin-bottom:0.9rem}
 .privacy-head h2{
-  font-family:var(--font);font-weight:900;
-  font-size:clamp(1.75rem,4.5vw,2.5rem);letter-spacing:-0.015em;
+  font-family:var(--font);font-weight:800;
+  font-size:clamp(1.75rem,4.5vw,2.5rem);letter-spacing:-0.02em;
 }
-.privacy-grid{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:1.75rem;
-  text-align:left;
+.privacy-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.75rem;text-align:left}
+.privacy-item{
+  padding:1.5rem;border-radius:var(--radius-lg);
+  background:var(--bg-card);border:1px solid var(--border);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  transition:border-color 0.3s ease,transform 0.4s var(--bounce);
 }
-.privacy-item{padding:0.5rem}
+.privacy-item:hover{border-color:rgba(225,48,108,0.2);transform:translateY(-4px)}
 .privacy-item .icon{width:24px;height:24px;color:var(--pink);margin-bottom:0.85rem}
 .privacy-item .icon svg{width:100%;height:100%}
-.privacy-item h3{font-family:var(--font);font-weight:800;font-size:0.95rem;margin-bottom:0.4rem;letter-spacing:-0.005em}
+.privacy-item h3{font-family:var(--font);font-weight:700;font-size:0.95rem;margin-bottom:0.4rem}
 .privacy-item p{color:var(--text-soft);font-size:0.85rem;line-height:1.65}
 
 @media(max-width:760px){
@@ -312,54 +344,56 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
     scrollbar-width:none;
   }
   .privacy-grid::-webkit-scrollbar{display:none}
-  .privacy-item{
-    scroll-snap-align:start;
-    padding:1.25rem;background:rgba(255,255,255,0.7);
-    border:1px solid var(--border);border-radius:var(--radius-lg);
-  }
+  .privacy-item{scroll-snap-align:start}
 }
 
 /* ═══════════ FAQ ═══════════ */
 .faq{position:relative;z-index:3;max-width:760px;margin:0 auto;padding:5rem 1.5rem;text-align:center}
 .faq-head{margin-bottom:2.5rem}
-.faq-head .section-badge{margin-bottom:0.9rem}
 .faq-head h2{
-  font-family:var(--font);font-weight:900;
-  font-size:clamp(1.75rem,4.5vw,2.5rem);letter-spacing:-0.015em;
+  font-family:var(--font);font-weight:800;
+  font-size:clamp(1.75rem,4.5vw,2.5rem);letter-spacing:-0.02em;
 }
 .faq-list{text-align:left}
 .faq-item{
-  background:rgba(255,255,255,0.7);
+  background:var(--bg-card);
   border:1px solid var(--border);border-radius:var(--radius-lg);
   margin-bottom:0.75rem;overflow:hidden;
-  transition:border-color 0.3s ease,box-shadow 0.3s ease,background 0.3s ease;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  transition:border-color 0.3s ease,box-shadow 0.3s ease;
 }
-.faq-item:hover{border-color:rgba(225,48,108,0.18);box-shadow:0 8px 28px rgba(225,48,108,0.06)}
-.faq-item[open]{background:#fff;border-color:rgba(225,48,108,0.22)}
+.faq-item:hover{border-color:rgba(225,48,108,0.15);box-shadow:0 8px 28px rgba(225,48,108,0.06)}
+.faq-item[open]{border-color:rgba(225,48,108,0.2);background:rgba(255,255,255,0.06)}
 .faq-item summary{
   list-style:none;cursor:pointer;
   padding:1.25rem 1.5rem;
   display:flex;align-items:center;justify-content:space-between;gap:1rem;
-  font-family:var(--font);font-weight:800;font-size:1rem;
-  color:var(--text);letter-spacing:-0.005em;
+  font-family:var(--font);font-weight:700;font-size:1rem;
+  color:var(--text);
 }
 .faq-item summary::-webkit-details-marker{display:none}
 .faq-item summary::after{
   content:'';width:18px;height:18px;flex-shrink:0;
-  background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23555570' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>") no-repeat center / contain;
+  background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a09bb0' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>") no-repeat center / contain;
   transition:transform 0.35s var(--ease);
 }
 .faq-item[open] summary::after{transform:rotate(180deg)}
 .faq-body-wrap{display:grid;grid-template-rows:0fr;transition:grid-template-rows 0.35s var(--ease)}
 .faq-item[open] .faq-body-wrap{grid-template-rows:1fr}
 .faq-body{overflow:hidden}
-.faq-body p{
-  padding:0 1.5rem 1.4rem;
-  color:var(--text-soft);font-size:0.92rem;line-height:1.75;
-}
+.faq-body p{padding:0 1.5rem 1.4rem;color:var(--text-soft);font-size:0.92rem;line-height:1.75}
 @media(max-width:760px){.faq{padding:3.5rem 1.25rem}}
 
 /* ═══════════ RESULTS ═══════════ */
+.section{position:relative;z-index:3;padding:6rem 1.5rem;max-width:800px;margin:0 auto}
+@media(max-width:760px){.section{padding:4rem 1.25rem}}
+.section-title{
+  font-family:var(--font);font-weight:800;
+  font-size:clamp(2rem,5vw,3rem);letter-spacing:-0.02em;
+  margin-bottom:0.5rem;line-height:1.15;
+}
+.section-desc{color:var(--text-soft);max-width:520px;margin-bottom:2rem;font-size:1rem;line-height:1.7}
+
 .results{display:none;position:relative;z-index:3}
 .results.show{display:block;animation:fadeUp 0.5s var(--ease)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
@@ -367,39 +401,40 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .results-banner{
   display:none;
   margin-bottom:1.5rem;padding:0.9rem 1.25rem;
-  background:var(--pink-bg);border:1px solid rgba(225,48,108,0.18);
-  border-radius:var(--radius-lg);color:var(--pink);
-  font-size:0.88rem;line-height:1.6;font-weight:600;
+  background:var(--pink-bg);border:1px solid rgba(225,48,108,0.15);
+  border-radius:var(--radius-lg);color:var(--pink-soft);
+  font-size:0.88rem;line-height:1.6;font-weight:500;
 }
 .results-banner.show{display:block}
-.results-banner strong{font-weight:800}
+.results-banner strong{font-weight:700}
 
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;margin-bottom:2rem}
 @media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}}
 .stat{
   padding:1.5rem 1.25rem;border-radius:var(--radius-lg);text-align:center;
   background:var(--bg-card);border:1px solid var(--border);
-  box-shadow:var(--shadow-sm);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   transition:transform 0.4s var(--bounce),box-shadow 0.4s ease,border-color 0.3s ease;
 }
-.stat:hover{transform:translateY(-6px);box-shadow:0 12px 40px rgba(225,48,108,0.08);border-color:rgba(225,48,108,0.18)}
+.stat:hover{transform:translateY(-6px);box-shadow:0 12px 40px rgba(225,48,108,0.1);border-color:rgba(225,48,108,0.2)}
 .stat-val{font-family:var(--font);font-weight:900;font-size:clamp(1.5rem,3vw,2.2rem);line-height:1.2;margin-bottom:0.15rem}
 .stat-val.pop{background:var(--gradient-sunset);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.stat-lbl{color:var(--text-muted);font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase}
+.stat-lbl{color:var(--text-muted);font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase}
 
 .controls{display:flex;gap:0.75rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap}
 .search{
   flex:1;min-width:180px;display:flex;align-items:center;gap:8px;
   padding:11px 16px;border-radius:var(--radius);
   background:var(--bg-card);border:1.5px solid var(--border);
-  box-shadow:var(--shadow-sm);transition:border-color 0.3s ease;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  transition:border-color 0.3s ease;
 }
 .search:focus-within{border-color:var(--pink)}
 .search svg{width:16px;height:16px;color:var(--text-muted);flex-shrink:0}
-.search input{flex:1;font-size:0.9rem;font-family:inherit;border:none;background:none;outline:none;color:inherit}
+.search input{flex:1;font-size:0.9rem;font-family:inherit;border:none;background:none;outline:none;color:var(--text)}
 .search input::placeholder{color:var(--text-muted)}
 .search-x{
-  width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,0.06);
+  width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,0.08);
   color:var(--text-muted);font-size:0.6rem;display:none;
   align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;border:none;
 }
@@ -407,24 +442,24 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 
 .sort{
   padding:11px 36px 11px 16px;border-radius:var(--radius);
-  background:var(--bg-card);border:1.5px solid var(--border);
+  background:var(--bg-card-solid);border:1.5px solid var(--border);
   color:var(--text);font-size:0.85rem;font-weight:600;font-family:inherit;
   -webkit-appearance:none;appearance:none;cursor:pointer;
   background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23a09bb0' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 12px center;
 }
-.sort option{background:#fff}
+.sort option{background:var(--bg-card-solid);color:var(--text)}
 
 .meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;flex-wrap:wrap;gap:0.5rem}
-.meta-count{color:var(--text-soft);font-size:0.85rem;font-weight:600}
+.meta-count{color:var(--text-soft);font-size:0.85rem;font-weight:500}
 .btn-export{
   display:inline-flex;align-items:center;gap:6px;
   padding:8px 16px;border-radius:var(--radius-pill);
   background:var(--bg-card);border:1.5px solid var(--border);
-  font-size:0.8rem;font-weight:700;color:var(--text-soft);font-family:inherit;
+  font-size:0.8rem;font-weight:600;color:var(--text-soft);font-family:inherit;
   cursor:pointer;transition:all 0.3s ease;
 }
-.btn-export:hover{border-color:rgba(225,48,108,0.3);color:var(--pink);box-shadow:var(--shadow-sm)}
+.btn-export:hover{border-color:rgba(225,48,108,0.3);color:var(--pink)}
 .btn-export svg{width:14px;height:14px}
 
 .list{max-height:65vh;overflow-y:auto;border-radius:var(--radius-lg);contain:layout style;-webkit-overflow-scrolling:touch}
@@ -432,7 +467,6 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .card{
   display:flex;align-items:center;gap:0.85rem;
   padding:0.85rem 1rem;margin-bottom:0;
-  border-radius:var(--radius);
   background:var(--bg-card);border:1px solid var(--border);
   border-top:none;
   height:64px;box-sizing:border-box;
@@ -441,12 +475,12 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 }
 .card:first-child{border-top:1px solid var(--border);border-radius:var(--radius) var(--radius) 0 0}
 .card:last-child{border-radius:0 0 var(--radius) var(--radius);border-bottom:1px solid var(--border)}
-.card:hover{transform:translateX(4px);border-color:rgba(225,48,108,0.25);box-shadow:0 6px 20px rgba(225,48,108,0.06);background:var(--bg-card-hover)}
+.card:hover{transform:translateX(4px);border-color:rgba(225,48,108,0.2);box-shadow:0 6px 20px rgba(225,48,108,0.08);background:var(--bg-card-hover)}
 
 .av{
   width:40px;height:40px;border-radius:12px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
-  font-family:var(--font);font-weight:900;font-size:1rem;color:#fff;
+  font-family:var(--font);font-weight:800;font-size:1rem;color:#fff;
 }
 .av-0{background:linear-gradient(135deg,#ff6b9d,#ff8a50)}
 .av-1{background:linear-gradient(135deg,#b44dff,#6ec6ff)}
@@ -456,14 +490,14 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .av-5{background:linear-gradient(135deg,#6ec6ff,#b44dff)}
 
 .card-info{flex:1;min-width:0}
-.card-user{font-family:var(--font);font-weight:800;font-size:0.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-user{font-family:var(--font);font-weight:700;font-size:0.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card-user a{transition:color 0.2s ease;color:inherit;text-decoration:none}
 .card-user a:hover{color:var(--pink)}
-.card-name{color:var(--text-muted);font-size:0.78rem;margin-top:1px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-name{color:var(--text-muted);font-size:0.78rem;margin-top:1px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 .card-link{
   flex-shrink:0;width:34px;height:34px;border-radius:10px;
-  background:rgba(0,0,0,0.03);
+  background:rgba(255,255,255,0.04);
   display:flex;align-items:center;justify-content:center;
   transition:all 0.3s ease;
 }
@@ -482,7 +516,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .empty-icon .shield-fill{animation:shield-pop 0.5s var(--bounce) forwards}
 @keyframes draw-check{to{stroke-dashoffset:0}}
 @keyframes shield-pop{from{transform:scale(0.8);opacity:0}to{transform:scale(1);opacity:1}}
-.empty h3{font-family:var(--font);font-weight:800;font-size:1.2rem;margin-bottom:0.4rem}
+.empty h3{font-family:var(--font);font-weight:700;font-size:1.2rem;margin-bottom:0.4rem}
 .empty p{color:var(--text-soft);font-size:0.9rem}
 
 /* ═══════════ FOOTER ═══════════ */
@@ -493,7 +527,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 }
 .footer::before{
   content:'';position:absolute;top:0;left:10%;right:10%;height:1px;
-  background:linear-gradient(to right, transparent, rgba(225,48,108,0.25), transparent);
+  background:linear-gradient(to right, transparent, rgba(225,48,108,0.2), transparent);
 }
 .footer p.tagline{
   font-style:italic;color:var(--text-soft);margin-bottom:1rem;
@@ -501,16 +535,25 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 }
 .footer-links{
   display:inline-flex;align-items:center;gap:1.25rem;
-  font-size:0.78rem;font-weight:700;color:var(--text-muted);
+  font-size:0.78rem;font-weight:600;color:var(--text-muted);
 }
 .footer-links a{color:var(--text-muted);transition:color 0.2s ease}
 .footer-links a:hover{color:var(--pink)}
-.footer-links .sep{opacity:0.4}
+.footer-links .sep{opacity:0.3}
 
-/* ═══════════ MOBILE OPTIMIZATIONS ═══════════ */
+/* ═══════════ MOBILE ═══════════ */
 @media(max-width:768px){
   .hero{min-height:90vh;padding:1.5rem}
   .hero h1{font-size:clamp(2.2rem,10vw,3.5rem)}
+  .cube-scene{width:100px;height:100px}
+  .cube-face{width:100px;height:100px;border-radius:20px}
+  .cube-face--front{transform:translateZ(50px)}
+  .cube-face--back{transform:rotateY(180deg) translateZ(50px)}
+  .cube-face--right{transform:rotateY(90deg) translateZ(50px)}
+  .cube-face--left{transform:rotateY(-90deg) translateZ(50px)}
+  .cube-face--top{transform:rotateX(90deg) translateZ(50px)}
+  .cube-face--bottom{transform:rotateX(-90deg) translateZ(50px)}
+  .glitter{width:60px;height:60px}
   .section{padding:3rem 1.25rem}
   .card{padding:0.85rem 1rem}
   .card-link{width:40px;height:40px}
@@ -519,11 +562,6 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   .sort{width:100%}
   .scroll-hint{display:none}
 }
-@media(max-width:380px){
-  .hero h1{font-size:2rem}
-  .section-title{font-size:1.4rem}
-}
-
 @media(max-width:480px){
   .hero h1{font-size:clamp(2.5rem,11vw,3.5rem)}
   .hero{padding:1.5rem 1.25rem;min-height:88vh}
@@ -534,7 +572,10 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   .search{min-width:0}
   .sort{width:100%}
 }
-
+@media(max-width:380px){
+  .hero h1{font-size:2rem}
+  .section-title{font-size:1.4rem}
+}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important}
 }
@@ -542,12 +583,84 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 </head>
 <body>
 
-<canvas id="shader-bg"></canvas>
-<div class="orb" aria-hidden="true"></div>
+<!-- Animated gradient background -->
+<div id="gradient-bg"></div>
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-icon"><svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="24" r="10" stroke="url(#ig)" stroke-width="3"/><path d="M12 56c0-11 9-20 20-20s20 9 20 20" stroke="url(#ig)" stroke-width="3" stroke-linecap="round"/><circle class="radar-ping" cx="32" cy="32" r="8" fill="none" stroke="url(#ig)" stroke-width="1.5"/><circle class="radar-ping" cx="32" cy="32" r="8" fill="none" stroke="url(#ig)" stroke-width="1.5" style="animation-delay:1.5s"/><defs><linearGradient id="ig" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#f77737"/><stop offset="50%" stop-color="#e1306c"/><stop offset="100%" stop-color="#833ab4"/></linearGradient></defs></svg></div>
+  <div class="cube-scene">
+    <!-- Glitter the cat -->
+    <div class="glitter">
+      <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- body -->
+        <ellipse cx="40" cy="48" rx="22" ry="16" fill="#f5f0e8"/>
+        <ellipse cx="40" cy="48" rx="22" ry="16" fill="url(#glitter-fur)" opacity="0.3"/>
+        <!-- head -->
+        <circle cx="40" cy="28" r="16" fill="#f5f0e8"/>
+        <circle cx="40" cy="28" r="16" fill="url(#glitter-fur)" opacity="0.2"/>
+        <!-- ears -->
+        <path d="M28 18L24 6l10 8z" fill="#f5f0e8" stroke="#e8ddd0" stroke-width="0.5"/>
+        <path d="M30 16L27 8l7 5z" fill="#ffb5c5"/>
+        <path d="M52 18L56 6l-10 8z" fill="#f5f0e8" stroke="#e8ddd0" stroke-width="0.5"/>
+        <path d="M50 16L53 8l-7 5z" fill="#ffb5c5"/>
+        <!-- eyes -->
+        <ellipse cx="34" cy="26" rx="3.5" ry="4" fill="#3a3a3a"/>
+        <ellipse cx="46" cy="26" rx="3.5" ry="4" fill="#3a3a3a"/>
+        <ellipse cx="34.8" cy="25" rx="1.5" ry="1.8" fill="#fff"/>
+        <ellipse cx="46.8" cy="25" rx="1.5" ry="1.8" fill="#fff"/>
+        <!-- nose -->
+        <path d="M38.5 30.5L40 32l1.5-1.5" stroke="#e8a0b0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- mouth -->
+        <path d="M37 33.5q3 2 6 0" stroke="#d4a0a0" stroke-width="0.8" stroke-linecap="round" fill="none"/>
+        <!-- whiskers -->
+        <line x1="20" y1="28" x2="32" y2="30" stroke="#d4c4b0" stroke-width="0.6"/>
+        <line x1="20" y1="32" x2="32" y2="32" stroke="#d4c4b0" stroke-width="0.6"/>
+        <line x1="48" y1="30" x2="60" y2="28" stroke="#d4c4b0" stroke-width="0.6"/>
+        <line x1="48" y1="32" x2="60" y2="32" stroke="#d4c4b0" stroke-width="0.6"/>
+        <!-- front paws -->
+        <ellipse cx="28" cy="60" rx="6" ry="4" fill="#f5f0e8" stroke="#e8ddd0" stroke-width="0.5"/>
+        <ellipse cx="52" cy="60" rx="6" ry="4" fill="#f5f0e8" stroke="#e8ddd0" stroke-width="0.5"/>
+        <!-- tail -->
+        <path class="cat-tail" d="M16 44 Q4 38 8 26 Q10 20 14 22" stroke="#f5f0e8" stroke-width="5" stroke-linecap="round" fill="none"/>
+        <path class="cat-tail" d="M16 44 Q4 38 8 26 Q10 20 14 22" stroke="url(#glitter-fur)" stroke-width="5" stroke-linecap="round" fill="none" opacity="0.2"/>
+        <!-- sparkle/glitter effects -->
+        <circle cx="55" cy="12" r="1.5" fill="#fff" opacity="0.9">
+          <animate attributeName="opacity" values="0.9;0.2;0.9" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="65" cy="22" r="1" fill="#f0c0d0" opacity="0.7">
+          <animate attributeName="opacity" values="0.7;0.1;0.7" dur="1.5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="15" cy="14" r="1.2" fill="#fff" opacity="0.8">
+          <animate attributeName="opacity" values="0.8;0.15;0.8" dur="1.8s" repeatCount="indefinite"/>
+        </circle>
+        <defs>
+          <linearGradient id="glitter-fur" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#f0c0d0"/>
+            <stop offset="50%" stop-color="#e8d0c0"/>
+            <stop offset="100%" stop-color="#c0d0e8"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+    <!-- 3D cube -->
+    <div class="cube">
+      <div class="cube-face cube-face--front">
+        <div class="ig-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="#fff" stroke="none"/></svg></div>
+      </div>
+      <div class="cube-face cube-face--back">
+        <div class="ig-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></div>
+      </div>
+      <div class="cube-face cube-face--right">
+        <div class="ig-icon"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.8"><circle cx="12" cy="12" r="5"/></svg></div>
+      </div>
+      <div class="cube-face cube-face--left">
+        <div class="ig-icon"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.8"><circle cx="12" cy="12" r="5"/></svg></div>
+      </div>
+      <div class="cube-face cube-face--top"></div>
+      <div class="cube-face cube-face--bottom"></div>
+    </div>
+  </div>
+
   <div class="hero-tag">runs entirely in your browser</div>
   <h1>see who doesn't <span class="gradient">follow you back</span>.</h1>
   <p class="subtitle">one click on instagram. no login, no upload, no server. we never see your data.</p>
@@ -611,9 +724,9 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
         <rect x="76" y="54" width="48" height="8" rx="2" fill="currentColor" opacity="0.18"/>
         <rect x="130" y="54" width="32" height="8" rx="2" fill="currentColor" opacity="0.18"/>
         <rect x="170" y="52" width="62" height="12" rx="6" fill="url(#bm-grad)" opacity="0.4"/>
-        <text x="201" y="61" text-anchor="middle" font-family="Nunito,sans-serif" font-size="7" font-weight="900" fill="#fff">follow radar</text>
+        <text x="201" y="61" text-anchor="middle" font-family="Outfit,sans-serif" font-size="7" font-weight="900" fill="#fff">follow radar</text>
         <rect x="160" y="120" width="100" height="28" rx="14" fill="url(#bm-grad)"/>
-        <text x="210" y="138" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11" font-weight="900" fill="#fff">follow radar</text>
+        <text x="210" y="138" text-anchor="middle" font-family="Outfit,sans-serif" font-size="11" font-weight="900" fill="#fff">follow radar</text>
         <path class="arrow-path" d="M210 116 C 210 90, 200 80, 200 65" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/>
         <path d="M196 70 L 200 64 L 204 70" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
         <defs>
@@ -626,7 +739,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
       </svg>
     </div>
 
-    <p class="bm-helper">don't see your bookmarks bar? press <kbd>⌘⇧B</kbd> on mac or <kbd>Ctrl+Shift+B</kbd> on windows.</p>
+    <p class="bm-helper">don't see your bookmarks bar? press <kbd>&#8984;&#8679;B</kbd> on mac or <kbd>Ctrl+Shift+B</kbd> on windows.</p>
   </div>
 </section>
 
@@ -667,37 +780,30 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
     <h2>things people ask.</h2>
   </div>
   <div class="faq-list">
-
     <details class="faq-item">
       <summary>is this safe?</summary>
       <div class="faq-body-wrap"><div class="faq-body"><p>yes. the bookmarklet is javascript that runs in your own browser, on your own logged-in instagram session, the same way the instagram website does. it doesn't send your data anywhere except back to follow radar, in your url bar, where you can see it.</p></div></div>
     </details>
-
     <details class="faq-item">
       <summary>will instagram ban me for using this?</summary>
-      <div class="faq-body-wrap"><div class="faq-body"><p>we don't think so, but we can't promise. the bookmarklet makes the same requests instagram's own web app makes, and it deliberately goes slowly (about one request every 1.5 seconds) to look like a real person browsing. if instagram throttles you, you might be temporarily blocked from viewing follower lists for half an hour. we don't know of anyone whose account has been banned for using a tool like this, but tools like this exist in a gray area. if you're worried, don't run it on an account that matters to you.</p></div></div>
+      <div class="faq-body-wrap"><div class="faq-body"><p>we don't think so, but we can't promise. the bookmarklet makes the same requests instagram's own web app makes, and it deliberately goes slowly to look like a real person browsing. if instagram throttles you, you might be temporarily blocked from viewing follower lists for half an hour. we don't know of anyone whose account has been banned for using a tool like this, but tools like this exist in a gray area.</p></div></div>
     </details>
-
     <details class="faq-item">
       <summary>it stopped halfway through. what happened?</summary>
-      <div class="faq-body-wrap"><div class="faq-body"><p>instagram throttled the requests. this is normal on big accounts. wait about 30 minutes, then click the bookmarklet again on instagram — it remembers where it left off and picks up from there. we saved your progress.</p></div></div>
+      <div class="faq-body-wrap"><div class="faq-body"><p>instagram throttled the requests. this is normal on big accounts. wait about 30 minutes, then click the bookmarklet again on instagram -- it remembers where it left off and picks up from there. we saved your progress.</p></div></div>
     </details>
-
     <details class="faq-item">
       <summary>why is there a 10,000 follower cap?</summary>
-      <div class="faq-body-wrap"><div class="faq-body"><p>above 10k, the scan takes long enough that instagram is much more likely to throttle you, and the wait is long enough that this stops feeling like a "one click" tool. if you really need it for a bigger account, the code is open source — fork it and remove the cap.</p></div></div>
+      <div class="faq-body-wrap"><div class="faq-body"><p>above 10k, the scan takes long enough that instagram is much more likely to throttle you. if you really need it for a bigger account, the code is open source -- fork it and remove the cap.</p></div></div>
     </details>
-
     <details class="faq-item">
       <summary>does this work on private accounts?</summary>
       <div class="faq-body-wrap"><div class="faq-body"><p>yes, for your own account and any private account you already follow. the bookmarklet uses your own logged-in session, so it sees exactly what you see when you're scrolling instagram normally.</p></div></div>
     </details>
-
     <details class="faq-item">
       <summary>what about the official instagram data export?</summary>
-      <div class="faq-body-wrap"><div class="faq-body"><p>that still works and is more reliable, but it's slow (instagram emails it to you, can take a day) and the file format keeps changing. the bookmarklet is the fast version. if you'd rather use the export, it's in instagram's settings under "your activity → download your information".</p></div></div>
+      <div class="faq-body-wrap"><div class="faq-body"><p>that still works and is more reliable, but it's slow (instagram emails it to you, can take a day) and the file format keeps changing. the bookmarklet is the fast version.</p></div></div>
     </details>
-
   </div>
 </section>
 
@@ -752,85 +858,48 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   <p class="tagline">made because i was sick of third-party apps wanting my password.</p>
   <div class="footer-links">
     <a href="#">github</a>
-    <span class="sep">·</span>
+    <span class="sep">&middot;</span>
     <a href="#privacy">privacy is the whole point</a>
-    <span class="sep">·</span>
+    <span class="sep">&middot;</span>
     <span>2026</span>
   </div>
 </footer>
 
+<!-- Animated gradient background (ported from React AnimatedGradientBackground) -->
 <script>
 (()=>{
-const c=document.getElementById('shader-bg');
-if(!c)return;
-const gl=c.getContext('webgl');
-if(!gl)return;
-
-const vs=`attribute vec4 a;void main(){gl_Position=a;}`;
-const fs=`precision highp float;
-uniform vec2 R;uniform float T;
-const float S=0.2,gw=0.015,mw=0.025,nw=0.0125,mf=5.,nf=1.,sc=5.,
-lsp=1.*S,la=1.,lf=0.2,ws=0.2*S,wf=0.5,wa=1.,of2=0.5,os=1.33*S,
-mnO=0.6,mxO=2.,mnW=0.01,mxW=0.2;
-const int N=16;
-#define dSL(p,h,t) smoothstep(h,0.,abs(p-(t)))
-#define dCL(p,h,t) smoothstep(h+gw,h,abs(p-(t)))
-#define dC(p,r,c) smoothstep(r+gw,r,length(c-(p)))
-float rnd(float t){return(cos(t)+cos(t*1.3+1.3)+cos(t*1.4+1.4))/3.;}
-float gY(float x,float hf,float o){return rnd(x*lf+T*lsp)*hf*la+o;}
-void main(){
-vec2 uv=gl_FragCoord.xy/R;
-vec2 sp=(gl_FragCoord.xy-R/2.)/R.x*2.*sc;
-float hf=1.-(cos(uv.x*6.28)*.5+.5);
-float vf=1.-(cos(uv.y*6.28)*.5+.5);
-sp.y+=rnd(sp.x*wf+T*ws)*wa*(.5+hf);
-sp.x+=rnd(sp.y*wf+T*ws+2.)*wa*hf;
-vec4 L=vec4(0.);
-vec4 lc=vec4(0.55,0.15,0.65,1.);
-for(int l=0;l<N;l++){
-float ni=float(l)/float(N);
-float ot=T*os,op=float(l)+sp.x*of2;
-float r=rnd(op+ot)*.5+.5;
-float hw=mix(mnW,mxW,r*hf)/2.;
-float o=rnd(op+ot*(1.+ni))*mix(mnO,mxO,hf);
-float lp=gY(sp.x,hf,o);
-float li=dSL(lp,hw,sp.y)/2.+dCL(lp,hw*.15,sp.y);
-float cx=mod(float(l)+T*lsp,25.)-12.;
-vec2 cp=vec2(cx,gY(cx,hf,o));
-li+=dC(cp,.01,sp)*4.;
-L+=li*lc*r;
-}
-vec4 bg1=vec4(0.06,0.04,0.12,1.);
-vec4 bg2=vec4(0.18,0.06,0.28,1.);
-vec4 fc=mix(bg1,bg2,uv.x)*vf;
-fc.a=1.;fc+=L;
-gl_FragColor=fc;
-}`;
-
-function mk(t,s){const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS)){gl.deleteShader(sh);return null}return sh}
-const vsh=mk(gl.VERTEX_SHADER,vs),fsh=mk(gl.FRAGMENT_SHADER,fs);
-if(!vsh||!fsh)return;
-const pg=gl.createProgram();gl.attachShader(pg,vsh);gl.attachShader(pg,fsh);gl.linkProgram(pg);
-if(!gl.getProgramParameter(pg,gl.LINK_STATUS))return;
-const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
-gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
-const aL=gl.getAttribLocation(pg,'a'),rL=gl.getUniformLocation(pg,'R'),tL=gl.getUniformLocation(pg,'T');
-function resize(){c.width=window.innerWidth;c.height=window.innerHeight;gl.viewport(0,0,c.width,c.height)}
-window.addEventListener('resize',resize);resize();
-const t0=Date.now();
-function draw(){const t=(Date.now()-t0)/1000;gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT);gl.useProgram(pg);gl.uniform2f(rL,c.width,c.height);gl.uniform1f(tL,t);gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.vertexAttribPointer(aL,2,gl.FLOAT,false,0,0);gl.enableVertexAttribArray(aL);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(draw)}
-requestAnimationFrame(draw);
+  const el = document.getElementById('gradient-bg');
+  if (!el) return;
+  const colors = ['#08070b','#e1306c','#f77737','#833ab4','#405de6','#34c759','#e1306c'];
+  const stops = [35, 50, 60, 70, 80, 90, 100];
+  const startGap = 125;
+  const speed = 0.02;
+  const range = 5;
+  let width = startGap;
+  let dir = 1;
+  function tick() {
+    if (width >= startGap + range) dir = -1;
+    if (width <= startGap - range) dir = 1;
+    width += dir * speed;
+    const grad = stops.map((s,i) => colors[i]+' '+s+'%').join(', ');
+    el.style.background = 'radial-gradient('+width+'% '+(width)+'% at 50% 20%, '+grad+')';
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+  // Fade in
+  requestAnimationFrame(() => el.classList.add('visible'));
 })();
 </script>
+
+<!-- Results view JS -->
 <script>
 (()=>{
 'use strict';
 
-// ─── State ──────────────────────────────────────────────────────
 const state = {
-  followers: [],     // Array<{username, full_name, is_private}>
-  following: [],     // Array<{username, full_name, is_private}>
-  nonFol: [],        // Array<{username, full_name, href, is_private}>
+  followers: [],
+  following: [],
+  nonFol: [],
   filtered: [],
   q: '',
   sort: 'alpha',
@@ -857,7 +926,6 @@ const el = {
   empty:  $('#empty'),
 };
 
-// ─── Hash decode (mirror of b.js encodePayload) ─────────────────
 function base64ToBytes(b64){
   const s = atob(b64);
   const bytes = new Uint8Array(s.length);
@@ -887,7 +955,6 @@ async function decodePayload(s){
   return JSON.parse(new TextDecoder().decode(raw));
 }
 
-// ─── Dev mock ───────────────────────────────────────────────────
 function devMockPayload(){
   const followers = [];
   const following = [];
@@ -895,11 +962,9 @@ function devMockPayload(){
   for (let i = 0; i < names.length; i++){
     following.push({username: names[i], full_name: names[i].replace(/^./, c => c.toUpperCase()), is_private: i % 9 === 0});
   }
-  // Half the names also follow back; the other half don't.
   for (let i = 0; i < names.length; i += 2){
     followers.push({username: names[i], full_name: names[i].replace(/^./, c => c.toUpperCase()), is_private: false});
   }
-  // A few people follow you that you don't follow back.
   followers.push({username:'mystery_fan_42', full_name:'A Stranger', is_private:false});
   followers.push({username:'old_classmate', full_name:'', is_private:true});
   return {
@@ -911,7 +976,6 @@ function devMockPayload(){
   };
 }
 
-// ─── Compute + render ───────────────────────────────────────────
 function profileUrl(u){return 'https://www.instagram.com/' + encodeURIComponent(u) + '/'}
 
 function loadPayload(p){
@@ -919,7 +983,6 @@ function loadPayload(p){
   state.following = Array.isArray(p.following) ? p.following : [];
   state.partial = !!p.partial;
 
-  // Compute mutuals + not-following-back.
   const followerSet = new Set(state.followers.map(u => u.username.toLowerCase()));
   const mutuals = [];
   const nonFol = [];
@@ -931,7 +994,6 @@ function loadPayload(p){
   state.nonFol = nonFol;
   state.filtered = nonFol.slice();
 
-  // Banner
   if (state.partial){
     el.banner.innerHTML = '<strong>instagram throttled us at ' + state.followers.length.toLocaleString() + ' followers / ' + state.following.length.toLocaleString() + ' following.</strong> these are the ones we got. wait ~30 minutes, then click the bookmarklet again on instagram to resume.';
     el.banner.classList.add('show');
@@ -941,16 +1003,12 @@ function loadPayload(p){
   render();
   el.res.classList.add('show');
 
-  // Animate count-ups.
   anim(el.sf, state.followers.length);
   anim(el.sg, state.following.length);
   anim(el.sn, nonFol.length);
   anim(el.sm, mutuals.length);
 
-  // Hide marketing sections when results are shown.
   document.querySelectorAll('.how, .bm-section, .privacy, .faq').forEach(s => { s.style.display = 'none'; });
-
-  // Scroll into view.
   setTimeout(() => el.res.scrollIntoView({behavior:'smooth', block:'start'}), 80);
 }
 
@@ -1021,7 +1079,6 @@ function vRender(){
   el.spB.style.height = (Math.max(0, (filtered.length - ei) * IH)) + 'px';
   const f = document.createDocumentFragment();
   for (let i = si; i < ei; i++) f.appendChild(mkCard(filtered[i], i));
-  // Replace children without innerHTML to prevent scroll flicker
   el.inner.replaceChildren(f);
 }
 
@@ -1057,7 +1114,6 @@ function exportCSV(){
 function debounce(fn, ms){let t;return()=>{clearTimeout(t);t=setTimeout(fn, ms)}}
 
 async function init(){
-  // Wire up controls.
   const df = debounce(() => { state.q = el.q.value; el.qx.classList.toggle('on', !!state.q); filter(); }, 150);
   el.q.addEventListener('input', df);
   el.qx.addEventListener('click', () => { el.q.value=''; state.q=''; el.qx.classList.remove('on'); filter(); });
@@ -1065,7 +1121,6 @@ async function init(){
   el.list.addEventListener('scroll', () => { if (state.filtered.length > 200) requestAnimationFrame(vRender); });
   el.csv.addEventListener('click', exportCSV);
 
-  // Read hash for payload or dev-mock.
   const hash = window.location.hash || '';
 
   if (hash === '#dev-mock'){
@@ -1077,7 +1132,6 @@ async function init(){
     const encoded = hash.slice(6);
     try {
       const payload = await decodePayload(encoded);
-      // Clear hash from URL bar so it isn't sitting visible after landing.
       try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch(e) {}
       loadPayload(payload);
     } catch (e) {
@@ -1088,7 +1142,6 @@ async function init(){
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Set bookmarklet href from the hidden payload element (avoids all escaping issues).
   const bmLink = document.getElementById('bm-link');
   const bmCode = document.getElementById('bm-code');
   if (bmLink && bmCode) {
