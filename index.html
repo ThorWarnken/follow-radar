@@ -86,6 +86,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .cube-scene{
   perspective:1200px;width:160px;height:160px;
   margin:0 auto 2.5rem;position:relative;
+  padding-top:120px; /* space for cat sitting on top */
 }
 .cube{
   width:100%;height:100%;position:relative;
@@ -100,21 +101,19 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   0%,100%{translate:0 0}
   50%{translate:0 -12px}
 }
-/* Core fill behind rounded faces to seal gaps */
-.cube-core{
-  position:absolute;width:130px;height:130px;top:15px;left:15px;
+/* Solid inner cube to seal corner gaps - no border-radius */
+.cube-inner{
+  position:absolute;inset:6px;
   transform-style:preserve-3d;
 }
-.cube-core-face{position:absolute;width:130px;height:130px}
-.cube-core-face--fb{background:#b03070;width:130px;height:130px}
-.cube-core-face--fb.f{transform:translateZ(80px)}
-.cube-core-face--fb.b{transform:rotateY(180deg) translateZ(80px)}
-.cube-core-face--lr{background:#7030a0;width:160px;height:130px;left:-15px}
-.cube-core-face--lr.r{transform:rotateY(90deg) translateZ(80px)}
-.cube-core-face--lr.l{transform:rotateY(-90deg) translateZ(80px)}
-.cube-core-face--tb{background:#d06030;width:130px;height:160px;top:-15px}
-.cube-core-face--tb.t{transform:rotateX(90deg) translateZ(80px)}
-.cube-core-face--tb.bt{transform:rotateX(-90deg) translateZ(80px);background:#1a0830}
+.cube-inner-face{position:absolute;inset:0}
+.cube-inner-face--front{background:#c03070;transform:translateZ(74px)}
+.cube-inner-face--back{background:#c06030;transform:rotateY(180deg) translateZ(74px)}
+.cube-inner-face--right{background:#8030a0;transform:rotateY(90deg) translateZ(74px)}
+.cube-inner-face--left{background:#5030b0;transform:rotateY(-90deg) translateZ(74px)}
+.cube-inner-face--top{background:#e08030;transform:rotateX(90deg) translateZ(74px)}
+.cube-inner-face--bottom{background:#1a0830;transform:rotateX(-90deg) translateZ(74px)}
+/* Outer rounded faces */
 .cube-face{
   position:absolute;width:160px;height:160px;
   border-radius:32px;
@@ -148,12 +147,13 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   animation:cube-float 6s ease-in-out infinite;
 }
 
-/* Glitter the cat - Lottie animation */
+/* Glitter the cat - sits on top of the cube */
 .glitter{
   position:absolute;z-index:10;
-  bottom:-20px;right:-90px;
-  width:140px;height:140px;
-  filter:drop-shadow(0 6px 20px rgba(225,48,108,0.3));
+  top:-100px;left:50%;transform:translateX(-50%);
+  width:160px;height:140px;
+  filter:drop-shadow(0 8px 24px rgba(225,48,108,0.3));
+  animation:cube-float 6s ease-in-out infinite;
 }
 .glitter dotlottie-player{width:100%;height:100%}
 
@@ -562,7 +562,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 @media(max-width:768px){
   .hero{min-height:90vh;padding:1.5rem}
   .hero h1{font-size:clamp(2.2rem,10vw,3.5rem)}
-  .cube-scene{width:120px;height:120px}
+  .cube-scene{width:120px;height:120px;padding-top:90px}
   .cube-face{width:120px;height:120px;border-radius:24px}
   .cube-face--front{transform:translateZ(60px)}
   .cube-face--back{transform:rotateY(180deg) translateZ(60px)}
@@ -570,18 +570,13 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   .cube-face--left{transform:rotateY(-90deg) translateZ(60px)}
   .cube-face--top{transform:rotateX(90deg) translateZ(60px)}
   .cube-face--bottom{transform:rotateX(-90deg) translateZ(60px)}
-  .cube-core-face{width:100px;height:100px}
-  .cube-core{width:100px;height:100px;top:10px;left:10px}
-  .cube-core-face--fb{width:100px;height:100px}
-  .cube-core-face--fb.f{transform:translateZ(60px)}
-  .cube-core-face--fb.b{transform:rotateY(180deg) translateZ(60px)}
-  .cube-core-face--lr{width:120px;height:100px;left:-10px}
-  .cube-core-face--lr.r{transform:rotateY(90deg) translateZ(60px)}
-  .cube-core-face--lr.l{transform:rotateY(-90deg) translateZ(60px)}
-  .cube-core-face--tb{width:100px;height:120px;top:-10px}
-  .cube-core-face--tb.t{transform:rotateX(90deg) translateZ(60px)}
-  .cube-core-face--tb.bt{transform:rotateX(-90deg) translateZ(60px)}
-  .glitter{width:100px;height:100px;right:-60px}
+  .cube-inner-face--front{transform:translateZ(54px)}
+  .cube-inner-face--back{transform:rotateY(180deg) translateZ(54px)}
+  .cube-inner-face--right{transform:rotateY(90deg) translateZ(54px)}
+  .cube-inner-face--left{transform:rotateY(-90deg) translateZ(54px)}
+  .cube-inner-face--top{transform:rotateX(90deg) translateZ(54px)}
+  .cube-inner-face--bottom{transform:rotateX(-90deg) translateZ(54px)}
+  .glitter{width:120px;height:110px;top:-80px}
   .section{padding:3rem 1.25rem}
   .card{padding:0.85rem 1rem}
   .card-link{width:40px;height:40px}
@@ -624,14 +619,14 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
     <div class="cube-glow"></div>
     <!-- 3D cube -->
     <div class="cube">
-      <!-- Inner core panels to seal gaps between rounded faces -->
-      <div class="cube-core">
-        <div class="cube-core-face cube-core-face--fb f"></div>
-        <div class="cube-core-face cube-core-face--fb b"></div>
-        <div class="cube-core-face cube-core-face--lr r"></div>
-        <div class="cube-core-face cube-core-face--lr l"></div>
-        <div class="cube-core-face cube-core-face--tb t"></div>
-        <div class="cube-core-face cube-core-face--tb bt"></div>
+      <!-- Solid inner cube to seal corner gaps -->
+      <div class="cube-inner">
+        <div class="cube-inner-face cube-inner-face--front"></div>
+        <div class="cube-inner-face cube-inner-face--back"></div>
+        <div class="cube-inner-face cube-inner-face--right"></div>
+        <div class="cube-inner-face cube-inner-face--left"></div>
+        <div class="cube-inner-face cube-inner-face--top"></div>
+        <div class="cube-inner-face cube-inner-face--bottom"></div>
       </div>
       <div class="cube-face cube-face--front">
         <div class="ig-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="#fff" stroke="none"/></svg></div>
