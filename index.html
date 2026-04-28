@@ -162,8 +162,8 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .glitter svg{width:100%;height:100%}
 
 /* tail wag */
-.cat-tail{transform-origin:55px 65px;animation:tail-wag 1.5s ease-in-out infinite alternate}
-@keyframes tail-wag{0%{transform:rotate(-12deg)}100%{transform:rotate(12deg)}}
+.cat-tail{transform-origin:72px 72px;animation:tail-wag 1.5s ease-in-out infinite alternate}
+@keyframes tail-wag{0%{transform:rotate(-10deg)}100%{transform:rotate(10deg)}}
 
 .hero-tag{
   display:inline-flex;align-items:center;gap:7px;
@@ -627,34 +627,55 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 <!-- HERO -->
 <section class="hero">
   <div class="cube-scene">
-    <!-- Glitter the cat - flat pink silhouette (matches 21st.dev reference) -->
+    <!-- Glitter the cat -->
     <div class="glitter">
-      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- tail -->
-        <path class="cat-tail" d="M58 62 C72 55, 80 40, 75 25 C73 18, 68 16, 65 20" stroke="#e84090" stroke-width="6" stroke-linecap="round" fill="none"/>
-        <!-- body -->
-        <path d="M25 88 C25 60, 30 55, 40 50 C50 55, 55 60, 55 88 Z" fill="#e84090"/>
-        <!-- head -->
-        <circle cx="40" cy="40" r="18" fill="#e84090"/>
-        <!-- left ear -->
-        <path d="M26 30 L20 12 L36 26 Z" fill="#e84090"/>
-        <path d="M28 28 L24 16 L34 26 Z" fill="#c03070"/>
-        <!-- right ear -->
-        <path d="M54 30 L60 12 L44 26 Z" fill="#e84090"/>
-        <path d="M52 28 L56 16 L46 26 Z" fill="#c03070"/>
-        <!-- eyes -->
-        <circle cx="33" cy="38" r="3" fill="#1a1020"/>
-        <circle cx="47" cy="38" r="3" fill="#1a1020"/>
-        <circle cx="34" cy="37" r="1.2" fill="#fff"/>
-        <circle cx="48" cy="37" r="1.2" fill="#fff"/>
-        <!-- front paws -->
-        <ellipse cx="32" cy="88" rx="8" ry="4" fill="#e84090"/>
-        <ellipse cx="48" cy="88" rx="8" ry="4" fill="#e84090"/>
+      <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- tail - thick, dark, curves up and back elegantly -->
+        <path class="cat-tail" d="M72 72 C88 62, 95 42, 88 26 C84 18, 76 16, 74 22" stroke="#2a2a3e" stroke-width="7" stroke-linecap="round" fill="none"/>
+        <!-- back leg hint -->
+        <ellipse cx="62" cy="94" rx="12" ry="7" fill="#d83888"/>
+        <!-- body - round, sitting upright -->
+        <path d="M28 96 C28 68, 32 58, 48 48 C64 58, 68 68, 68 96 Z" fill="#e84090"/>
+        <!-- belly/chest - white area -->
+        <path d="M36 96 C36 76, 40 66, 48 60 C56 66, 60 76, 60 96 Z" fill="#f8f0f4" opacity="0.85"/>
+        <!-- head - round -->
+        <circle cx="48" cy="38" r="20" fill="#e84090"/>
+        <!-- left ear outer -->
+        <path d="M32 28 L24 6 L42 24 Z" fill="#e84090"/>
+        <!-- left ear inner -->
+        <path d="M34 26 L28 12 L40 24 Z" fill="#c03070"/>
+        <!-- right ear outer -->
+        <path d="M64 28 L72 6 L54 24 Z" fill="#e84090"/>
+        <!-- right ear inner -->
+        <path d="M62 26 L68 12 L56 24 Z" fill="#c03070"/>
+        <!-- eyes - round, expressive -->
+        <circle cx="40" cy="36" r="4" fill="#1a1020"/>
+        <circle cx="56" cy="36" r="4" fill="#1a1020"/>
+        <!-- eye highlights -->
+        <circle cx="41.5" cy="34.5" r="1.8" fill="#fff"/>
+        <circle cx="57.5" cy="34.5" r="1.8" fill="#fff"/>
+        <circle cx="39" cy="37.5" r="0.8" fill="#fff" opacity="0.5"/>
+        <circle cx="55" cy="37.5" r="0.8" fill="#fff" opacity="0.5"/>
+        <!-- nose - small triangle -->
+        <path d="M46.5 42 L48 44 L49.5 42 Z" fill="#c03070"/>
+        <!-- mouth -->
+        <path d="M45 45 Q48 47.5 51 45" stroke="#c03070" stroke-width="0.8" stroke-linecap="round" fill="none"/>
         <!-- whiskers -->
-        <line x1="15" y1="42" x2="30" y2="42" stroke="#f5a0c0" stroke-width="0.7" opacity="0.5"/>
-        <line x1="15" y1="46" x2="30" y2="44" stroke="#f5a0c0" stroke-width="0.7" opacity="0.5"/>
-        <line x1="50" y1="42" x2="65" y2="42" stroke="#f5a0c0" stroke-width="0.7" opacity="0.5"/>
-        <line x1="50" y1="44" x2="65" y2="46" stroke="#f5a0c0" stroke-width="0.7" opacity="0.5"/>
+        <line x1="18" y1="40" x2="36" y2="41" stroke="#f5a0c0" stroke-width="0.8" opacity="0.5"/>
+        <line x1="16" y1="44" x2="36" y2="44" stroke="#f5a0c0" stroke-width="0.8" opacity="0.5"/>
+        <line x1="18" y1="48" x2="36" y2="46" stroke="#f5a0c0" stroke-width="0.8" opacity="0.5"/>
+        <line x1="60" y1="41" x2="78" y2="40" stroke="#f5a0c0" stroke-width="0.8" opacity="0.5"/>
+        <line x1="60" y1="44" x2="80" y2="44" stroke="#f5a0c0" stroke-width="0.8" opacity="0.5"/>
+        <line x1="60" y1="46" x2="78" y2="48" stroke="#f5a0c0" stroke-width="0.8" opacity="0.5"/>
+        <!-- front paws -->
+        <ellipse cx="38" cy="96" rx="10" ry="5" fill="#e84090"/>
+        <ellipse cx="58" cy="96" rx="10" ry="5" fill="#e84090"/>
+        <!-- paw toe lines -->
+        <path d="M34 96 v2 M38 96 v2.5 M42 96 v2" stroke="#c03070" stroke-width="0.8" stroke-linecap="round" opacity="0.5"/>
+        <path d="M54 96 v2 M58 96 v2.5 M62 96 v2" stroke="#c03070" stroke-width="0.8" stroke-linecap="round" opacity="0.5"/>
+        <!-- cheek blush -->
+        <circle cx="34" cy="43" r="3.5" fill="#f06090" opacity="0.35"/>
+        <circle cx="62" cy="43" r="3.5" fill="#f06090" opacity="0.35"/>
       </svg>
     </div>
     <div class="cube-glow"></div>
