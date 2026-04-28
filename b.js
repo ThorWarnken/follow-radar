@@ -18,8 +18,8 @@
   'use strict';
 
   const MAX_ACCOUNT_SIZE = 10000;
-  const THROTTLE_MS = 1500;
-  const THROTTLE_JITTER_MS = 500;
+  const THROTTLE_MS = 800;
+  const THROTTLE_JITTER_MS = 300;
   const PAGE_SIZE = 200;
   const IG_APP_ID = '936619743392459';
   const RESUME_MAX_AGE_MS = 24 * 60 * 60 * 1000;
@@ -330,24 +330,49 @@
 
   function createOverlay() {
     if (overlayEl) return;
+    // Outer wrapper with gradient border effect
     overlayEl = document.createElement('div');
     overlayEl.setAttribute('style', [
       'position:fixed','bottom:24px','right:24px','z-index:2147483647',
-      'background:#fff','color:#1a1a2e','padding:14px 18px',
-      'border-radius:14px','box-shadow:0 12px 40px rgba(225,48,108,0.18)',
+      'padding:2px','border-radius:18px',
+      'background:linear-gradient(135deg,#f77737,#e1306c,#833ab4)',
+      'box-shadow:0 12px 48px rgba(225,48,108,0.25),0 4px 12px rgba(131,58,180,0.15)',
       'font:600 13px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
-      'min-width:240px','border:1px solid rgba(225,48,108,0.18)',
+      'min-width:260px','animation:fr-fadein 0.3s ease',
     ].join(';'));
+    // Inner card
+    const inner = document.createElement('div');
+    inner.setAttribute('style', [
+      'background:#fff','border-radius:16px','padding:16px 20px','color:#1a1a2e',
+    ].join(';'));
+    // Header row with radar icon + title
+    const header = document.createElement('div');
+    header.setAttribute('style', 'display:flex;align-items:center;gap:10px;margin-bottom:10px');
+    const icon = document.createElement('div');
+    icon.innerHTML = '<svg width="28" height="28" viewBox="0 0 100 100"><defs><linearGradient id="fg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f77737"/><stop offset="50%" stop-color="#e1306c"/><stop offset="100%" stop-color="#833ab4"/></linearGradient></defs><circle cx="50" cy="50" r="45" fill="url(#fg)"/><circle cx="50" cy="50" r="8" fill="white"/><circle cx="50" cy="50" r="22" fill="none" stroke="white" stroke-width="4" opacity="0.7"/><circle cx="50" cy="50" r="36" fill="none" stroke="white" stroke-width="3" opacity="0.4"/></svg>';
+    const title = document.createElement('div');
+    title.setAttribute('style', 'font-weight:900;font-size:14px;letter-spacing:-0.01em');
+    title.textContent = 'follow radar';
+    header.appendChild(icon);
+    header.appendChild(title);
+    inner.appendChild(header);
+    // Status text
     overlayTextEl = document.createElement('div');
-    overlayTextEl.textContent = 'Starting…';
-    overlayTextEl.style.marginBottom = '8px';
-    overlayEl.appendChild(overlayTextEl);
+    overlayTextEl.textContent = 'Starting\u2026';
+    overlayTextEl.setAttribute('style', 'margin-bottom:10px;font-size:12.5px;color:#555570');
+    inner.appendChild(overlayTextEl);
+    // Progress bar
     const track = document.createElement('div');
-    track.setAttribute('style', 'height:4px;background:rgba(0,0,0,0.06);border-radius:2px;overflow:hidden');
+    track.setAttribute('style', 'height:6px;background:rgba(0,0,0,0.06);border-radius:3px;overflow:hidden');
     overlayBarEl = document.createElement('div');
-    overlayBarEl.setAttribute('style', 'height:100%;width:0%;background:linear-gradient(90deg,#f77737,#e1306c,#833ab4);transition:width 0.3s ease');
+    overlayBarEl.setAttribute('style', 'height:100%;width:0%;background:linear-gradient(90deg,#f77737,#e1306c,#833ab4);border-radius:3px;transition:width 0.4s cubic-bezier(0.16,1,0.3,1)');
     track.appendChild(overlayBarEl);
-    overlayEl.appendChild(track);
+    inner.appendChild(track);
+    overlayEl.appendChild(inner);
+    // Inject keyframe animation
+    const style = document.createElement('style');
+    style.textContent = '@keyframes fr-fadein{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}';
+    document.head.appendChild(style);
     document.body.appendChild(overlayEl);
   }
 
