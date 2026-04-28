@@ -327,8 +327,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   padding:4rem 3rem;
   border-radius:var(--radius-xl);
   background:#161420;
-  box-shadow:0 8px 40px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.05);
-  box-shadow:0 20px 80px rgba(225,48,108,0.06);
+  box-shadow:0 8px 40px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.05),0 20px 80px rgba(225,48,108,0.06);
 }
 .bm-card::before{
   content:'';position:absolute;inset:0;border-radius:var(--radius-xl);
@@ -840,7 +839,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
     <h2>your bookmarklet.</h2>
     <p class="bm-sub">drag this button up to your bookmarks bar. that's the install.</p>
 
-    <a class="bm-button" id="bm-link" href="javascript:void(0)">
+    <a class="bm-button" id="bm-link" href="javascript:void(0)" aria-label="Only Followers bookmarklet - drag to bookmarks bar">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
       Only Followers
     </a>
@@ -1019,7 +1018,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 <footer class="footer">
   <p class="tagline">made because i was sick of third-party apps wanting my password.</p>
   <div class="footer-links">
-    <a href="#">github</a>
+    <a href="https://github.com/ThorWarnken/follow-radar" target="_blank" rel="noopener">github</a>
     <span class="sep">&middot;</span>
     <a href="#privacy-policy">privacy policy</a>
     <span class="sep">&middot;</span>
@@ -1045,13 +1044,14 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
     <p>payments are processed by <a href="https://stripe.com/privacy" target="_blank" rel="noopener">Stripe</a>. when you click a pricing option, you are redirected to Stripe's hosted checkout page. we never see, handle, or store your payment information (credit card numbers, billing address, etc.). Stripe's privacy policy governs how they handle your payment data.</p>
 
     <h3>cookies and tracking</h3>
-    <p>we do not use cookies, analytics, tracking pixels, or any third-party scripts beyond the fonts loaded from Google Fonts. we do not run Google Analytics, Facebook Pixel, or any similar service.</p>
+    <p>we do not use cookies, analytics, or tracking pixels. we do not run Google Analytics, Facebook Pixel, or any similar service. we load fonts from Google Fonts, an animation player from unpkg, and a decorative animation from lottie.host (see third-party services below).</p>
 
     <h3>third-party services</h3>
     <ul>
       <li><strong>Google Fonts</strong> — loads the Outfit and DM Sans typefaces. subject to <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a>.</li>
       <li><strong>Stripe</strong> — processes payments. subject to <a href="https://stripe.com/privacy" target="_blank" rel="noopener">Stripe's privacy policy</a>.</li>
       <li><strong>GitHub Pages</strong> — hosts this website. subject to <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">GitHub's privacy statement</a>.</li>
+      <li><strong>unpkg / lottie.host</strong> — loads a decorative cat animation. no user data is sent.</li>
     </ul>
 
     <h3>children</h3>
@@ -1402,13 +1402,24 @@ async function init(){
     });
   });
 
+  // Restore saved results and unlock
+  function unlockAndRestore(type) {
+    setUnlocked(type);
+    let saved;
+    try { saved = JSON.parse(localStorage.getItem(RESULTS_KEY)); } catch(e) {}
+    if (saved && saved.followers && saved.following) {
+      loadPayload(saved);
+    } else {
+      render();
+    }
+  }
+
   // When user returns to this tab after paying, unlock automatically
   function checkPendingPayment() {
     const pending = localStorage.getItem('follow-radar:pending-plan');
     if (pending && ['scan', 'monthly', 'yearly'].includes(pending)) {
       localStorage.removeItem('follow-radar:pending-plan');
-      setUnlocked(pending);
-      render();
+      unlockAndRestore(pending);
     }
   }
   document.addEventListener('visibilitychange', () => {
@@ -1420,10 +1431,9 @@ async function init(){
   if (paidBtn) {
     paidBtn.addEventListener('click', () => {
       const pending = localStorage.getItem('follow-radar:pending-plan');
-      const type = pending || 'scan';
+      if (!pending) return; // only works if they clicked a pricing card first
       localStorage.removeItem('follow-radar:pending-plan');
-      setUnlocked(type);
-      render();
+      unlockAndRestore(pending);
     });
   }
 
@@ -1448,6 +1458,16 @@ async function init(){
     } catch (e) {
       console.error('[follow radar] could not decode hash payload:', e);
       alert('Could not read results from URL: ' + e.message);
+    }
+    return;
+  }
+
+  // No hash — try to restore saved results (e.g. after page reload)
+  if (isUnlocked()) {
+    let saved;
+    try { saved = JSON.parse(localStorage.getItem(RESULTS_KEY)); } catch(e) {}
+    if (saved && saved.followers && saved.following) {
+      loadPayload(saved);
     }
   }
 }
