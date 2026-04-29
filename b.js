@@ -442,7 +442,7 @@
     const header = document.createElement('div');
     header.setAttribute('style', 'display:flex;align-items:center;gap:10px;margin-bottom:10px');
     const icon = document.createElement('div');
-    icon.innerHTML = '<svg width="28" height="28" viewBox="0 0 100 100"><defs><linearGradient id="fg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f77737"/><stop offset="50%" stop-color="#e1306c"/><stop offset="100%" stop-color="#833ab4"/></linearGradient></defs><circle cx="50" cy="50" r="45" fill="url(#fg)"/><circle cx="50" cy="50" r="8" fill="white"/><circle cx="50" cy="50" r="22" fill="none" stroke="white" stroke-width="4" opacity="0.7"/><circle cx="50" cy="50" r="36" fill="none" stroke="white" stroke-width="3" opacity="0.4"/></svg>';
+    icon.innerHTML = '<svg width="28" height="28" viewBox="0 0 32 32"><defs><linearGradient id="fr-bird-g" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#f77737"/><stop offset="50%" stop-color="#e1306c"/><stop offset="100%" stop-color="#833ab4"/></linearGradient></defs><path d="M26 7C26 7 29 4 27 3C25 2 22 5 19 8C16 5 13 2 11 3C9 4 12 7 12 7L8 11C6 13 5 16 6 19L3 22L5 24L8 21C11 23 15 23 18 21L22 17C24 15 25 12 24 9L26 7ZM15 18C13.5 18 12 16.5 12 15C12 13.5 13.5 12 15 12C16.5 12 18 13.5 18 15C18 16.5 16.5 18 15 18Z" fill="url(#fr-bird-g)"/></svg>';
     const title = document.createElement('div');
     title.setAttribute('style', 'font-weight:900;font-size:14px;letter-spacing:-0.01em');
     title.textContent = 'Flock';
