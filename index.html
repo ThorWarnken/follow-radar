@@ -148,54 +148,75 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 }
 .hero-trust svg{width:14px;height:14px;color:var(--green)}
 
-/* Hero visual */
-.hero-visual{
-  position:relative;width:100%;max-width:400px;aspect-ratio:1;
-  display:flex;align-items:center;justify-content:center;
+/* Hero phone mockup */
+.hero-phone{
+  position:relative;width:100%;max-width:300px;
 }
-.hero-visual::before{
-  content:'';position:absolute;inset:15%;
-  background:radial-gradient(circle,rgba(99,102,241,0.2) 0%,rgba(217,70,239,0.08) 50%,transparent 70%);
-  border-radius:50%;filter:blur(40px);
-  animation:hero-glow 4s ease-in-out infinite alternate;
-}
-@keyframes hero-glow{
-  0%{opacity:0.6;transform:scale(0.95)}
-  100%{opacity:1;transform:scale(1.05)}
-}
-.hero-bird{
-  width:65%;height:65%;position:relative;z-index:1;
-  filter:drop-shadow(0 0 30px rgba(99,102,241,0.3));
-  animation:hero-float 6s ease-in-out infinite;
-}
-@keyframes hero-float{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-12px)}
-}
-/* Floating stat pills */
-.hero-pill{
-  position:absolute;z-index:2;
-  display:flex;align-items:center;gap:8px;
-  padding:10px 16px;border-radius:var(--radius-pill);
+.hero-phone-frame{
   background:var(--bg-card);border:1px solid var(--border);
-  box-shadow:0 8px 32px rgba(0,0,0,0.3);
-  font-family:var(--font);font-weight:600;font-size:0.8rem;
-  white-space:nowrap;
-  animation:pill-float 5s ease-in-out infinite;
+  border-radius:32px;padding:12px;
+  box-shadow:0 24px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(99,102,241,0.08),0 0 60px rgba(99,102,241,0.1);
 }
-.hero-pill svg{width:16px;height:16px;flex-shrink:0}
-.hero-pill-1{top:8%;left:0;animation-delay:0s}
-.hero-pill-2{top:42%;right:-10px;animation-delay:1.2s}
-.hero-pill-3{bottom:12%;left:5%;animation-delay:2.4s}
-@keyframes pill-float{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-8px)}
+.hero-phone-notch{
+  width:100px;height:24px;background:var(--bg);
+  border-radius:0 0 16px 16px;margin:0 auto 16px;
 }
-.pill-num{
-  font-weight:800;font-size:0.85rem;
+.hero-phone-content{
+  background:var(--bg);border-radius:20px;padding:20px 16px;
+  min-height:360px;display:flex;flex-direction:column;
+}
+.hero-phone-header{
+  display:flex;align-items:center;gap:10px;margin-bottom:20px;
+}
+.hero-phone-header img{width:28px;height:28px}
+.hero-phone-title{font-family:var(--font);font-weight:700;font-size:0.95rem}
+.hero-phone-stats{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;
+}
+.hero-stat{
+  padding:12px;border-radius:var(--radius);
+  border:1px solid var(--border);text-align:center;
+}
+.hero-stat-num{
+  font-family:var(--font);font-weight:800;font-size:1.3rem;
   background:var(--gradient-primary);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  background-clip:text;
+  background-clip:text;line-height:1.2;
+}
+.hero-stat-label{font-size:0.65rem;color:var(--text-muted);margin-top:2px}
+.hero-phone-rows{flex:1;display:flex;flex-direction:column;gap:0}
+.hero-phone-row{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 0;border-bottom:1px solid rgba(42,47,71,0.4);
+}
+.hero-phone-row:last-child{border-bottom:none}
+.hero-phone-av{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font);font-weight:700;font-size:0.75rem;color:#fff;
+}
+.hero-phone-user{font-family:var(--font);font-weight:600;font-size:0.8rem;flex:1;min-width:0}
+.hero-phone-tag{
+  font-size:0.6rem;font-weight:600;padding:3px 8px;border-radius:var(--radius-pill);
+  background:rgba(217,70,239,0.12);color:#D946EF;
+}
+/* Floating accents around phone */
+.hero-phone::before,.hero-phone::after{
+  content:'';position:absolute;border-radius:50%;pointer-events:none;
+}
+.hero-phone::before{
+  width:200px;height:200px;top:-40px;right:-60px;
+  background:radial-gradient(circle,rgba(99,102,241,0.12),transparent 70%);
+  animation:hero-orb 6s ease-in-out infinite;
+}
+.hero-phone::after{
+  width:160px;height:160px;bottom:-30px;left:-50px;
+  background:radial-gradient(circle,rgba(217,70,239,0.1),transparent 70%);
+  animation:hero-orb 6s ease-in-out 3s infinite;
+}
+@keyframes hero-orb{
+  0%,100%{transform:translate(0,0) scale(1)}
+  50%{transform:translate(8px,-8px) scale(1.1)}
 }
 
 @media(max-width:768px){
@@ -790,21 +811,50 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
     </div>
   </div>
   <div class="hero-right">
-    <div class="hero-visual">
-      <img src="bird-logo.svg" alt="Flock" class="hero-bird">
-      <div class="hero-pill hero-pill-1">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-        <span>Followers</span>
-        <span class="pill-num">1,247</span>
-      </div>
-      <div class="hero-pill hero-pill-2">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#D946EF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
-        <span>Not following back</span>
-        <span class="pill-num">72</span>
-      </div>
-      <div class="hero-pill hero-pill-3">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#34c759" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>Private scan</span>
+    <div class="hero-phone">
+      <div class="hero-phone-frame">
+        <div class="hero-phone-notch"></div>
+        <div class="hero-phone-content">
+          <div class="hero-phone-header">
+            <img src="bird-logo.svg" alt="">
+            <div class="hero-phone-title">Flock Results</div>
+          </div>
+          <div class="hero-phone-stats">
+            <div class="hero-stat">
+              <div class="hero-stat-num">1,247</div>
+              <div class="hero-stat-label">Followers</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-num">72</div>
+              <div class="hero-stat-label">Don't follow back</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-num">1,175</div>
+              <div class="hero-stat-label">Mutuals</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-num">1,319</div>
+              <div class="hero-stat-label">Following</div>
+            </div>
+          </div>
+          <div class="hero-phone-rows">
+            <div class="hero-phone-row">
+              <div class="hero-phone-av" style="background:linear-gradient(135deg,#6366F1,#818CF8)">J</div>
+              <div class="hero-phone-user">@jake_designs</div>
+              <div class="hero-phone-tag">Not following</div>
+            </div>
+            <div class="hero-phone-row">
+              <div class="hero-phone-av" style="background:linear-gradient(135deg,#D946EF,#E879F9)">M</div>
+              <div class="hero-phone-user">@maya.creates</div>
+              <div class="hero-phone-tag">Not following</div>
+            </div>
+            <div class="hero-phone-row">
+              <div class="hero-phone-av" style="background:linear-gradient(135deg,#6366F1,#D946EF)">R</div>
+              <div class="hero-phone-user">@riley_photo</div>
+              <div class="hero-phone-tag">Not following</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
