@@ -423,48 +423,61 @@
 
   function createOverlay() {
     if (overlayEl) return;
-    // Outer wrapper with gradient border effect
+    // Outer wrapper — gradient border via padding trick
     overlayEl = document.createElement('div');
     overlayEl.setAttribute('style', [
       'position:fixed','bottom:24px','right:24px','z-index:2147483647',
-      'padding:2px','border-radius:18px',
-      'background:linear-gradient(135deg,#f77737,#e1306c,#833ab4)',
-      'box-shadow:0 12px 48px rgba(225,48,108,0.25),0 4px 12px rgba(131,58,180,0.15)',
-      'font:600 13px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
-      'min-width:260px','animation:fr-fadein 0.3s ease',
+      'padding:1.5px','border-radius:16px',
+      'background:linear-gradient(135deg,#6366F1,#D946EF)',
+      'box-shadow:0 8px 40px rgba(0,0,0,0.4),0 0 24px rgba(99,102,241,0.25)',
+      'font:500 13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
+      'min-width:280px','animation:fr-fadein 0.4s cubic-bezier(0.16,1,0.3,1)',
     ].join(';'));
-    // Inner card
+    // Inner dark card
     const inner = document.createElement('div');
     inner.setAttribute('style', [
-      'background:#fff','border-radius:16px','padding:16px 20px','color:#1a1a2e',
+      'background:#0F142B','border-radius:14.5px','padding:16px 20px','color:#FFFFFF',
     ].join(';'));
-    // Header row with radar icon + title
+    // Header row — bird icon + title + scanning dot
     const header = document.createElement('div');
-    header.setAttribute('style', 'display:flex;align-items:center;gap:10px;margin-bottom:10px');
-    const icon = document.createElement('div');
-    icon.innerHTML = '<svg width="28" height="28" viewBox="0 0 32 32"><defs><linearGradient id="fr-bird-g" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#f77737"/><stop offset="50%" stop-color="#e1306c"/><stop offset="100%" stop-color="#833ab4"/></linearGradient></defs><path d="M26 7C26 7 29 4 27 3C25 2 22 5 19 8C16 5 13 2 11 3C9 4 12 7 12 7L8 11C6 13 5 16 6 19L3 22L5 24L8 21C11 23 15 23 18 21L22 17C24 15 25 12 24 9L26 7ZM15 18C13.5 18 12 16.5 12 15C12 13.5 13.5 12 15 12C16.5 12 18 13.5 18 15C18 16.5 16.5 18 15 18Z" fill="url(#fr-bird-g)"/></svg>';
+    header.setAttribute('style', 'display:flex;align-items:center;gap:10px;margin-bottom:12px');
+    // Bird icon in a soft gradient circle
+    const iconWrap = document.createElement('div');
+    iconWrap.setAttribute('style', 'width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(217,70,239,0.1));display:flex;align-items:center;justify-content:center;flex-shrink:0');
+    iconWrap.innerHTML = '<svg width="22" height="22" viewBox="0 0 32 32"><defs><linearGradient id="fr-bird-g" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#6366F1"/><stop offset="100%" stop-color="#D946EF"/></linearGradient></defs><path d="M26 7C26 7 29 4 27 3C25 2 22 5 19 8C16 5 13 2 11 3C9 4 12 7 12 7L8 11C6 13 5 16 6 19L3 22L5 24L8 21C11 23 15 23 18 21L22 17C24 15 25 12 24 9L26 7ZM15 18C13.5 18 12 16.5 12 15C12 13.5 13.5 12 15 12C16.5 12 18 13.5 18 15C18 16.5 16.5 18 15 18Z" fill="url(#fr-bird-g)"/></svg>';
+    const titleCol = document.createElement('div');
+    titleCol.setAttribute('style', 'flex:1;min-width:0');
     const title = document.createElement('div');
-    title.setAttribute('style', 'font-weight:900;font-size:14px;letter-spacing:-0.01em');
+    title.setAttribute('style', 'font-weight:700;font-size:14px;letter-spacing:-0.01em;color:#fff');
     title.textContent = 'Flock';
-    header.appendChild(icon);
-    header.appendChild(title);
+    const subtitle = document.createElement('div');
+    subtitle.setAttribute('style', 'font-size:11px;color:#667085;margin-top:1px');
+    subtitle.textContent = 'Scanning your account';
+    titleCol.appendChild(title);
+    titleCol.appendChild(subtitle);
+    // Pulsing live dot
+    const dot = document.createElement('div');
+    dot.setAttribute('style', 'width:8px;height:8px;border-radius:50%;background:#34c759;flex-shrink:0;animation:fr-pulse 1.5s ease-in-out infinite');
+    header.appendChild(iconWrap);
+    header.appendChild(titleCol);
+    header.appendChild(dot);
     inner.appendChild(header);
     // Status text
     overlayTextEl = document.createElement('div');
     overlayTextEl.textContent = 'Starting\u2026';
-    overlayTextEl.setAttribute('style', 'margin-bottom:10px;font-size:12.5px;color:#555570');
+    overlayTextEl.setAttribute('style', 'margin-bottom:12px;font-size:12.5px;color:#EEF0FF;font-variant-numeric:tabular-nums');
     inner.appendChild(overlayTextEl);
     // Progress bar
     const track = document.createElement('div');
-    track.setAttribute('style', 'height:6px;background:rgba(0,0,0,0.06);border-radius:3px;overflow:hidden');
+    track.setAttribute('style', 'height:4px;background:rgba(99,102,241,0.12);border-radius:2px;overflow:hidden');
     overlayBarEl = document.createElement('div');
-    overlayBarEl.setAttribute('style', 'height:100%;width:0%;background:linear-gradient(90deg,#f77737,#e1306c,#833ab4);border-radius:3px;transition:width 0.4s cubic-bezier(0.16,1,0.3,1)');
+    overlayBarEl.setAttribute('style', 'height:100%;width:0%;background:linear-gradient(90deg,#6366F1,#D946EF);border-radius:2px;transition:width 0.4s cubic-bezier(0.16,1,0.3,1)');
     track.appendChild(overlayBarEl);
     inner.appendChild(track);
     overlayEl.appendChild(inner);
-    // Inject keyframe animation
+    // Inject animations
     const style = document.createElement('style');
-    style.textContent = '@keyframes fr-fadein{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}';
+    style.textContent = '@keyframes fr-fadein{from{opacity:0;transform:translateY(16px) scale(0.96)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes fr-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.85)}}';
     document.head.appendChild(style);
     document.body.appendChild(overlayEl);
   }
