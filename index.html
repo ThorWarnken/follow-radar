@@ -3,48 +3,47 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Only Followers - who's not following you back?</title>
+<title>Flock - See who's not following back</title>
 <meta name="description" content="Find out who doesn't follow you back on Instagram. Private, runs entirely in your browser.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%25' stop-color='%23f77737'/><stop offset='50%25' stop-color='%23e1306c'/><stop offset='100%25' stop-color='%23833ab4'/></linearGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23g)'/><circle cx='50' cy='50' r='8' fill='white'/><circle cx='50' cy='50' r='22' fill='none' stroke='white' stroke-width='4' opacity='0.7'/><circle cx='50' cy='50' r='36' fill='none' stroke='white' stroke-width='3' opacity='0.4'/></svg>">
-<script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%25' stop-color='%236366F1'/><stop offset='100%25' stop-color='%23D946EF'/></linearGradient></defs><path d='M75 25C75 25 85 15 80 10C75 5 65 15 55 25C45 15 35 5 30 10C25 15 35 25 35 25L55 50L75 25Z' fill='url(%23g)'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#0a0b14;
-  --bg-card:#12131f;
-  --bg-card-hover:rgba(255,255,255,0.05);
-  --bg-card-solid:#12131f;
-  --border:rgba(255,255,255,0.06);
-  --border-hover:rgba(255,255,255,0.12);
-  --text:#f4f0fb;
-  --text-soft:#9d97b0;
-  --text-muted:#5a5474;
-  --pink:#e1306c;
-  --pink-soft:#f0829e;
-  --pink-bg:rgba(225,48,108,0.1);
-  --purple:#833ab4;
-  --purple-soft:#b080d0;
-  --purple-bg:rgba(131,58,180,0.1);
-  --orange:#f77737;
-  --orange-bg:rgba(247,119,55,0.1);
+  --bg:#0F142B;
+  --bg-alt:#131829;
+  --bg-card:#1A1F37;
+  --bg-card-hover:rgba(99,102,241,0.06);
+  --bg-card-solid:#1A1F37;
+  --border:#2A2F47;
+  --border-hover:rgba(99,102,241,0.3);
+  --text:#FFFFFF;
+  --text-soft:#EEF0FF;
+  --text-muted:#667085;
+  --indigo:#6366F1;
+  --indigo-soft:#818CF8;
+  --indigo-bg:rgba(99,102,241,0.1);
+  --magenta:#D946EF;
+  --magenta-bg:rgba(217,70,239,0.1);
   --green:#34c759;
   --green-bg:rgba(52,199,89,0.1);
-  --gradient-candy:linear-gradient(135deg,#f77737,#e1306c,#833ab4);
-  --gradient-sunset:linear-gradient(135deg,#f77737,#e1306c,#c13584);
-  --gradient-ig:linear-gradient(135deg,#833ab4,#e1306c,#f77737);
-  --radius:14px;
-  --radius-lg:20px;
-  --radius-xl:28px;
+  --orange:#F59E0B;
+  --orange-bg:rgba(245,158,11,0.1);
+  --gradient-primary:linear-gradient(135deg,#6366F1,#D946EF);
+  --gradient-subtle:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(217,70,239,0.1));
+  --radius:12px;
+  --radius-lg:16px;
+  --radius-xl:24px;
   --radius-pill:100px;
-  --shadow-sm:0 2px 8px rgba(0,0,0,0.3);
-  --shadow-md:0 4px 20px rgba(0,0,0,0.4);
-  --shadow-lg:0 8px 40px rgba(0,0,0,0.5);
-  --shadow-glow:0 4px 24px rgba(225,48,108,0.25);
-  --font:'Bricolage Grotesque',sans-serif;
-  --font-body:'Plus Jakarta Sans',sans-serif;
+  --shadow-sm:0 2px 8px rgba(0,0,0,0.2);
+  --shadow-md:0 4px 20px rgba(0,0,0,0.3);
+  --shadow-lg:0 8px 40px rgba(0,0,0,0.4);
+  --shadow-glow:0 4px 24px rgba(99,102,241,0.25);
+  --font:'Satoshi',sans-serif;
+  --font-body:'Inter',sans-serif;
   --ease:cubic-bezier(0.16,1,0.3,1);
   --bounce:cubic-bezier(0.34,1.56,0.64,1);
 }
@@ -55,17 +54,9 @@ body{
   background:var(--bg);position:relative;
 }
 
-/* ═══════════ ANIMATED GRADIENT BG ═══════════ */
+/* gradient-bg div kept for JS but invisible */
 #gradient-bg{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity 2s cubic-bezier(0.25,0.1,0.25,1)}
-#gradient-bg.visible{opacity:1}
-@media(prefers-reduced-motion:reduce){#gradient-bg{display:none}}
-
-/* grain texture overlay */
-body::before{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:1;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-  opacity:0.035;mix-blend-mode:soft-light;
-}
+#gradient-bg.visible{opacity:0}
 
 a{color:inherit;text-decoration:none}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
@@ -73,241 +64,156 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 
 ::-webkit-scrollbar{width:6px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(225,48,108,0.3);border-radius:3px}
+::-webkit-scrollbar-thumb{background:rgba(99,102,241,0.3);border-radius:3px}
 
-/* ═══════════ HERO ═══════════ */
+/* ==================== NAVIGATION ==================== */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:0 2rem;height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(15,20,43,0.8);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(42,47,71,0.5);
+}
+.nav-logo{display:flex;align-items:center;gap:10px;font-family:var(--font);font-weight:700;font-size:1.15rem;color:#fff}
+.nav-logo svg{width:32px;height:32px}
+.nav-links{display:flex;align-items:center;gap:2rem}
+.nav-links a{font-size:0.875rem;font-weight:500;color:var(--text-muted);transition:color 0.2s}
+.nav-links a:hover{color:#fff}
+.nav-cta{
+  padding:8px 20px;border-radius:var(--radius-pill);
+  background:var(--indigo);color:#fff;font-size:0.875rem;font-weight:600;
+  transition:background 0.2s,transform 0.2s;
+}
+.nav-cta:hover{background:#5558E6;transform:translateY(-1px)}
+@media(max-width:768px){
+  .nav{padding:0 1rem}
+  .nav-links a:not(.nav-cta){display:none}
+}
+
+/* ==================== HERO ==================== */
 .hero{
   position:relative;z-index:3;min-height:100vh;
-  display:flex;flex-direction:column;align-items:flex-start;justify-content:center;
-  padding:2rem 2rem 2rem clamp(2rem,8vw,8rem);
-  max-width:1400px;margin:0 auto;
-}
-
-/* Gradient mesh blob behind hero */
-.hero::before{
-  content:'';position:absolute;top:10%;right:-10%;width:70vw;height:70vw;
-  max-width:800px;max-height:800px;
-  background:
-    radial-gradient(ellipse at 30% 40%, rgba(225,48,108,0.18) 0%, transparent 60%),
-    radial-gradient(ellipse at 70% 60%, rgba(131,58,180,0.15) 0%, transparent 55%),
-    radial-gradient(ellipse at 50% 30%, rgba(247,119,55,0.12) 0%, transparent 50%);
-  filter:blur(80px);
-  pointer-events:none;z-index:-1;
-  border-radius:50%;
-}
-
-.site-name{
-  font-family:var(--font);font-weight:700;font-size:0.95rem;
-  letter-spacing:0.08em;text-transform:uppercase;margin-bottom:2rem;
-  color:var(--text-muted);
-}
-
-/* ─── Floating Instagram Cube ─────────────────────────────────────
- * True 6-face 3D cube with sealed edges.
- * ────────────────────────────────────────────────────────────────── */
-.cube-wrap{
-  display:flex;flex-direction:column;align-items:center;
-  margin:0 0 2.5rem;position:relative;
-}
-.glitter{
-  width:150px;height:120px;margin-bottom:-30px;position:relative;z-index:10;
-  filter:drop-shadow(0 8px 24px rgba(225,48,108,0.3));
-  animation:cube-float 6s ease-in-out infinite;
-}
-.glitter dotlottie-player{width:100%;height:100%}
-
-/* Ambient glow */
-.cube-aura{
-  position:absolute;width:240px;height:240px;top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  background:radial-gradient(circle,rgba(225,48,108,0.25) 0%,rgba(131,58,180,0.15) 40%,transparent 70%);
-  border-radius:50%;filter:blur(30px);
-  animation:aura-breathe 4s ease-in-out infinite;
-  pointer-events:none;
-}
-@keyframes aura-breathe{
-  0%,100%{opacity:0.7;transform:translate(-50%,-50%) scale(1)}
-  50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}
-}
-
-.cube-scene{
-  perspective:800px;width:150px;height:150px;position:relative;
-  animation:cube-float 6s ease-in-out infinite;
-}
-@keyframes cube-float{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-14px)}
-}
-
-.cube{
-  width:100%;height:100%;position:relative;
-  transform-style:preserve-3d;
-  animation:cube-rock 10s ease-in-out infinite;
-}
-@keyframes cube-rock{
-  0%{transform:rotateX(-20deg) rotateY(-25deg)}
-  25%{transform:rotateX(-16deg) rotateY(5deg)}
-  50%{transform:rotateX(-22deg) rotateY(28deg)}
-  75%{transform:rotateX(-18deg) rotateY(-8deg)}
-  100%{transform:rotateX(-20deg) rotateY(-25deg)}
-}
-
-.cube-fill{
-  position:absolute;width:156px;height:156px;top:-3px;left:-3px;
-  border-radius:10px;
-}
-.cube-fill--front{background:#c0406a;transform:translateZ(74.5px)}
-.cube-fill--back{background:#80305a;transform:rotateY(180deg) translateZ(74.5px)}
-.cube-fill--right{background:#7030a0;transform:rotateY(90deg) translateZ(74.5px)}
-.cube-fill--left{background:#5838b0;transform:rotateY(-90deg) translateZ(74.5px)}
-.cube-fill--top{background:#d07030;transform:rotateX(90deg) translateZ(74.5px)}
-.cube-fill--bottom{background:#0d0515;transform:rotateX(-90deg) translateZ(74.5px)}
-
-.cube-face{
-  position:absolute;width:150px;height:150px;
-  border-radius:34px;
   display:flex;align-items:center;justify-content:center;
-  border:1px solid rgba(255,255,255,0.12);
-  overflow:hidden;
+  padding:6rem 2rem 4rem;
+  max-width:1200px;margin:0 auto;
+  gap:4rem;
 }
-.cube-face::after{
-  content:'';position:absolute;inset:0;border-radius:inherit;
-  background:linear-gradient(160deg,rgba(255,255,255,0.3) 0%,rgba(255,255,255,0.06) 35%,transparent 55%);
-  pointer-events:none;
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background-image:radial-gradient(rgba(99,102,241,0.08) 1px, transparent 1px);
+  background-size:24px 24px;
+  pointer-events:none;z-index:-1;
 }
-.cube-face--front{
-  background:linear-gradient(135deg,#833ab4 0%,#e1306c 45%,#f77737 100%);
-  transform:translateZ(75px);
-  box-shadow:0 20px 60px rgba(225,48,108,0.3),inset 0 1px 1px rgba(255,255,255,0.3),inset 0 -1px 2px rgba(0,0,0,0.1);
-}
-.cube-face--back{
-  background:linear-gradient(135deg,#f77737,#e1306c,#833ab4);
-  transform:rotateY(180deg) translateZ(75px);
-}
-.cube-face--right{
-  background:linear-gradient(180deg,#6228d7 0%,#833ab4 40%,#c13584 100%);
-  transform:rotateY(90deg) translateZ(75px);
-}
-.cube-face--left{
-  background:linear-gradient(180deg,#405de6 0%,#833ab4 40%,#6228d7 100%);
-  transform:rotateY(-90deg) translateZ(75px);
-}
-.cube-face--top{
-  background:linear-gradient(135deg,#f77737 0%,#fcaf45 50%,#f9d423 100%);
-  transform:rotateX(90deg) translateZ(75px);
-  border-color:rgba(255,255,255,0.2);
-}
-.cube-face--bottom{
-  background:#0d0515;
-  transform:rotateX(-90deg) translateZ(75px);
-  border-color:rgba(255,255,255,0.02);
-}
-
-.ig-icon{width:48%;height:48%}
-.ig-icon svg{width:100%;height:100%;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.3))}
-
-.cube-shadow{
-  width:130px;height:20px;margin-top:4px;
-  background:radial-gradient(ellipse,rgba(225,48,108,0.35) 0%,rgba(131,58,180,0.15) 40%,transparent 70%);
-  border-radius:50%;filter:blur(12px);
-  animation:shadow-pulse 6s ease-in-out infinite;
-}
-@keyframes shadow-pulse{
-  0%,100%{transform:scaleX(1);opacity:0.8}
-  50%{transform:scaleX(0.65);opacity:0.45}
-}
+.hero-left{flex:1;max-width:560px}
+.hero-right{flex:1;max-width:440px;display:flex;justify-content:center}
 
 .hero-tag{
   display:inline-flex;align-items:center;gap:8px;
-  padding:8px 20px;border-radius:var(--radius-pill);
-  background:rgba(52,199,89,0.08);color:var(--green);
-  font-size:0.78rem;font-weight:700;margin-bottom:2rem;
-  border:1px solid rgba(52,199,89,0.12);letter-spacing:0.02em;
+  padding:6px 16px;border-radius:var(--radius-pill);
+  background:var(--indigo-bg);color:var(--indigo-soft);
+  font-size:0.8rem;font-weight:600;margin-bottom:1.5rem;
+  border:1px solid rgba(99,102,241,0.15);
 }
-.hero-tag::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse-dot 2s ease infinite}
-@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.7)}}
+.hero-tag svg{width:14px;height:14px}
 
 .hero h1{
-  font-family:var(--font);font-weight:800;
-  font-size:clamp(3.5rem,10vw,7rem);line-height:0.95;
-  letter-spacing:-0.05em;margin-bottom:2rem;
-  max-width:12ch;
+  font-family:var(--font);font-weight:900;
+  font-size:clamp(2.8rem,5.5vw,4.2rem);line-height:1.08;
+  letter-spacing:-0.03em;margin-bottom:1.5rem;
+  color:#fff;
 }
-.hero h1 .gradient{
-  background:linear-gradient(90deg,#ffb870,#ffe0d0,#d8b4fe,#ffe0d0,#ffb870);
-  background-size:200% auto;
+.hero h1 strong{
+  background:var(--gradient-primary);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   background-clip:text;
-  animation:gradient-shift 6s linear infinite;
 }
-@keyframes gradient-shift{to{background-position:200% center}}
 
 .hero p.subtitle{
-  font-size:clamp(1rem,2vw,1.2rem);color:var(--text-soft);
-  max-width:440px;line-height:1.7;font-weight:400;
+  font-size:1.1rem;color:var(--text-muted);
+  max-width:440px;line-height:1.7;font-weight:400;margin-bottom:2rem;
 }
 
-.scroll-hint{
-  position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);
-  display:flex;flex-direction:column;align-items:center;gap:8px;
-  color:var(--text-muted);font-size:0.68rem;font-weight:700;
-  letter-spacing:0.15em;text-transform:uppercase;
+.hero-cta{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:14px 32px;border-radius:var(--radius-pill);
+  background:var(--indigo);color:#fff;font-family:var(--font);font-weight:700;font-size:1rem;
+  transition:all 0.3s ease;box-shadow:var(--shadow-glow);
 }
-.scroll-bounce{animation:scroll-b 2s ease-in-out infinite}
-.scroll-bounce svg{width:18px;height:18px;color:var(--text-muted)}
-@keyframes scroll-b{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+.hero-cta:hover{background:#5558E6;transform:translateY(-2px);box-shadow:0 8px 32px rgba(99,102,241,0.35)}
+.hero-cta svg{width:18px;height:18px}
 
-/* ═══════════ HOW IT WORKS ═══════════ */
-.how{
+.hero-trust{
+  margin-top:1rem;display:flex;align-items:center;gap:6px;
+  color:var(--text-muted);font-size:0.8rem;font-weight:500;
+}
+.hero-trust svg{width:14px;height:14px;color:var(--green)}
+
+/* Hero mockup card */
+.mockup-card{
+  width:100%;max-width:380px;
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius-xl);padding:1.5rem;
+  box-shadow:0 20px 60px rgba(0,0,0,0.3),0 0 0 1px rgba(99,102,241,0.08);
+}
+.mockup-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:1.25rem;
+}
+.mockup-title{font-family:var(--font);font-weight:700;font-size:1rem}
+.mockup-badge{
+  padding:4px 12px;border-radius:var(--radius-pill);
+  background:var(--magenta-bg);color:var(--magenta);
+  font-family:var(--font);font-weight:700;font-size:0.8rem;
+}
+.mockup-row{
+  display:flex;align-items:center;gap:0.75rem;
+  padding:0.65rem 0;border-bottom:1px solid rgba(42,47,71,0.5);
+}
+.mockup-row:last-child{border-bottom:none}
+.mockup-av{
+  width:36px;height:36px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font);font-weight:700;font-size:0.85rem;color:#fff;
+}
+.mockup-av-1{background:linear-gradient(135deg,#6366F1,#818CF8)}
+.mockup-av-2{background:linear-gradient(135deg,#D946EF,#E879F9)}
+.mockup-av-3{background:linear-gradient(135deg,#6366F1,#D946EF)}
+.mockup-info{flex:1;min-width:0}
+.mockup-user{font-family:var(--font);font-weight:600;font-size:0.88rem}
+.mockup-name{color:var(--text-muted);font-size:0.75rem}
+
+@media(max-width:768px){
+  .hero{flex-direction:column;text-align:center;padding:7rem 1.5rem 3rem;gap:2.5rem}
+  .hero-left{display:flex;flex-direction:column;align-items:center}
+  .hero p.subtitle{max-width:100%}
+  .hero-right{max-width:320px}
+}
+
+/* ==================== FEATURES ==================== */
+.features{
   position:relative;z-index:3;
-  max-width:1200px;margin:0 auto;padding:8rem 2rem 8rem clamp(2rem,8vw,8rem);
+  max-width:1200px;margin:0 auto;
+  padding:6rem 2rem;background:var(--bg-alt);
 }
-.how-head{margin-bottom:4rem;text-align:left}
-.how-head h2{
-  font-family:var(--font);font-weight:800;
-  font-size:clamp(2.2rem,5vw,3.5rem);letter-spacing:-0.03em;line-height:1.1;
+.features-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem}
+.feature-card{
+  padding:2rem 1.5rem;border-radius:var(--radius-lg);
+  background:var(--bg-card);border:1px solid var(--border);
+  transition:transform 0.4s var(--ease),border-color 0.3s ease,box-shadow 0.3s ease;
 }
-.how-head .section-badge{margin-bottom:1rem}
-.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;position:relative}
-.how-card{
-  position:relative;padding:2.5rem 2rem 2rem;
-  background:var(--bg-card);
-  border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-lg);
-  text-align:left;overflow:hidden;
-  transition:transform 0.5s var(--ease),box-shadow 0.5s ease;
+.feature-card:hover{transform:translateY(-4px);border-color:rgba(99,102,241,0.25);box-shadow:0 12px 40px rgba(0,0,0,0.2)}
+.feature-icon{
+  width:40px;height:40px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--indigo-bg);color:var(--indigo);margin-bottom:1.25rem;
 }
-/* Gradient top border */
-.how-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,#f77737,#e1306c,#833ab4);
-}
-.how-card:hover{
-  transform:translateY(-6px);
-  box-shadow:0 20px 60px rgba(0,0,0,0.4);
-}
-.how-card .num{
-  font-family:var(--font);font-weight:800;
-  font-size:5rem;line-height:1;color:rgba(255,255,255,0.03);
-  letter-spacing:-0.04em;margin-bottom:1rem;
-}
-.how-card .icon{width:36px;height:36px;color:var(--pink);margin-bottom:1.25rem}
-.how-card .icon svg{width:100%;height:100%}
-.how-card h3{font-family:var(--font);font-weight:700;font-size:1.1rem;margin-bottom:0.6rem;letter-spacing:-0.01em}
-.how-card p{color:var(--text-soft);font-size:0.9rem;line-height:1.7}
-.how-arrow{
-  position:absolute;top:50%;transform:translateY(-50%);
-  width:32px;height:12px;color:rgba(225,48,108,0.2);
-}
-.how-arrow.a1{left:calc(33.33% - 16px)}
-.how-arrow.a2{left:calc(66.66% - 16px)}
-.how-arrow svg{width:100%;height:100%}
-@media(max-width:760px){
-  .how-grid{grid-template-columns:1fr;gap:1rem}
-  .how-arrow{display:none}
-  .how{padding:5rem 1.5rem}
-}
+.feature-icon svg{width:20px;height:20px}
+.feature-card h3{font-family:var(--font);font-weight:700;font-size:1rem;margin-bottom:0.5rem;letter-spacing:-0.01em}
+.feature-card p{color:var(--text-muted);font-size:0.88rem;line-height:1.7}
+@media(max-width:900px){.features-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:540px){.features-grid{grid-template-columns:1fr}}
 
-/* ═══════════ SECTION BADGES ═══════════ */
+/* ==================== SECTION BADGES ==================== */
 .section-badge{
   display:inline-flex;align-items:center;gap:6px;
   padding:5px 14px;border-radius:var(--radius-pill);
@@ -315,76 +221,106 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   letter-spacing:0.12em;text-transform:uppercase;
   margin-bottom:0.75rem;
 }
-.badge-pink{background:var(--pink-bg);color:var(--pink)}
-.badge-purple{background:var(--purple-bg);color:var(--purple)}
+.badge-indigo{background:var(--indigo-bg);color:var(--indigo-soft)}
+.badge-magenta{background:var(--magenta-bg);color:var(--magenta)}
 .badge-orange{background:var(--orange-bg);color:var(--orange)}
 
-/* ═══════════ BOOKMARKLET CARD ═══════════ */
-.bm-section{position:relative;z-index:3;max-width:1000px;margin:0 auto;padding:2rem 2rem 8rem;text-align:center}
+/* ==================== HOW IT WORKS ==================== */
+.how{
+  position:relative;z-index:3;
+  max-width:1200px;margin:0 auto;padding:6rem 2rem;
+}
+.how-head{margin-bottom:3rem;text-align:center}
+.how-head h2{
+  font-family:var(--font);font-weight:900;
+  font-size:clamp(2rem,4vw,2.8rem);letter-spacing:-0.03em;line-height:1.1;
+}
+.how-head .section-badge{margin-bottom:1rem}
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;position:relative}
+.how-card{
+  position:relative;padding:2.5rem 2rem 2rem;
+  background:var(--bg-card);
+  border:1px solid var(--border);border-radius:var(--radius-lg);
+  text-align:left;overflow:hidden;
+  transition:transform 0.5s var(--ease),box-shadow 0.5s ease,border-color 0.3s ease;
+}
+.how-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--gradient-primary);
+}
+.how-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 20px 60px rgba(0,0,0,0.3);
+  border-color:rgba(99,102,241,0.2);
+}
+.how-card .num{
+  font-family:var(--font);font-weight:900;
+  font-size:4rem;line-height:1;color:rgba(99,102,241,0.08);
+  letter-spacing:-0.04em;margin-bottom:1rem;
+}
+.how-card .icon{width:36px;height:36px;color:var(--indigo);margin-bottom:1.25rem}
+.how-card .icon svg{width:100%;height:100%}
+.how-card h3{font-family:var(--font);font-weight:700;font-size:1.05rem;margin-bottom:0.6rem;letter-spacing:-0.01em}
+.how-card p{color:var(--text-muted);font-size:0.88rem;line-height:1.7}
+.how-arrow{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:32px;height:12px;color:rgba(99,102,241,0.25);
+}
+.how-arrow.a1{left:calc(33.33% - 16px)}
+.how-arrow.a2{left:calc(66.66% - 16px)}
+.how-arrow svg{width:100%;height:100%}
+@media(max-width:760px){
+  .how-grid{grid-template-columns:1fr;gap:1rem}
+  .how-arrow{display:none}
+  .how{padding:4rem 1.5rem}
+}
+
+/* ==================== BOOKMARKLET ==================== */
+.bm-section{position:relative;z-index:3;max-width:900px;margin:0 auto;padding:2rem 2rem 6rem;text-align:center}
 .bm-card{
   position:relative;
-  padding:5rem 3rem;
+  padding:4rem 3rem;
   border-radius:var(--radius-xl);
   background:var(--bg-card);
-  box-shadow:0 8px 40px rgba(0,0,0,0.4);
-}
-.bm-card::before{
-  content:'';position:absolute;inset:0;border-radius:var(--radius-xl);
-  padding:1px;
-  background:linear-gradient(135deg,rgba(131,58,180,0.3),rgba(225,48,108,0.3),rgba(247,119,55,0.3));
-  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor;mask-composite:exclude;
-  pointer-events:none;
+  border:1px solid var(--border);
+  box-shadow:var(--shadow-lg);
 }
 .bm-card h2{
-  font-family:var(--font);font-weight:800;
-  font-size:clamp(2rem,4.5vw,3rem);letter-spacing:-0.03em;
+  font-family:var(--font);font-weight:900;
+  font-size:clamp(1.8rem,4vw,2.5rem);letter-spacing:-0.03em;
   margin-bottom:0.6rem;
 }
 .bm-card .bm-sub{
-  color:var(--text-soft);font-size:1.05rem;line-height:1.7;
+  color:var(--text-muted);font-size:1rem;line-height:1.7;
   margin:0 auto 2.5rem;max-width:480px;
 }
 
 .bm-button{
   display:inline-flex;align-items:center;gap:10px;
-  padding:18px 44px;border-radius:var(--radius-pill);
-  background:linear-gradient(135deg,#f77737,#e1306c,#833ab4);
-  color:#fff;font-family:var(--font);font-weight:800;font-size:1.1rem;
+  padding:16px 40px;border-radius:var(--radius-pill);
+  background:var(--gradient-primary);
+  color:#fff;font-family:var(--font);font-weight:700;font-size:1.05rem;
   letter-spacing:0.005em;
   box-shadow:var(--shadow-glow);
   text-decoration:none;
   transition:transform 0.4s var(--bounce),box-shadow 0.4s ease;
-  animation:bm-pulse 3s ease-in-out infinite;
   cursor:grab;user-select:none;-webkit-user-drag:element;
-  position:relative;background-size:100% 100%;overflow:hidden;
+  position:relative;overflow:hidden;
 }
 .bm-button:active{cursor:grabbing}
 .bm-button:hover{
-  transform:scale(1.06);
-  box-shadow:0 12px 48px rgba(225,48,108,0.45);
-  animation-play-state:paused;
+  transform:scale(1.04);
+  box-shadow:0 12px 48px rgba(99,102,241,0.4);
 }
 .bm-button svg{width:18px;height:18px}
-@keyframes bm-pulse{
-  0%,100%{transform:scale(1);box-shadow:var(--shadow-glow)}
-  50%{transform:scale(1.02);box-shadow:0 6px 28px rgba(225,48,108,0.35)}
-}
-
-.bm-button::before{
-  content:'';position:absolute;inset:-3px;border-radius:inherit;
-  background:linear-gradient(135deg,#f77737,#e1306c,#833ab4);
-  z-index:-1;filter:blur(12px);opacity:0.5;
-  animation:bm-pulse 3s ease-in-out infinite;
-}
 .bm-button::after{
   content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent);
   animation:bm-shimmer 4s ease-in-out infinite 2s;
 }
 @keyframes bm-shimmer{0%{left:-100%}30%{left:150%}100%{left:150%}}
 
-.bm-diagram{margin:3rem auto 1rem;max-width:420px;color:var(--text-muted)}
+.bm-diagram{margin:2.5rem auto 1rem;max-width:400px;color:var(--text-muted)}
 .bm-diagram svg{width:100%;height:auto;display:block}
 .bm-diagram .arrow-path{stroke-dasharray:4 4;animation:dash-flow 4s linear infinite}
 @keyframes dash-flow{to{stroke-dashoffset:-32}}
@@ -398,64 +334,78 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 }
 
 @media(max-width:760px){
-  .bm-card{padding:3rem 1.5rem}
-  .bm-section{padding:1rem 1.5rem 5rem}
+  .bm-card{padding:2.5rem 1.5rem}
+  .bm-section{padding:1rem 1.5rem 4rem}
 }
 @media(prefers-reduced-motion:reduce){
   .bm-button{animation:none}
   .bm-diagram .arrow-path{animation:none}
-  .cube{animation:none;transform:rotateX(-15deg) rotateY(-25deg)}
 }
 
-/* ═══════════ PRIVACY ═══════════ */
-.privacy{position:relative;z-index:3;max-width:1200px;margin:0 auto;padding:8rem 2rem 8rem clamp(2rem,8vw,8rem)}
-.privacy-head{margin-bottom:3.5rem;text-align:left}
+/* ==================== PRICING SECTION (STANDALONE) ==================== */
+.pricing-section{
+  position:relative;z-index:3;
+  max-width:800px;margin:0 auto;padding:6rem 2rem;
+  text-align:center;
+  background:var(--bg-alt);
+}
+.pricing-head{margin-bottom:3rem}
+.pricing-head h2{
+  font-family:var(--font);font-weight:900;
+  font-size:clamp(2rem,4vw,2.8rem);letter-spacing:-0.03em;line-height:1.1;
+}
+.pricing-head .section-badge{margin-bottom:1rem}
+.pricing-grid{
+  display:flex;gap:1.25rem;justify-content:center;flex-wrap:wrap;
+}
+
+/* ==================== PRIVACY ==================== */
+.privacy{position:relative;z-index:3;max-width:1200px;margin:0 auto;padding:6rem 2rem}
+.privacy-head{margin-bottom:3rem;text-align:center}
 .privacy-head h2{
-  font-family:var(--font);font-weight:800;
-  font-size:clamp(2rem,4.5vw,3rem);letter-spacing:-0.03em;line-height:1.1;
+  font-family:var(--font);font-weight:900;
+  font-size:clamp(2rem,4vw,2.8rem);letter-spacing:-0.03em;line-height:1.1;
 }
 .privacy-head .section-badge{margin-bottom:1rem}
-.privacy-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem;text-align:left}
+.privacy-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.25rem;text-align:left}
 .privacy-item{
   padding:2rem;border-radius:var(--radius-lg);
-  background:var(--bg-card);border:1px solid rgba(255,255,255,0.06);
+  background:var(--bg-card);border:1px solid var(--border);
   position:relative;overflow:hidden;
-  transition:transform 0.5s var(--ease),box-shadow 0.5s ease;
+  transition:transform 0.5s var(--ease),box-shadow 0.5s ease,border-color 0.3s ease;
 }
-/* Gradient top border */
 .privacy-item::before{
   content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,#f77737,#e1306c,#833ab4);
+  background:var(--gradient-primary);
 }
-.privacy-item:hover{transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,0,0,0.3)}
-.privacy-item .icon{width:28px;height:28px;color:var(--pink);margin-bottom:1rem}
+.privacy-item:hover{transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,0,0,0.2);border-color:rgba(99,102,241,0.2)}
+.privacy-item .icon{width:28px;height:28px;color:var(--indigo);margin-bottom:1rem}
 .privacy-item .icon svg{width:100%;height:100%}
 .privacy-item h3{font-family:var(--font);font-weight:700;font-size:1rem;margin-bottom:0.5rem;letter-spacing:-0.01em}
-.privacy-item p{color:var(--text-soft);font-size:0.88rem;line-height:1.7}
+.privacy-item p{color:var(--text-muted);font-size:0.88rem;line-height:1.7}
 
 @media(max-width:760px){
-  .privacy{padding:5rem 1.5rem}
-  .privacy-head{text-align:left}
+  .privacy{padding:4rem 1.5rem}
   .privacy-grid{grid-template-columns:1fr;gap:1rem}
 }
 
-/* ═══════════ FAQ ═══════════ */
-.faq{position:relative;z-index:3;max-width:760px;margin:0 auto;padding:6rem 2rem 6rem clamp(2rem,8vw,4rem)}
-.faq-head{margin-bottom:3rem;text-align:left}
+/* ==================== FAQ ==================== */
+.faq{position:relative;z-index:3;max-width:760px;margin:0 auto;padding:6rem 2rem;background:var(--bg-alt)}
+.faq-head{margin-bottom:3rem;text-align:center}
 .faq-head h2{
-  font-family:var(--font);font-weight:800;
-  font-size:clamp(2rem,4.5vw,2.8rem);letter-spacing:-0.03em;line-height:1.1;
+  font-family:var(--font);font-weight:900;
+  font-size:clamp(2rem,4vw,2.5rem);letter-spacing:-0.03em;line-height:1.1;
 }
 .faq-head .section-badge{margin-bottom:1rem}
 .faq-list{text-align:left}
 .faq-item{
   background:var(--bg-card);
-  border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-lg);
+  border:1px solid var(--border);border-radius:var(--radius-lg);
   margin-bottom:0.75rem;overflow:hidden;
   transition:border-color 0.3s ease;
 }
-.faq-item:hover{border-color:rgba(255,255,255,0.1)}
-.faq-item[open]{border-color:rgba(225,48,108,0.15);background:rgba(255,255,255,0.03)}
+.faq-item:hover{border-color:rgba(99,102,241,0.2)}
+.faq-item[open]{border-color:rgba(99,102,241,0.3);background:rgba(99,102,241,0.03)}
 .faq-item summary{
   list-style:none;cursor:pointer;
   padding:1.25rem 1.5rem;
@@ -466,25 +416,25 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .faq-item summary::-webkit-details-marker{display:none}
 .faq-item summary::after{
   content:'';width:18px;height:18px;flex-shrink:0;
-  background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239d97b0' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>") no-repeat center / contain;
+  background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23667085' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>") no-repeat center / contain;
   transition:transform 0.35s var(--ease);
 }
 .faq-item[open] summary::after{transform:rotate(180deg)}
 .faq-body-wrap{display:grid;grid-template-rows:0fr;transition:grid-template-rows 0.35s var(--ease)}
 .faq-item[open] .faq-body-wrap{grid-template-rows:1fr}
 .faq-body{overflow:hidden}
-.faq-body p{padding:0 1.5rem 1.4rem;color:var(--text-soft);font-size:0.92rem;line-height:1.75}
+.faq-body p{padding:0 1.5rem 1.4rem;color:var(--text-muted);font-size:0.92rem;line-height:1.75}
 @media(max-width:760px){.faq{padding:4rem 1.5rem}}
 
-/* ═══════════ RESULTS ═══════════ */
+/* ==================== RESULTS ==================== */
 .section{position:relative;z-index:3;padding:6rem 1.5rem;max-width:800px;margin:0 auto}
 @media(max-width:760px){.section{padding:4rem 1.25rem}}
 .section-title{
-  font-family:var(--font);font-weight:800;
-  font-size:clamp(2rem,5vw,3rem);letter-spacing:-0.03em;
+  font-family:var(--font);font-weight:900;
+  font-size:clamp(2rem,5vw,2.8rem);letter-spacing:-0.03em;
   margin-bottom:0.5rem;line-height:1.1;
 }
-.section-desc{color:var(--text-soft);max-width:520px;margin-bottom:2rem;font-size:1rem;line-height:1.7}
+.section-desc{color:var(--text-muted);max-width:520px;margin-bottom:2rem;font-size:1rem;line-height:1.7}
 
 .results{display:none;position:relative;z-index:3}
 .results.show{display:block;animation:fadeUp 0.5s var(--ease)}
@@ -493,8 +443,8 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .results-banner{
   display:none;
   margin-bottom:1.5rem;padding:0.9rem 1.25rem;
-  background:var(--pink-bg);border:1px solid rgba(225,48,108,0.12);
-  border-radius:var(--radius-lg);color:var(--pink-soft);
+  background:var(--magenta-bg);border:1px solid rgba(217,70,239,0.15);
+  border-radius:var(--radius-lg);color:#E879F9;
   font-size:0.88rem;line-height:1.6;font-weight:500;
 }
 .results-banner.show{display:block}
@@ -504,27 +454,27 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 @media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}}
 .stat{
   padding:1.5rem 1.25rem;border-radius:var(--radius-lg);text-align:center;
-  background:var(--bg-card);border:1px solid rgba(255,255,255,0.06);
+  background:var(--bg-card);border:1px solid var(--border);
   position:relative;overflow:hidden;
   transition:transform 0.4s var(--bounce),box-shadow 0.4s ease;
 }
 .stat::before{
   content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,#f77737,#e1306c,#833ab4);
+  background:var(--gradient-primary);
 }
-.stat:hover{transform:translateY(-6px);box-shadow:0 12px 40px rgba(225,48,108,0.08)}
-.stat-val{font-family:var(--font);font-weight:800;font-size:clamp(1.5rem,3vw,2.2rem);line-height:1.2;margin-bottom:0.15rem}
-.stat-val.pop{background:var(--gradient-sunset);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat:hover{transform:translateY(-6px);box-shadow:0 12px 40px rgba(99,102,241,0.08)}
+.stat-val{font-family:var(--font);font-weight:900;font-size:clamp(1.5rem,3vw,2.2rem);line-height:1.2;margin-bottom:0.15rem}
+.stat-val.pop{background:var(--gradient-primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .stat-lbl{color:var(--text-muted);font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase}
 
 .controls{display:flex;gap:0.75rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap}
 .search{
   flex:1;min-width:180px;display:flex;align-items:center;gap:8px;
   padding:11px 16px;border-radius:var(--radius);
-  background:var(--bg-card);border:1.5px solid rgba(255,255,255,0.06);
+  background:var(--bg-card);border:1.5px solid var(--border);
   transition:border-color 0.3s ease;
 }
-.search:focus-within{border-color:var(--pink)}
+.search:focus-within{border-color:var(--indigo)}
 .search svg{width:16px;height:16px;color:var(--text-muted);flex-shrink:0}
 .search input{flex:1;font-size:0.9rem;font-family:inherit;border:none;background:none;outline:none;color:var(--text)}
 .search input::placeholder{color:var(--text-muted)}
@@ -537,24 +487,24 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 
 .sort{
   padding:11px 36px 11px 16px;border-radius:var(--radius);
-  background:var(--bg-card-solid);border:1.5px solid rgba(255,255,255,0.06);
+  background:var(--bg-card-solid);border:1.5px solid var(--border);
   color:var(--text);font-size:0.85rem;font-weight:600;font-family:inherit;
   -webkit-appearance:none;appearance:none;cursor:pointer;
-  background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239d97b0' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23667085' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 12px center;
 }
 .sort option{background:var(--bg-card-solid);color:var(--text)}
 
 .meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;flex-wrap:wrap;gap:0.5rem}
-.meta-count{color:var(--text-soft);font-size:0.85rem;font-weight:500}
+.meta-count{color:var(--text-muted);font-size:0.85rem;font-weight:500}
 .btn-export{
   display:inline-flex;align-items:center;gap:6px;
   padding:8px 16px;border-radius:var(--radius-pill);
-  background:var(--bg-card);border:1.5px solid rgba(255,255,255,0.06);
-  font-size:0.8rem;font-weight:600;color:var(--text-soft);font-family:inherit;
+  background:var(--bg-card);border:1.5px solid var(--border);
+  font-size:0.8rem;font-weight:600;color:var(--text-muted);font-family:inherit;
   cursor:pointer;transition:all 0.3s ease;
 }
-.btn-export:hover{border-color:rgba(225,48,108,0.3);color:var(--pink)}
+.btn-export:hover{border-color:rgba(99,102,241,0.3);color:var(--indigo)}
 .btn-export svg{width:14px;height:14px}
 
 .list{max-height:65vh;overflow-y:auto;border-radius:var(--radius-lg);contain:layout style;-webkit-overflow-scrolling:touch}
@@ -570,29 +520,29 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 }
 .card:first-child{border-top:1px solid var(--border);border-radius:var(--radius) var(--radius) 0 0}
 .card:last-child{border-radius:0 0 var(--radius) var(--radius);border-bottom:1px solid var(--border)}
-.card:hover{transform:translateX(4px);border-color:rgba(225,48,108,0.15);box-shadow:0 6px 20px rgba(225,48,108,0.06);background:var(--bg-card-hover)}
+.card:hover{transform:translateX(4px);border-color:rgba(99,102,241,0.2);box-shadow:0 6px 20px rgba(99,102,241,0.06);background:var(--bg-card-hover)}
 
 .av{
   width:40px;height:40px;border-radius:12px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
-  font-family:var(--font);font-weight:800;font-size:1rem;color:#fff;
+  font-family:var(--font);font-weight:700;font-size:1rem;color:#fff;
 }
-.av-0{background:linear-gradient(135deg,#ff6b9d,#ff8a50)}
-.av-1{background:linear-gradient(135deg,#b44dff,#6ec6ff)}
-.av-2{background:linear-gradient(135deg,#ff8a50,#ffb347)}
-.av-3{background:linear-gradient(135deg,#5cd67b,#6ec6ff)}
-.av-4{background:linear-gradient(135deg,#ff6b9d,#b44dff)}
-.av-5{background:linear-gradient(135deg,#6ec6ff,#b44dff)}
+.av-0{background:linear-gradient(135deg,#6366F1,#818CF8)}
+.av-1{background:linear-gradient(135deg,#D946EF,#E879F9)}
+.av-2{background:linear-gradient(135deg,#6366F1,#D946EF)}
+.av-3{background:linear-gradient(135deg,#818CF8,#D946EF)}
+.av-4{background:linear-gradient(135deg,#4F46E5,#6366F1)}
+.av-5{background:linear-gradient(135deg,#A855F7,#D946EF)}
 
 .card-info{flex:1;min-width:0}
 .card-user{font-family:var(--font);font-weight:700;font-size:0.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card-user a{transition:color 0.2s ease;color:inherit;text-decoration:none}
-.card-user a:hover{color:var(--pink)}
+.card-user a:hover{color:var(--indigo)}
 .card-name{color:var(--text-muted);font-size:0.78rem;margin-top:1px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mutual-badge{
   display:inline-block;margin-left:8px;padding:2px 8px;
   border-radius:var(--radius-pill);font-size:0.7rem;font-weight:700;
-  background:linear-gradient(135deg,#833ab4,#e1306c);color:#fff;
+  background:var(--gradient-primary);color:#fff;
   vertical-align:middle;
 }
 
@@ -602,9 +552,9 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   display:flex;align-items:center;justify-content:center;
   transition:all 0.3s ease;
 }
-.card-link:hover{background:var(--pink-bg)}
+.card-link:hover{background:var(--indigo-bg)}
 .card-link svg{width:14px;height:14px;color:var(--text-muted);transition:color 0.2s}
-.card-link:hover svg{color:var(--pink)}
+.card-link:hover svg{color:var(--indigo)}
 
 .empty{
   text-align:center;padding:3rem 2rem;display:none;
@@ -618,7 +568,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 @keyframes draw-check{to{stroke-dashoffset:0}}
 @keyframes shield-pop{from{transform:scale(0.8);opacity:0}to{transform:scale(1);opacity:1}}
 .empty h3{font-family:var(--font);font-weight:700;font-size:1.2rem;margin-bottom:0.4rem}
-.empty p{color:var(--text-soft);font-size:0.9rem}
+.empty p{color:var(--text-muted);font-size:0.9rem}
 
 /* Paywall */
 .paywall-overlay{
@@ -633,7 +583,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   text-align:center;padding:2rem 1rem 1rem;
 }
 .paywall-cta h3{
-  font-family:var(--font);font-size:1.3rem;font-weight:800;
+  font-family:var(--font);font-size:1.3rem;font-weight:900;
   margin-bottom:0.5rem;
 }
 .paywall-cta p{
@@ -646,21 +596,21 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .pricing-card{
   flex:1;min-width:160px;max-width:200px;padding:1.5rem 1rem;
   border-radius:var(--radius);background:var(--bg-card);
-  border:2px solid rgba(131,58,180,0.12);
+  border:2px solid var(--border);
   text-align:center;text-decoration:none;color:inherit;
   transition:border-color 0.2s,transform 0.2s;
 }
 .pricing-card:hover{
-  border-color:#e1306c;transform:translateY(-4px);
-  box-shadow:0 8px 30px rgba(225,48,108,0.1);
+  border-color:var(--indigo);transform:translateY(-4px);
+  box-shadow:0 8px 30px rgba(99,102,241,0.1);
 }
 .pricing-card.featured{
-  border-color:rgba(131,58,180,0.25);
-  background:linear-gradient(135deg,rgba(131,58,180,0.06),rgba(225,48,108,0.04));
+  border-color:rgba(99,102,241,0.3);
+  background:linear-gradient(135deg,rgba(99,102,241,0.06),rgba(217,70,239,0.04));
 }
 .pricing-card .price{
-  font-family:var(--font);font-size:1.5rem;font-weight:800;
-  background:linear-gradient(135deg,#833ab4,#e1306c);
+  font-family:var(--font);font-size:1.5rem;font-weight:900;
+  background:var(--gradient-primary);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   background-clip:text;
 }
@@ -673,7 +623,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .pricing-card .best-value{
   display:inline-block;padding:2px 10px;border-radius:var(--radius-pill);
   font-size:0.68rem;font-weight:800;text-transform:uppercase;
-  background:linear-gradient(135deg,#833ab4,#e1306c);color:#fff;
+  background:var(--gradient-primary);color:#fff;
   margin-bottom:0.5rem;
 }
 .lock-icon{
@@ -685,19 +635,19 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   color:var(--text-muted);font-size:0.78rem;font-weight:600;cursor:pointer;
   transition:color 0.2s,border-color 0.2s;
 }
-.paid-btn:hover{color:var(--pink);border-color:var(--pink)}
+.paid-btn:hover{color:var(--indigo);border-color:var(--indigo)}
 
 /* Privacy policy */
 .privacy-policy{max-width:680px;margin:0 auto}
-.policy-text{text-align:left;line-height:1.8;color:var(--text-soft);font-size:0.9rem}
+.policy-text{text-align:left;line-height:1.8;color:var(--text-muted);font-size:0.9rem}
 .policy-text h3{font-family:var(--font);font-weight:700;font-size:1rem;color:var(--text);margin:1.5rem 0 0.5rem}
 .policy-text p{margin-bottom:0.75rem}
 .policy-text ul{margin:0 0 0.75rem 1.25rem;padding:0}
 .policy-text li{margin-bottom:0.4rem}
-.policy-text a{color:var(--pink);text-decoration:none}
+.policy-text a{color:var(--indigo);text-decoration:none}
 .policy-text a:hover{text-decoration:underline}
 
-/* ═══════════ FOOTER ═══════════ */
+/* ==================== FOOTER ==================== */
 .footer{
   position:relative;z-index:3;text-align:center;
   padding:6rem 2rem 3rem;
@@ -705,67 +655,43 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 }
 .footer::before{
   content:'';position:absolute;top:0;left:10%;right:10%;height:1px;
-  background:linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+  background:linear-gradient(90deg, transparent, rgba(42,47,71,0.8), transparent);
 }
+.footer-brand{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:0.75rem}
+.footer-brand svg{width:28px;height:28px}
+.footer-brand span{font-family:var(--font);font-weight:700;font-size:1rem;color:#fff}
 .footer p.tagline{
-  font-style:italic;color:var(--text-soft);margin-bottom:1rem;
+  color:var(--text-muted);margin-bottom:1rem;
   max-width:480px;margin-left:auto;margin-right:auto;
-  font-size:0.92rem;
+  font-size:0.88rem;
 }
 .footer-links{
   display:inline-flex;align-items:center;gap:1.25rem;
   font-size:0.78rem;font-weight:600;color:var(--text-muted);
 }
 .footer-links a{color:var(--text-muted);transition:color 0.2s ease}
-.footer-links a:hover{color:var(--pink)}
+.footer-links a:hover{color:var(--indigo)}
 .footer-links .sep{opacity:0.3}
 
-/* ═══════════ MOBILE ═══════════ */
+/* ==================== MOBILE ==================== */
 @media(max-width:768px){
-  .hero{min-height:90vh;padding:1.5rem;align-items:flex-start}
-  .hero h1{font-size:clamp(2.5rem,12vw,4rem)}
-  .cube-scene{width:110px;height:110px}
-  .cube-face{width:110px;height:110px;border-radius:26px}
-  .cube-fill{width:116px;height:116px;top:-3px;left:-3px;border-radius:8px}
-  .cube-face--front{transform:translateZ(55px)}
-  .cube-face--back{transform:rotateY(180deg) translateZ(55px)}
-  .cube-face--right{transform:rotateY(90deg) translateZ(55px)}
-  .cube-face--left{transform:rotateY(-90deg) translateZ(55px)}
-  .cube-face--top{transform:rotateX(90deg) translateZ(55px)}
-  .cube-face--bottom{transform:rotateX(-90deg) translateZ(55px)}
-  .cube-fill--front{transform:translateZ(54.5px)}
-  .cube-fill--back{transform:rotateY(180deg) translateZ(54.5px)}
-  .cube-fill--right{transform:rotateY(90deg) translateZ(54.5px)}
-  .cube-fill--left{transform:rotateY(-90deg) translateZ(54.5px)}
-  .cube-fill--top{transform:rotateX(90deg) translateZ(54.5px)}
-  .cube-fill--bottom{transform:rotateX(-90deg) translateZ(54.5px)}
-  .cube-aura{width:170px;height:170px}
-  .cube-shadow{width:100px}
-  .glitter{width:110px;height:90px;margin-bottom:-20px}
   .section{padding:3rem 1.25rem}
   .card{padding:0.85rem 1rem}
   .card-link{width:40px;height:40px}
   .controls{flex-direction:column}
   .search{min-width:100%}
   .sort{width:100%}
-  .scroll-hint{display:none}
 }
 @media(max-width:480px){
-  .hero h1{font-size:clamp(2.5rem,11vw,3.5rem)}
-  .hero{padding:1.5rem 1.25rem;min-height:88vh}
   .bm-card{padding:2.5rem 1.25rem}
   .bm-card .bm-sub{font-size:0.95rem}
-  .bm-button{padding:16px 32px;font-size:1rem}
+  .bm-button{padding:14px 28px;font-size:0.95rem}
   .controls{flex-direction:column;align-items:stretch}
   .search{min-width:0}
   .sort{width:100%}
 }
-@media(max-width:380px){
-  .hero h1{font-size:2rem}
-  .section-title{font-size:1.4rem}
-}
 
-/* ═══════════ SCROLL REVEAL ═══════════ */
+/* ==================== SCROLL REVEAL ==================== */
 .reveal{opacity:0;transform:translateY(30px);transition:opacity 0.7s var(--ease),transform 0.7s var(--ease)}
 .reveal.visible{opacity:1;transform:translateY(0)}
 .reveal-delay-1{transition-delay:0.1s}
@@ -778,12 +704,12 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .how-card.reveal.visible{transform:translateY(0) scale(1)}
 
 /* Hero entrance */
-.hero .site-name{animation:heroIn 0.8s var(--ease) both}
-.hero .cube-wrap{animation:heroIn 0.8s var(--ease) 0.15s both}
-.hero .hero-tag{animation:heroIn 0.8s var(--ease) 0.3s both}
-.hero h1{animation:heroIn 0.8s var(--ease) 0.4s both}
-.hero .subtitle{animation:heroIn 0.6s var(--ease) 0.55s both}
-.hero .scroll-hint{animation:heroIn 0.6s var(--ease) 0.7s both}
+.hero .hero-tag{animation:heroIn 0.8s var(--ease) 0.1s both}
+.hero h1{animation:heroIn 0.8s var(--ease) 0.2s both}
+.hero .subtitle{animation:heroIn 0.6s var(--ease) 0.35s both}
+.hero .hero-cta{animation:heroIn 0.6s var(--ease) 0.45s both}
+.hero .hero-trust{animation:heroIn 0.6s var(--ease) 0.55s both}
+.hero-right{animation:heroIn 0.8s var(--ease) 0.3s both}
 @keyframes heroIn{from{opacity:0;transform:translateY(24px)}}
 
 /* Stat card stagger */
@@ -799,88 +725,153 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 
 /* Pricing card hover glow */
 .pricing-card.featured:hover{
-  box-shadow:0 8px 30px rgba(131,58,180,0.15);
+  box-shadow:0 8px 30px rgba(99,102,241,0.15);
 }
 
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important}
   .reveal{opacity:1;transform:none}
+  #gradient-bg{display:none}
 }
 </style>
 </head>
 <body>
 
-<!-- Animated gradient background -->
+<!-- Animated gradient background (kept for JS reference) -->
 <div id="gradient-bg"></div>
+
+<!-- NAVIGATION -->
+<nav class="nav">
+  <a href="#" class="nav-logo">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bird-grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#6366F1"/>
+          <stop offset="100%" stop-color="#D946EF"/>
+        </linearGradient>
+      </defs>
+      <path d="M26 7C26 7 29 4 27 3C25 2 22 5 19 8C16 5 13 2 11 3C9 4 12 7 12 7L8 11C6 13 5 16 6 19L3 22L5 24L8 21C11 23 15 23 18 21L22 17C24 15 25 12 24 9L26 7ZM15 18C13.5 18 12 16.5 12 15C12 13.5 13.5 12 15 12C16.5 12 18 13.5 18 15C18 16.5 16.5 18 15 18Z" fill="url(#bird-grad)"/>
+    </svg>
+    Flock
+  </a>
+  <div class="nav-links">
+    <a href="#how">How It Works</a>
+    <a href="#privacy">Privacy</a>
+    <a href="#faq">FAQ</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#get" class="nav-cta">Get Started</a>
+  </div>
+</nav>
 
 <!-- HERO -->
 <section class="hero">
-  <div class="site-name">Only Followers</div>
-  <div class="cube-wrap">
-    <!-- Glitter the cat -->
-    <div class="glitter">
-      <dotlottie-player src="https://lottie.host/8cf4ba71-e5fb-44f3-8134-178c4d389417/0CCsdcgNIP.json" background="transparent" speed="1" loop autoplay></dotlottie-player>
+  <div class="hero-left">
+    <div class="hero-tag">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Free to try
     </div>
-    <!-- Floating 3D Cube -->
-    <div class="cube-scene">
-      <div class="cube-aura"></div>
-      <div class="cube">
-        <!-- Fill panels seal corner gaps -->
-        <div class="cube-fill cube-fill--front"></div>
-        <div class="cube-fill cube-fill--back"></div>
-        <div class="cube-fill cube-fill--right"></div>
-        <div class="cube-fill cube-fill--left"></div>
-        <div class="cube-fill cube-fill--top"></div>
-        <div class="cube-fill cube-fill--bottom"></div>
-        <!-- Rounded gradient faces -->
-        <div class="cube-face cube-face--front">
-          <div class="ig-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="#fff" stroke="none"/></svg></div>
+    <h1>Find out who <strong>isn't</strong> following you back.</h1>
+    <p class="subtitle">Scan your Instagram and instantly see who doesn't follow you back. One click. No login. No server.</p>
+    <a href="#get" class="hero-cta">
+      Get Started
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+    </a>
+    <div class="hero-trust">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      Runs entirely in your browser
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="mockup-card">
+      <div class="mockup-header">
+        <div class="mockup-title">New Unfollowers</div>
+        <div class="mockup-badge">72</div>
+      </div>
+      <div class="mockup-row">
+        <div class="mockup-av mockup-av-1">J</div>
+        <div class="mockup-info">
+          <div class="mockup-user">@jake_designs</div>
+          <div class="mockup-name">Jake Morrison</div>
         </div>
-        <div class="cube-face cube-face--back"></div>
-        <div class="cube-face cube-face--right"></div>
-        <div class="cube-face cube-face--left"></div>
-        <div class="cube-face cube-face--top"></div>
-        <div class="cube-face cube-face--bottom"></div>
+      </div>
+      <div class="mockup-row">
+        <div class="mockup-av mockup-av-2">M</div>
+        <div class="mockup-info">
+          <div class="mockup-user">@maya.creates</div>
+          <div class="mockup-name">Maya Chen</div>
+        </div>
+      </div>
+      <div class="mockup-row">
+        <div class="mockup-av mockup-av-3">R</div>
+        <div class="mockup-info">
+          <div class="mockup-user">@riley_photo</div>
+          <div class="mockup-name">Riley Anderson</div>
+        </div>
       </div>
     </div>
-    <div class="cube-shadow"></div>
   </div>
+</section>
 
-  <div class="hero-tag">runs entirely in your browser</div>
-  <h1>see who doesn't <span class="gradient">follow you back</span>.</h1>
-  <p class="subtitle">one click on instagram. no login, no upload, no server. we never see your data.</p>
-  <div class="scroll-hint">
-    scroll
-    <div class="scroll-bounce"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l5 5 5-5"/></svg></div>
+<!-- FEATURES -->
+<section class="features reveal" id="features">
+  <div class="features-grid">
+    <div class="feature-card reveal reveal-delay-1">
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <h3>Understand your connections</h3>
+      <p>See who doesn't follow you back.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-2">
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+      </div>
+      <h3>Smart. Fast. Private.</h3>
+      <p>We scan your Instagram securely and instantly.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-3">
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      <h3>Take action</h3>
+      <p>Clean up your network and focus on real ones.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-4">
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <h3>Your data stays yours</h3>
+      <p>We never post. We never share. We just analyze.</p>
+    </div>
   </div>
 </section>
 
 <!-- HOW IT WORKS -->
 <section class="how reveal" id="how">
   <div class="how-head">
-    <div class="section-badge badge-pink">how it works</div>
-    <h2>three steps. about sixty seconds.</h2>
+    <div class="section-badge badge-indigo">How It Works</div>
+    <h2>Three steps. About sixty seconds.</h2>
   </div>
   <div class="how-grid">
     <div class="how-card reveal reveal-delay-1">
       <div class="num">01</div>
       <div class="icon"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h20v28l-10-6-10 6V4z"/></svg></div>
-      <h3>drag the button to your bookmarks bar</h3>
-      <p>it's a tiny piece of code. does nothing until you click it.</p>
+      <h3>Drag the bookmarklet</h3>
+      <p>Add our tool to your bookmarks bar in one click.</p>
     </div>
     <svg class="how-arrow a1" viewBox="0 0 32 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h26"/><path d="M22 1l6 5-6 5"/></svg>
     <div class="how-card reveal reveal-delay-2">
       <div class="num">02</div>
       <div class="icon"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="28" height="28" rx="7"/><circle cx="18" cy="18" r="6"/><circle cx="26" cy="10" r="1.6" fill="currentColor"/></svg></div>
-      <h3>open instagram and log in</h3>
-      <p>has to be the web version, not the app. mobile safari works.</p>
+      <h3>Open Instagram</h3>
+      <p>Go to instagram.com and make sure you're logged in.</p>
     </div>
     <svg class="how-arrow a2" viewBox="0 0 32 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h26"/><path d="M22 1l6 5-6 5"/></svg>
     <div class="how-card reveal reveal-delay-3">
       <div class="num">03</div>
       <div class="icon"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 6l4 22 5-9 9-3-18-10z"/></svg></div>
-      <h3>click the bookmarklet, wait a minute</h3>
-      <p>we'll scan your followers and following, then bring you back here with the answers.</p>
+      <h3>Click and scan</h3>
+      <p>Click the bookmarklet. We'll scan and bring you back with results.</p>
     </div>
   </div>
 </section>
@@ -888,13 +879,13 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 <!-- BOOKMARKLET CARD -->
 <section class="bm-section reveal" id="get">
   <div class="bm-card">
-    <div class="section-badge badge-pink">drag me</div>
-    <h2>your bookmarklet.</h2>
-    <p class="bm-sub">drag this button up to your bookmarks bar. that's the install.</p>
+    <div class="section-badge badge-indigo">Get Started</div>
+    <h2>Get your bookmarklet.</h2>
+    <p class="bm-sub">Drag this button to your bookmarks bar. That's it.</p>
 
-    <a class="bm-button" id="bm-link" href="javascript:void(0)" aria-label="Only Followers bookmarklet - drag to bookmarks bar">
+    <a class="bm-button" id="bm-link" href="javascript:void(0)" aria-label="Flock bookmarklet - drag to bookmarks bar">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-      Only Followers
+      Flock
     </a>
 
     <div class="bm-diagram" aria-hidden="true">
@@ -908,52 +899,77 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
         <rect x="32" y="54" width="38" height="8" rx="2" fill="currentColor" opacity="0.18"/>
         <rect x="76" y="54" width="48" height="8" rx="2" fill="currentColor" opacity="0.18"/>
         <rect x="130" y="54" width="32" height="8" rx="2" fill="currentColor" opacity="0.18"/>
-        <rect x="170" y="52" width="62" height="12" rx="6" fill="url(#bm-grad)" opacity="0.4"/>
-        <text x="201" y="61" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-size="7" font-weight="800" fill="#fff">&#9733; OF</text>
-        <rect x="160" y="120" width="100" height="28" rx="14" fill="url(#bm-grad)"/>
-        <text x="210" y="138" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-size="11" font-weight="800" fill="#fff">&#9733; OF</text>
+        <rect x="170" y="52" width="62" height="12" rx="6" fill="url(#bm-grad2)" opacity="0.5"/>
+        <text x="201" y="61" text-anchor="middle" font-family="Satoshi,sans-serif" font-size="7" font-weight="700" fill="#fff">Flock</text>
+        <rect x="160" y="120" width="100" height="28" rx="14" fill="url(#bm-grad2)"/>
+        <text x="210" y="138" text-anchor="middle" font-family="Satoshi,sans-serif" font-size="11" font-weight="700" fill="#fff">Flock</text>
         <path class="arrow-path" d="M210 116 C 210 90, 200 80, 200 65" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/>
         <path d="M196 70 L 200 64 L 204 70" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
         <defs>
-          <linearGradient id="bm-grad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#f77737"/>
-            <stop offset="50%" stop-color="#e1306c"/>
-            <stop offset="100%" stop-color="#833ab4"/>
+          <linearGradient id="bm-grad2" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#6366F1"/>
+            <stop offset="100%" stop-color="#D946EF"/>
           </linearGradient>
         </defs>
       </svg>
     </div>
 
-    <p class="bm-helper">don't see your bookmarks bar? press <kbd>&#8984;&#8679;B</kbd> on mac or <kbd>Ctrl+Shift+B</kbd> on windows.</p>
+    <p class="bm-helper">Don't see your bookmarks bar? Press <kbd>&#8984;&#8679;B</kbd> on Mac or <kbd>Ctrl+Shift+B</kbd> on Windows.</p>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section reveal" id="pricing">
+  <div class="pricing-head">
+    <div class="section-badge badge-magenta">Pricing</div>
+    <h2>Simple, transparent pricing.</h2>
+  </div>
+  <div class="pricing-grid">
+    <a class="pricing-card" href="javascript:void(0)">
+      <div class="plan-name">This Scan</div>
+      <div class="price">$4</div>
+      <div class="plan-sub">one-time</div>
+    </a>
+    <a class="pricing-card featured" href="javascript:void(0)">
+      <div class="plan-name">Monthly</div>
+      <div class="price">$6</div>
+      <div class="plan-sub">per month</div>
+    </a>
+    <a class="pricing-card" href="javascript:void(0)">
+      <div class="best-value">Best Value</div>
+      <div class="plan-name">Yearly</div>
+      <div class="price">$25</div>
+      <div class="plan-sub">per year</div>
+    </a>
   </div>
 </section>
 
 <!-- PRIVACY -->
 <section class="privacy reveal" id="privacy">
   <div class="privacy-head">
-    <div class="section-badge badge-purple">privacy</div>
-    <h2>nothing leaves your browser. truly.</h2>
+    <div class="section-badge badge-indigo">Privacy</div>
+    <h2>Nothing leaves your browser. Truly.</h2>
   </div>
   <div class="privacy-grid">
     <div class="privacy-item reveal reveal-delay-1">
       <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-      <h3>no login</h3>
-      <p>we never ask for your password. instagram never sees us at all.</p>
+      <h3>No Login</h3>
+      <p>We never ask for your password. Instagram never sees us at all.</p>
     </div>
     <div class="privacy-item reveal reveal-delay-2">
       <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M2 9h20"/><path d="M7 18v3M17 18v3M5 21h14"/></svg></div>
-      <h3>no server</h3>
-      <p>everything runs in your browser. there is no backend to leak data from.</p>
+      <h3>No Server</h3>
+      <p>Everything runs in your browser. There is no backend to leak data from.</p>
     </div>
     <div class="privacy-item reveal reveal-delay-3">
       <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></div>
-      <h3>no tracking</h3>
-      <p>no analytics, no cookies, no fingerprinting. open the network tab and check.</p>
+      <h3>No Tracking</h3>
+      <p>No analytics, no cookies, no fingerprinting. Open the network tab and check.</p>
     </div>
     <div class="privacy-item reveal reveal-delay-4">
       <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
-      <h3>open source</h3>
-      <p>the bookmarklet is a few hundred lines of javascript. read it before you run it.</p>
+      <h3>Open Source</h3>
+      <p>The bookmarklet is a few hundred lines of JavaScript. Read it before you run it.</p>
     </div>
   </div>
 </section>
@@ -961,33 +977,33 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 <!-- FAQ -->
 <section class="faq reveal" id="faq">
   <div class="faq-head">
-    <div class="section-badge badge-orange">questions</div>
-    <h2>things people ask.</h2>
+    <div class="section-badge badge-orange">Questions</div>
+    <h2>Things people ask.</h2>
   </div>
   <div class="faq-list">
     <details class="faq-item">
-      <summary>is this safe?</summary>
-      <div class="faq-body-wrap"><div class="faq-body"><p>yes. the bookmarklet is javascript that runs in your own browser, on your own logged-in instagram session, the same way the instagram website does. it doesn't send your data anywhere except back to Only Followers, in your url bar, where you can see it.</p></div></div>
+      <summary>Is this safe?</summary>
+      <div class="faq-body-wrap"><div class="faq-body"><p>Yes. The bookmarklet is JavaScript that runs in your own browser, on your own logged-in Instagram session, the same way the Instagram website does. It doesn't send your data anywhere except back to Flock, in your URL bar, where you can see it.</p></div></div>
     </details>
     <details class="faq-item">
-      <summary>will instagram ban me for using this?</summary>
-      <div class="faq-body-wrap"><div class="faq-body"><p>we don't think so, but we can't promise. the bookmarklet makes the same requests instagram's own web app makes, and it deliberately goes slowly to look like a real person browsing. if instagram throttles you, you might be temporarily blocked from viewing follower lists for half an hour. we don't know of anyone whose account has been banned for using a tool like this, but tools like this exist in a gray area.</p></div></div>
+      <summary>Will Instagram ban me for using this?</summary>
+      <div class="faq-body-wrap"><div class="faq-body"><p>We don't think so, but we can't promise. The bookmarklet makes the same requests Instagram's own web app makes, and it deliberately goes slowly to look like a real person browsing. If Instagram throttles you, you might be temporarily blocked from viewing follower lists for half an hour. We don't know of anyone whose account has been banned for using a tool like this, but tools like this exist in a gray area.</p></div></div>
     </details>
     <details class="faq-item">
-      <summary>it stopped halfway through. what happened?</summary>
-      <div class="faq-body-wrap"><div class="faq-body"><p>instagram throttled the requests. this is normal on big accounts. wait about 30 minutes, then click the bookmarklet again on instagram -- it remembers where it left off and picks up from there. we saved your progress.</p></div></div>
+      <summary>It stopped halfway through. What happened?</summary>
+      <div class="faq-body-wrap"><div class="faq-body"><p>Instagram throttled the requests. This is normal on big accounts. Wait about 30 minutes, then click the bookmarklet again on Instagram -- it remembers where it left off and picks up from there. We saved your progress.</p></div></div>
     </details>
     <details class="faq-item">
-      <summary>why is there a 10,000 follower cap?</summary>
-      <div class="faq-body-wrap"><div class="faq-body"><p>above 10k, the scan takes long enough that instagram is much more likely to throttle you. if you really need it for a bigger account, the code is open source -- fork it and remove the cap.</p></div></div>
+      <summary>Why is there a 10,000 follower cap?</summary>
+      <div class="faq-body-wrap"><div class="faq-body"><p>Above 10k, the scan takes long enough that Instagram is much more likely to throttle you. If you really need it for a bigger account, the code is open source -- fork it and remove the cap.</p></div></div>
     </details>
     <details class="faq-item">
-      <summary>does this work on private accounts?</summary>
-      <div class="faq-body-wrap"><div class="faq-body"><p>yes, for your own account and any private account you already follow. the bookmarklet uses your own logged-in session, so it sees exactly what you see when you're scrolling instagram normally.</p></div></div>
+      <summary>Does this work on private accounts?</summary>
+      <div class="faq-body-wrap"><div class="faq-body"><p>Yes, for your own account and any private account you already follow. The bookmarklet uses your own logged-in session, so it sees exactly what you see when you're scrolling Instagram normally.</p></div></div>
     </details>
     <details class="faq-item">
-      <summary>what about the official instagram data export?</summary>
-      <div class="faq-body-wrap"><div class="faq-body"><p>that still works and is more reliable, but it's slow (instagram emails it to you, can take a day) and the file format keeps changing. the bookmarklet is the fast version.</p></div></div>
+      <summary>What about the official Instagram data export?</summary>
+      <div class="faq-body-wrap"><div class="faq-body"><p>That still works and is more reliable, but it's slow (Instagram emails it to you, can take a day) and the file format keeps changing. The bookmarklet is the fast version.</p></div></div>
     </details>
   </div>
 </section>
@@ -999,7 +1015,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
       <div class="section-badge badge-orange">results</div>
       <h2 class="section-title">here's what we found.</h2>
     </div>
-    <button id="new-scan" type="button" style="padding:8px 18px;border-radius:100px;background:none;border:1px solid rgba(255,255,255,0.1);color:#5a5474;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:inherit">new scan</button>
+    <button id="new-scan" type="button" style="padding:8px 18px;border-radius:100px;background:none;border:1px solid rgba(255,255,255,0.1);color:#667085;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:inherit">new scan</button>
   </div>
 
   <div class="results-banner" id="banner"></div>
@@ -1043,7 +1059,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
     <div class="paywall-cta">
       <svg class="lock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
       <h3 id="paywall-title">unlock all results</h3>
-      <p>you've seen your top 2 — upgrade to see everyone who doesn't follow you back.</p>
+      <p>You've seen your top 2 -- upgrade to see everyone who doesn't follow you back.</p>
       <div class="pricing-cards">
         <a class="pricing-card" id="pay-scan" href="javascript:void(0)" target="_blank" rel="noopener">
           <div class="plan-name">this scan</div>
@@ -1068,58 +1084,70 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 
   <div class="empty" id="empty">
     <div class="empty-icon"><svg viewBox="0 0 56 56" fill="none"><path class="shield-fill" d="M28 4L8 14v14c0 12.6 8.5 24.4 20 27 11.5-2.6 20-14.4 20-27V14L28 4z" fill="var(--green)" opacity="0.12" stroke="var(--green)" stroke-width="2.5" stroke-linejoin="round"/><path class="check-draw" d="M18 28l7 7 13-14" stroke="var(--green)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-    <h3>everyone follows you back!</h3>
-    <p>everyone's got your back. nothing to see here.</p>
+    <h3>Everyone follows you back!</h3>
+    <p>Everyone's got your back. Nothing to see here.</p>
   </div>
 </section>
 
 <footer class="footer">
-  <p class="tagline">made because i was sick of third-party apps wanting my password.</p>
+  <div class="footer-brand">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bird-grad-f" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#6366F1"/>
+          <stop offset="100%" stop-color="#D946EF"/>
+        </linearGradient>
+      </defs>
+      <path d="M26 7C26 7 29 4 27 3C25 2 22 5 19 8C16 5 13 2 11 3C9 4 12 7 12 7L8 11C6 13 5 16 6 19L3 22L5 24L8 21C11 23 15 23 18 21L22 17C24 15 25 12 24 9L26 7ZM15 18C13.5 18 12 16.5 12 15C12 13.5 13.5 12 15 12C16.5 12 18 13.5 18 15C18 16.5 16.5 18 15 18Z" fill="url(#bird-grad-f)"/>
+    </svg>
+    <span>Flock</span>
+  </div>
+  <p class="tagline">See who's not following back.</p>
   <div class="footer-links">
-    <a href="https://github.com/ThorWarnken/follow-radar" target="_blank" rel="noopener">github</a>
+    <a href="https://github.com/ThorWarnken/follow-radar" target="_blank" rel="noopener">GitHub</a>
     <span class="sep">&middot;</span>
-    <a href="#privacy-policy">privacy policy</a>
+    <a href="#privacy-policy">Privacy Policy</a>
     <span class="sep">&middot;</span>
-    <span>2026</span>
+    <span>&copy; 2026 Flock</span>
   </div>
 </footer>
 
 <section class="section privacy-policy" id="privacy-policy" style="display:none">
-  <h2 class="section-title">privacy policy</h2>
+  <h2 class="section-title">Privacy Policy</h2>
   <div class="policy-text">
     <p><strong>Last updated:</strong> April 28, 2026</p>
 
-    <h3>what we collect</h3>
-    <p>nothing. Only Followers runs entirely in your browser. your instagram data (followers, following lists) is processed locally on your device and is never sent to any server.</p>
+    <h3>What we collect</h3>
+    <p>Nothing. Flock runs entirely in your browser. Your Instagram data (followers, following lists) is processed locally on your device and is never sent to any server.</p>
 
-    <h3>how the bookmarklet works</h3>
-    <p>the bookmarklet runs javascript in your browser on instagram.com, using your own logged-in session. it reads your followers and following lists from instagram's web API — the same endpoints instagram's own website uses. the data is compressed and passed back to this site via the URL hash, which never leaves your browser.</p>
+    <h3>How the bookmarklet works</h3>
+    <p>The bookmarklet runs JavaScript in your browser on instagram.com, using your own logged-in session. It reads your followers and following lists from Instagram's web API -- the same endpoints Instagram's own website uses. The data is compressed and passed back to this site via the URL hash, which never leaves your browser.</p>
 
-    <h3>data storage</h3>
-    <p>your scan results may be temporarily stored in your browser's localStorage to preserve them during the payment flow. this data stays on your device and is never transmitted. you can clear it at any time by clearing your browser data.</p>
+    <h3>Data storage</h3>
+    <p>Your scan results may be temporarily stored in your browser's localStorage to preserve them during the payment flow. This data stays on your device and is never transmitted. You can clear it at any time by clearing your browser data.</p>
 
-    <h3>payments</h3>
-    <p>payments are processed by <a href="https://stripe.com/privacy" target="_blank" rel="noopener">Stripe</a>. when you click a pricing option, you are redirected to Stripe's hosted checkout page. we never see, handle, or store your payment information (credit card numbers, billing address, etc.). Stripe's privacy policy governs how they handle your payment data.</p>
+    <h3>Payments</h3>
+    <p>Payments are processed by <a href="https://stripe.com/privacy" target="_blank" rel="noopener">Stripe</a>. When you click a pricing option, you are redirected to Stripe's hosted checkout page. We never see, handle, or store your payment information (credit card numbers, billing address, etc.). Stripe's privacy policy governs how they handle your payment data.</p>
 
-    <h3>cookies and tracking</h3>
-    <p>we do not use cookies, analytics, or tracking pixels. we do not run Google Analytics, Facebook Pixel, or any similar service. we load fonts from Google Fonts, an animation player from unpkg, and a decorative animation from lottie.host (see third-party services below).</p>
+    <h3>Cookies and tracking</h3>
+    <p>We do not use cookies, analytics, or tracking pixels. We do not run Google Analytics, Facebook Pixel, or any similar service. We load fonts from Google Fonts and Fontshare (see third-party services below).</p>
 
-    <h3>third-party services</h3>
+    <h3>Third-party services</h3>
     <ul>
-      <li><strong>Google Fonts</strong> — loads the Bricolage Grotesque and Plus Jakarta Sans typefaces. subject to <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a>.</li>
-      <li><strong>Stripe</strong> — processes payments. subject to <a href="https://stripe.com/privacy" target="_blank" rel="noopener">Stripe's privacy policy</a>.</li>
-      <li><strong>GitHub Pages</strong> — hosts this website. subject to <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">GitHub's privacy statement</a>.</li>
-      <li><strong>unpkg / lottie.host</strong> — loads a decorative cat animation. no user data is sent.</li>
+      <li><strong>Google Fonts</strong> -- loads the Inter typeface. Subject to <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a>.</li>
+      <li><strong>Fontshare</strong> -- loads the Satoshi typeface. Subject to <a href="https://www.fontshare.com/terms" target="_blank" rel="noopener">Fontshare's terms</a>.</li>
+      <li><strong>Stripe</strong> -- processes payments. Subject to <a href="https://stripe.com/privacy" target="_blank" rel="noopener">Stripe's privacy policy</a>.</li>
+      <li><strong>GitHub Pages</strong> -- hosts this website. Subject to <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">GitHub's privacy statement</a>.</li>
     </ul>
 
-    <h3>children</h3>
-    <p>Only Followers is not intended for use by anyone under 13 years of age.</p>
+    <h3>Children</h3>
+    <p>Flock is not intended for use by anyone under 13 years of age.</p>
 
-    <h3>changes</h3>
-    <p>if this policy changes, the updated version will be posted here with a new date.</p>
+    <h3>Changes</h3>
+    <p>If this policy changes, the updated version will be posted here with a new date.</p>
 
-    <h3>contact</h3>
-    <p>questions? open an issue on <a href="https://github.com/ThorWarnken/follow-radar" target="_blank" rel="noopener">GitHub</a>.</p>
+    <h3>Contact</h3>
+    <p>Questions? Open an issue on <a href="https://github.com/ThorWarnken/follow-radar" target="_blank" rel="noopener">GitHub</a>.</p>
   </div>
 </section>
 
