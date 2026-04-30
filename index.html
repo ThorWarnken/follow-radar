@@ -761,6 +761,17 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .view-tab.active{background:rgba(255,255,255,0.08);color:#fff}
 .view-tab:hover:not(.active){color:rgba(255,255,255,0.7)}
 
+/* Growth tab accent */
+#tab-growth{display:inline-flex;align-items:center;gap:6px;position:relative}
+#tab-growth svg.tab-icon{width:14px;height:14px;stroke:#F97316;flex-shrink:0}
+#tab-growth .tab-badge{font-size:0.55rem;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;background:linear-gradient(135deg,#F97316,#EF4444);color:#fff;padding:2px 5px;border-radius:4px;line-height:1}
+#tab-growth:not(.active){background:rgba(249,115,22,0.06);border:1px solid rgba(249,115,22,0.15);animation:growthTabPulse 3s ease-in-out infinite}
+#tab-growth:not(.active):hover{background:rgba(249,115,22,0.12);border-color:rgba(249,115,22,0.3);color:#F97316}
+#tab-growth.active{background:linear-gradient(135deg,rgba(249,115,22,0.15),rgba(239,68,68,0.1));border:1px solid rgba(249,115,22,0.25);color:#fff}
+#tab-growth.active svg.tab-icon{stroke:#fff}
+@keyframes growthTabPulse{0%,100%{box-shadow:0 0 0 0 rgba(249,115,22,0)}50%{box-shadow:0 0 12px 0 rgba(249,115,22,0.15)}}
+@media(prefers-reduced-motion:reduce){#tab-growth:not(.active){animation:none}}
+
 /* Growth view — orange/red/white theme */
 .growth-gate{text-align:center;padding:3rem 1.5rem}
 .growth-gate-icon{margin:0 auto 1rem;width:64px;height:64px;border-radius:16px;background:rgba(249,115,22,0.1);display:flex;align-items:center;justify-content:center}
@@ -1109,7 +1120,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 
   <div class="view-tabs" id="view-tabs" style="display:none">
     <button class="view-tab active" id="tab-following" type="button">Following</button>
-    <button class="view-tab" id="tab-growth" type="button">Potential Growth</button>
+    <button class="view-tab" id="tab-growth" type="button"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>Potential Growth<span class="tab-badge">PRO</span></button>
   </div>
 
   <div id="following-view">
