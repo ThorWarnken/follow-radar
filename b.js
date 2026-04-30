@@ -551,6 +551,67 @@
     overlayTextEl = null;
   }
 
+  // ─── Post scraping (for growth analytics) ────────────────────────
+
+  function trimPost(item) {
+    return {
+      id: item.id || item.pk || '',
+      taken_at: item.taken_at || 0,
+      like_count: item.like_count || 0,
+      comment_count: item.comment_count || 0,
+      media_type: item.media_type || 1, // 1=photo, 2=video, 8=carousel
+      caption_length: (item.caption && item.caption.text) ? item.caption.text.length : 0,
+      carousel_count: (item.carousel_media_count) || (item.carousel_media ? item.carousel_media.length : 0) || 0,
+      video_duration: item.video_duration || 0,
+    };
+  }
+
+  async function scrapePosts(userId, maxPosts) {
+    const posts = [];
+    let maxId = null;
+    const limit = maxPosts || 50;
+
+    for (let page = 0; page < 5; page++) { // max 5 pages to be safe
+      await throttle();
+      let url = 'https://i.instagram.com/api/v1/feed/user/' + userId + '/?count=33';
+      if (maxId) url += '&max_id=' + encodeURIComponent(maxId);
+
+      let r, body;
+      try {
+        r = await doFetch(url, {
+          credentials: 'include',
+          headers: { 'X-IG-App-ID': IG_APP_ID, 'Accept': 'application/json' },
+        });
+      } catch (e) {
+        console.warn('[flock] post fetch network error:', e);
+        break;
+      }
+
+      if (!r.ok) {
+        console.warn('[flock] post fetch http ' + r.status);
+        break;
+      }
+
+      try {
+        body = await r.json();
+      } catch (e) {
+        break;
+      }
+
+      if (!body || !Array.isArray(body.items)) break;
+
+      for (const item of body.items) {
+        posts.push(trimPost(item));
+        if (posts.length >= limit) break;
+      }
+
+      if (posts.length >= limit || !body.more_available || !body.next_max_id) break;
+      maxId = body.next_max_id;
+    }
+
+    return posts;
+  }
+
   // ─── Ship results ────────────────────────────────────────────────
 
   async function shipResults(payload) {
@@ -673,6 +734,16 @@
       console.warn('[follow radar] mutual count fetch failed:', e);
     }
 
+    // Phase 4: scrape recent posts for growth analytics
+    let posts = [];
+    try {
+      updateOverlay('Analyzing your posts\u2026', 0.92);
+      posts = await scrapePosts(user.userId, 50);
+      updateOverlay('Analyzing your posts\u2026 ' + posts.length + ' found', 0.98);
+    } catch (e) {
+      console.warn('[flock] post scrape failed:', e);
+    }
+
     destroyOverlay();
     clearResumeState();
 
@@ -688,6 +759,7 @@
       scrapedAt: new Date().toISOString(),
       followers: followers,
       following: followingWithMutuals,
+      posts: posts,
     };
     try {
       await shipResults(payload);
