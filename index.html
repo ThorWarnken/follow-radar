@@ -544,7 +544,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .btn-export:hover{border-color:rgba(99,102,241,0.3);color:var(--indigo)}
 .btn-export svg{width:14px;height:14px}
 
-.list{max-height:65vh;overflow-y:auto;border-radius:var(--radius-lg);-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.list{border-radius:var(--radius-lg)}
 
 .card{
   display:flex;align-items:center;gap:0.85rem;
@@ -1659,7 +1659,9 @@ function render(){
 function vRender(){
   const {filtered} = state;
   if (filtered.length <= 200) return;
-  const sT = el.list.scrollTop, vH = el.list.clientHeight;
+  const listRect = el.list.getBoundingClientRect();
+  const sT = -listRect.top;
+  const vH = window.innerHeight;
   const si = Math.max(0, Math.floor(sT / IH) - BUF);
   const ei = Math.min(filtered.length, Math.ceil((sT + vH) / IH) + BUF);
   if (si === lS && ei === lE) return;
@@ -1710,26 +1712,7 @@ async function init(){
   el.q.addEventListener('input', df);
   el.qx.addEventListener('click', () => { el.q.value=''; state.q=''; el.qx.classList.remove('on'); filter(); });
   el.srt.addEventListener('change', () => { state.sort = el.srt.value; doSort(); render(); });
-  el.list.addEventListener('scroll', () => { if (state.filtered.length > 200) requestAnimationFrame(vRender); });
-  // Tame trackpad momentum — take over scrolling entirely
-  (function() {
-    let targetScroll = 0, rafId = 0;
-    function smoothTo() {
-      const cur = el.list.scrollTop;
-      const diff = targetScroll - cur;
-      if (Math.abs(diff) < 1) { el.list.scrollTop = targetScroll; rafId = 0; return; }
-      el.list.scrollTop = cur + diff * 0.25;
-      rafId = requestAnimationFrame(smoothTo);
-    }
-    el.list.addEventListener('wheel', function(e) {
-      e.preventDefault();
-      // Cap each wheel event to 1 row height max
-      const dy = Math.max(-IH, Math.min(IH, e.deltaY));
-      const maxST = el.list.scrollHeight - el.list.clientHeight;
-      targetScroll = Math.max(0, Math.min(maxST, (rafId ? targetScroll : el.list.scrollTop) + dy));
-      if (!rafId) rafId = requestAnimationFrame(smoothTo);
-    }, {passive: false});
-  })();
+  window.addEventListener('scroll', () => { if (state.filtered.length > 200) requestAnimationFrame(vRender); }, {passive: true});
   el.csv.addEventListener('click', exportCSV);
 
   // New scan button — clears saved data and reloads to landing page
