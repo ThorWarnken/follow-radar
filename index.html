@@ -1548,7 +1548,7 @@ function loadPayload(p){
   for (const u of state.following){
     const k = u.username.toLowerCase();
     if (followerSet.has(k)) mutuals.push(u);
-    else nonFol.push({username: u.username, full_name: u.full_name || '', href: profileUrl(u.username), is_private: !!u.is_private, mutual_count: u.mutual_count || 0});
+    else nonFol.push({username: u.username, full_name: u.full_name || '', href: profileUrl(u.username), is_private: !!u.is_private, mutual_count: u.mutual_count || 0, follower_count: u.follower_count || 0});
   }
   state.nonFol = nonFol;
   state.sort = 'mutuals';
@@ -1711,13 +1711,25 @@ async function init(){
   el.qx.addEventListener('click', () => { el.q.value=''; state.q=''; el.qx.classList.remove('on'); filter(); });
   el.srt.addEventListener('change', () => { state.sort = el.srt.value; doSort(); render(); });
   el.list.addEventListener('scroll', () => { if (state.filtered.length > 200) requestAnimationFrame(vRender); });
-  // Dampen trackpad momentum scrolling — cap scroll delta per frame
-  el.list.addEventListener('wheel', function(e) {
-    e.preventDefault();
-    const maxDelta = IH * 2; // cap at 2 rows per wheel tick
-    const dy = Math.max(-maxDelta, Math.min(maxDelta, e.deltaY));
-    this.scrollTop += dy;
-  }, {passive: false});
+  // Tame trackpad momentum — take over scrolling entirely
+  (function() {
+    let targetScroll = 0, rafId = 0;
+    function smoothTo() {
+      const cur = el.list.scrollTop;
+      const diff = targetScroll - cur;
+      if (Math.abs(diff) < 1) { el.list.scrollTop = targetScroll; rafId = 0; return; }
+      el.list.scrollTop = cur + diff * 0.25;
+      rafId = requestAnimationFrame(smoothTo);
+    }
+    el.list.addEventListener('wheel', function(e) {
+      e.preventDefault();
+      // Cap each wheel event to 1 row height max
+      const dy = Math.max(-IH, Math.min(IH, e.deltaY));
+      const maxST = el.list.scrollHeight - el.list.clientHeight;
+      targetScroll = Math.max(0, Math.min(maxST, (rafId ? targetScroll : el.list.scrollTop) + dy));
+      if (!rafId) rafId = requestAnimationFrame(smoothTo);
+    }, {passive: false});
+  })();
   el.csv.addEventListener('click', exportCSV);
 
   // New scan button — clears saved data and reloads to landing page
