@@ -7,4 +7,4 @@ binding = "FLOCK_PAYMENTS"
 id = "9e3df65db136458f9ea8c92fcda80e3d"
 
 [vars]
-ALLOWED_ORIGIN = "https://thorwarnken.github.io"
+ALLOWED_ORIGIN = "https://flockscan.org"
