@@ -4,7 +4,7 @@ compatibility_date = "2024-12-01"
 
 [[kv_namespaces]]
 binding = "FLOCK_PAYMENTS"
-id = "PLACEHOLDER_KV_ID"
+id = "9e3df65db136458f9ea8c92fcda80e3d"
 
 [vars]
 ALLOWED_ORIGIN = "https://thorwarnken.github.io"
