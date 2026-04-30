@@ -25,6 +25,7 @@
   const RESUME_MAX_AGE_MS = 24 * 60 * 60 * 1000;
   const FOLLOW_RADAR_URL = 'https://thorwarnken.github.io/follow-radar';
   const RESUME_KEY = 'follow-radar:resume';
+  const BIRD_LOGO_URI = FOLLOW_RADAR_URL + '/bird-logo.svg';
 
   class RateLimitError extends Error {
     constructor(reason) {
@@ -444,34 +445,11 @@
     // Bird icon in a soft gradient circle
     const iconWrap = document.createElement('div');
     iconWrap.setAttribute('style', 'width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(217,70,239,0.1));display:flex;align-items:center;justify-content:center;flex-shrink:0');
-    const NS = 'http://www.w3.org/2000/svg';
-    const bSvg = document.createElementNS(NS, 'svg');
-    bSvg.setAttribute('width', '22');
-    bSvg.setAttribute('height', '22');
-    bSvg.setAttribute('viewBox', '0 0 32 32');
-    const bDefs = document.createElementNS(NS, 'defs');
-    const bGrad = document.createElementNS(NS, 'linearGradient');
-    bGrad.setAttribute('id', 'fr-bird-g');
-    bGrad.setAttribute('x1', '0');
-    bGrad.setAttribute('y1', '0');
-    bGrad.setAttribute('x2', '32');
-    bGrad.setAttribute('y2', '32');
-    bGrad.setAttribute('gradientUnits', 'userSpaceOnUse');
-    const bStop1 = document.createElementNS(NS, 'stop');
-    bStop1.setAttribute('offset', '0%');
-    bStop1.setAttribute('stop-color', '#6366F1');
-    const bStop2 = document.createElementNS(NS, 'stop');
-    bStop2.setAttribute('offset', '100%');
-    bStop2.setAttribute('stop-color', '#D946EF');
-    bGrad.appendChild(bStop1);
-    bGrad.appendChild(bStop2);
-    bDefs.appendChild(bGrad);
-    bSvg.appendChild(bDefs);
-    const bPath = document.createElementNS(NS, 'path');
-    bPath.setAttribute('d', 'M26 7C26 7 29 4 27 3C25 2 22 5 19 8C16 5 13 2 11 3C9 4 12 7 12 7L8 11C6 13 5 16 6 19L3 22L5 24L8 21C11 23 15 23 18 21L22 17C24 15 25 12 24 9L26 7ZM15 18C13.5 18 12 16.5 12 15C12 13.5 13.5 12 15 12C16.5 12 18 13.5 18 15C18 16.5 16.5 18 15 18Z');
-    bPath.setAttribute('fill', 'url(#fr-bird-g)');
-    bSvg.appendChild(bPath);
-    iconWrap.appendChild(bSvg);
+    const birdImg = document.createElement('img');
+    birdImg.setAttribute('width', '22');
+    birdImg.setAttribute('height', '22');
+    birdImg.setAttribute('src', BIRD_LOGO_URI);
+    iconWrap.appendChild(birdImg);
     const titleCol = document.createElement('div');
     titleCol.setAttribute('style', 'flex:1;min-width:0');
     const title = document.createElement('div');
