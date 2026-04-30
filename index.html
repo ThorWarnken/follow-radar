@@ -1342,10 +1342,12 @@ function setUnlocked(type, expiresAt) {
   localStorage.setItem(UNLOCK_KEY, JSON.stringify({ type: type, verified: true, expiresAt: expiresAt, timestamp: Date.now() }));
 }
 
-async function verifyPayment(email) {
+async function verifyPayment(email, username) {
   if (!email) return null;
   try {
-    const r = await fetch(VERIFY_URL + '?email=' + encodeURIComponent(email));
+    let url = VERIFY_URL + '?email=' + encodeURIComponent(email);
+    if (username) url += '&username=' + encodeURIComponent(username);
+    const r = await fetch(url);
     if (!r.ok) return null;
     return await r.json();
   } catch(e) {
@@ -1355,7 +1357,7 @@ async function verifyPayment(email) {
 }
 
 function loadPayload(p){
-
+  state.username = p.username || '';
   state.followers = Array.isArray(p.followers) ? p.followers : [];
   state.following = Array.isArray(p.following) ? p.following : [];
   state.partial = !!p.partial;
@@ -1583,7 +1585,7 @@ async function init(){
     const params = new URLSearchParams(window.location.search);
     const email = params.get('email');
     if (!email) return false;
-    const result = await verifyPayment(email);
+    const result = await verifyPayment(email, state.username);
     if (result && result.unlocked) {
       // Clean email from URL
       try { history.replaceState(null, '', window.location.pathname + window.location.hash); } catch(e) {}
@@ -1598,7 +1600,7 @@ async function init(){
   async function checkPendingPayment() {
     const email = localStorage.getItem('follow-radar:email');
     if (!email) return;
-    const result = await verifyPayment(email);
+    const result = await verifyPayment(email, state.username);
     if (result && result.unlocked) {
       unlockAndRestore(result.plan, result.expiresAt);
     }
@@ -1625,12 +1627,14 @@ async function init(){
       paidBtn.textContent = 'checking...';
       paidBtn.disabled = true;
       paidError.style.display = 'none';
-      const result = await verifyPayment(email);
+      const result = await verifyPayment(email, state.username);
       if (result && result.unlocked) {
         localStorage.setItem('follow-radar:email', email);
         unlockAndRestore(result.plan, result.expiresAt);
       } else {
-        paidError.textContent = 'no active payment found for this email';
+        paidError.textContent = result && result.linkedUsername
+          ? 'This subscription is linked to @' + result.linkedUsername
+          : 'no active payment found for this email';
         paidError.style.display = 'block';
         paidBtn.textContent = "i've already paid";
         paidBtn.disabled = false;
@@ -1680,6 +1684,7 @@ async function init(){
       // Persist results so they survive page reloads
       try {
         localStorage.setItem(RESULTS_KEY, JSON.stringify({
+          username: payload.username || '',
           followers: payload.followers,
           following: payload.following,
           partial: !!payload.partial,

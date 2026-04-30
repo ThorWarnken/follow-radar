@@ -130,6 +130,7 @@ async function handleSubscriptionUpdated(subscription, env) {
 
 async function handleVerify(url, env, corsHeaders) {
   const email = (url.searchParams.get('email') || '').toLowerCase().trim();
+  const username = (url.searchParams.get('username') || '').toLowerCase().trim();
 
   if (!email) {
     return json({ error: 'email required' }, 400, corsHeaders);
@@ -149,15 +150,34 @@ async function handleVerify(url, env, corsHeaders) {
 
   // Check if the unlock has expired
   if (record.expiresAt && Date.now() > record.expiresAt) {
-    // Expired — clean up
     await env.FLOCK_PAYMENTS.delete(email);
     return json({ unlocked: false }, 200, corsHeaders);
+  }
+
+  // For monthly/yearly subscriptions, lock to one Instagram account
+  if (record.plan === 'monthly' || record.plan === 'yearly') {
+    if (username) {
+      if (!record.igUsername) {
+        // First scan — bind this subscription to this Instagram account
+        record.igUsername = username;
+        const remainingTtl = Math.max(60, Math.floor((record.expiresAt - Date.now()) / 1000));
+        await env.FLOCK_PAYMENTS.put(email, JSON.stringify(record), { expirationTtl: remainingTtl });
+      } else if (record.igUsername !== username) {
+        // Different Instagram account — deny access
+        return json({
+          unlocked: false,
+          error: 'This subscription is linked to @' + record.igUsername,
+          linkedUsername: record.igUsername,
+        }, 200, corsHeaders);
+      }
+    }
   }
 
   return json({
     unlocked: true,
     plan: record.plan,
     expiresAt: record.expiresAt,
+    igUsername: record.igUsername || null,
   }, 200, corsHeaders);
 }
 
