@@ -424,66 +424,114 @@
 
   function createOverlay() {
     if (overlayEl) return;
-    // Outer wrapper — gradient border via padding trick
+    // Inject animations
+    const style = document.createElement('style');
+    style.textContent = [
+      '@keyframes fr-in{from{opacity:0;transform:translateY(12px) scale(0.95)}to{opacity:1;transform:translateY(0) scale(1)}}',
+      '@keyframes fr-spin{to{transform:rotate(360deg)}}',
+      '@keyframes fr-dots{0%,80%,100%{opacity:.25}40%{opacity:1}}',
+      '@keyframes fr-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}',
+    ].join('');
+    document.head.appendChild(style);
+
+    // Outer container
     overlayEl = document.createElement('div');
     overlayEl.setAttribute('style', [
-      'position:fixed','bottom:24px','right:24px','z-index:2147483647',
-      'padding:1.5px','border-radius:16px',
-      'background:linear-gradient(135deg,#6366F1,#D946EF)',
-      'box-shadow:0 8px 40px rgba(0,0,0,0.4),0 0 24px rgba(99,102,241,0.25)',
-      'font:500 13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
-      'min-width:280px','animation:fr-fadein 0.4s cubic-bezier(0.16,1,0.3,1)',
+      'position:fixed','bottom:20px','right:20px','z-index:2147483647',
+      'width:260px','border-radius:14px',
+      'background:rgba(12,14,36,0.92)',
+      'backdrop-filter:blur(16px)','-webkit-backdrop-filter:blur(16px)',
+      'border:1px solid rgba(99,102,241,0.2)',
+      'box-shadow:0 4px 24px rgba(0,0,0,0.5),0 0 0 1px rgba(99,102,241,0.08)',
+      'font:500 13px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
+      'color:#fff','overflow:hidden',
+      'animation:fr-in 0.35s cubic-bezier(0.16,1,0.3,1)',
     ].join(';'));
-    // Inner dark card
-    const inner = document.createElement('div');
-    inner.setAttribute('style', [
-      'background:#0F142B','border-radius:14.5px','padding:16px 20px','color:#FFFFFF',
+
+    // Content area
+    const content = document.createElement('div');
+    content.setAttribute('style', 'padding:14px 16px 12px');
+
+    // Top row: spinner + title + live badge
+    const topRow = document.createElement('div');
+    topRow.setAttribute('style', 'display:flex;align-items:center;gap:10px;margin-bottom:10px');
+
+    // Spinning ring
+    const spinner = document.createElement('div');
+    spinner.setAttribute('style', [
+      'width:28px','height:28px','border-radius:50%','flex-shrink:0',
+      'border:2.5px solid rgba(99,102,241,0.15)',
+      'border-top-color:#6366F1','border-right-color:#A855F7',
+      'animation:fr-spin 1s linear infinite',
     ].join(';'));
-    // Header row — bird icon + title + scanning dot
-    const header = document.createElement('div');
-    header.setAttribute('style', 'display:flex;align-items:center;gap:10px;margin-bottom:12px');
-    // Bird icon in a soft gradient circle
-    const iconWrap = document.createElement('div');
-    iconWrap.setAttribute('style', 'width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(217,70,239,0.1));display:flex;align-items:center;justify-content:center;flex-shrink:0');
-    const birdImg = document.createElement('img');
-    birdImg.setAttribute('width', '22');
-    birdImg.setAttribute('height', '22');
-    birdImg.setAttribute('src', BIRD_LOGO_URI);
-    iconWrap.appendChild(birdImg);
+
+    // Title column
     const titleCol = document.createElement('div');
     titleCol.setAttribute('style', 'flex:1;min-width:0');
     const title = document.createElement('div');
-    title.setAttribute('style', 'font-weight:700;font-size:14px;letter-spacing:-0.01em;color:#fff');
+    title.setAttribute('style', 'font-weight:700;font-size:13px;letter-spacing:0.02em;color:#fff');
     title.textContent = 'Flock';
     const subtitle = document.createElement('div');
-    subtitle.setAttribute('style', 'font-size:11px;color:#667085;margin-top:1px');
-    subtitle.textContent = 'Scanning your account';
+    subtitle.setAttribute('style', 'font-size:10px;color:rgba(255,255,255,0.4);margin-top:1px;text-transform:uppercase;letter-spacing:0.06em');
+    subtitle.textContent = 'Scanning';
     titleCol.appendChild(title);
     titleCol.appendChild(subtitle);
-    // Pulsing live dot
-    const dot = document.createElement('div');
-    dot.setAttribute('style', 'width:8px;height:8px;border-radius:50%;background:#34c759;flex-shrink:0;animation:fr-pulse 1.5s ease-in-out infinite');
-    header.appendChild(iconWrap);
-    header.appendChild(titleCol);
-    header.appendChild(dot);
-    inner.appendChild(header);
+
+    // Live badge with animated dots
+    const badge = document.createElement('div');
+    badge.setAttribute('style', [
+      'display:flex','align-items:center','gap:3px',
+      'padding:3px 8px','border-radius:20px',
+      'background:rgba(99,102,241,0.12)',
+      'flex-shrink:0',
+    ].join(';'));
+    for (let i = 0; i < 3; i++) {
+      const d = document.createElement('div');
+      d.setAttribute('style', [
+        'width:4px','height:4px','border-radius:50%',
+        'background:#6366F1',
+        'animation:fr-dots 1.2s ease-in-out ' + (i * 0.15) + 's infinite',
+      ].join(';'));
+      badge.appendChild(d);
+    }
+
+    topRow.appendChild(spinner);
+    topRow.appendChild(titleCol);
+    topRow.appendChild(badge);
+    content.appendChild(topRow);
+
     // Status text
     overlayTextEl = document.createElement('div');
     overlayTextEl.textContent = 'Starting\u2026';
-    overlayTextEl.setAttribute('style', 'margin-bottom:12px;font-size:12.5px;color:#EEF0FF;font-variant-numeric:tabular-nums');
-    inner.appendChild(overlayTextEl);
-    // Progress bar
+    overlayTextEl.setAttribute('style', 'font-size:12px;color:rgba(255,255,255,0.65);font-variant-numeric:tabular-nums;margin-bottom:12px');
+    content.appendChild(overlayTextEl);
+
+    // Progress bar track
     const track = document.createElement('div');
-    track.setAttribute('style', 'height:4px;background:rgba(99,102,241,0.12);border-radius:2px;overflow:hidden');
+    track.setAttribute('style', 'height:3px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden');
     overlayBarEl = document.createElement('div');
-    overlayBarEl.setAttribute('style', 'height:100%;width:0%;background:linear-gradient(90deg,#6366F1,#D946EF);border-radius:2px;transition:width 0.4s cubic-bezier(0.16,1,0.3,1)');
+    overlayBarEl.setAttribute('style', [
+      'height:100%','width:0%','border-radius:2px',
+      'background:linear-gradient(90deg,#6366F1,#A855F7,#D946EF)',
+      'background-size:200% 100%',
+      'animation:fr-shimmer 2s linear infinite',
+      'transition:width 0.4s cubic-bezier(0.16,1,0.3,1)',
+    ].join(';'));
     track.appendChild(overlayBarEl);
-    inner.appendChild(track);
-    overlayEl.appendChild(inner);
-    // Inject animations
-    const style = document.createElement('style');
-    style.textContent = '@keyframes fr-fadein{from{opacity:0;transform:translateY(16px) scale(0.96)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes fr-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.85)}}';
-    document.head.appendChild(style);
+    content.appendChild(track);
+
+    overlayEl.appendChild(content);
+
+    // Bottom accent line
+    const accent = document.createElement('div');
+    accent.setAttribute('style', [
+      'height:2px',
+      'background:linear-gradient(90deg,#6366F1,#A855F7,#D946EF,#6366F1)',
+      'background-size:200% 100%',
+      'animation:fr-shimmer 3s linear infinite',
+    ].join(';'));
+    overlayEl.appendChild(accent);
+
     document.body.appendChild(overlayEl);
   }
 
