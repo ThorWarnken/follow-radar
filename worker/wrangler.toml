@@ -1,0 +1,10 @@
+name = "flock-payments"
+main = "src/index.js"
+compatibility_date = "2024-12-01"
+
+[[kv_namespaces]]
+binding = "FLOCK_PAYMENTS"
+id = "PLACEHOLDER_KV_ID"
+
+[vars]
+ALLOWED_ORIGIN = "https://thorwarnken.github.io"
