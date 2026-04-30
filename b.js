@@ -293,6 +293,7 @@
       is_private: !!u.is_private,
     };
     if (u.is_verified) obj.is_verified = true;
+    if (typeof u.follower_count === 'number') obj.follower_count = u.follower_count;
     if (typeof mutualCount === 'number') obj.mutual_count = mutualCount;
     return obj;
   }
