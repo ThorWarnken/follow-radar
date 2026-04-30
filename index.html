@@ -1923,6 +1923,19 @@ async function init(){
     document.getElementById('growth-username').textContent = username ? '@' + username : '';
     document.getElementById('g-post-count').textContent = posts.length;
 
+    // Attach click-to-expand on cards (must run even if no posts)
+    document.querySelectorAll('#growth-cards .g-card').forEach(card => {
+      if (!card._expandBound) {
+        card._expandBound = true;
+        card.addEventListener('click', function(e) {
+          if (e.target.closest('a')) return;
+          const wasExpanded = this.classList.contains('expanded');
+          document.querySelectorAll('#growth-cards .g-card').forEach(c => c.classList.remove('expanded'));
+          if (!wasExpanded) this.classList.add('expanded');
+        });
+      }
+    });
+
     if (posts.length === 0) {
       document.getElementById('growth-confidence').textContent = 'No posts found. Post some content and scan again to see your growth analytics.';
       return;
@@ -2207,15 +2220,6 @@ async function init(){
         '<div class="g-detail-tip"><strong>Tip:</strong> Look for patterns in your top posts. Same day? Same time? Same format? Replicate what works.</div>';
     }
 
-    // Card click-to-expand
-    document.querySelectorAll('#growth-cards .g-card').forEach(card => {
-      card.addEventListener('click', function(e) {
-        if (e.target.closest('a')) return;
-        const wasExpanded = this.classList.contains('expanded');
-        document.querySelectorAll('#growth-cards .g-card').forEach(c => c.classList.remove('expanded'));
-        if (!wasExpanded) this.classList.add('expanded');
-      });
-    });
   }
 
   // Scroll reveal
