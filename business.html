@@ -294,6 +294,119 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   .hero-headline{font-size:2rem}
 }
 
+/* ==================== ONBOARDING ==================== */
+.onboard{
+  display:none;padding:0 2rem 120px;
+  max-width:700px;margin:0 auto;
+}
+.onboard.show{display:block}
+.onboard-card{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-xl);
+  padding:2.5rem 2.25rem;
+  box-shadow:var(--shadow-md);
+}
+.onboard-header{text-align:center;margin-bottom:2.5rem}
+.onboard-badge{
+  display:inline-block;font-family:var(--font);font-weight:700;
+  font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--gold);padding:6px 14px;
+  background:var(--gold-bg);border:1px solid var(--gold-border);
+  border-radius:var(--radius-pill);margin-bottom:1rem;
+}
+.onboard-title{
+  font-family:var(--font);font-weight:800;
+  font-size:clamp(1.6rem,3vw,2.2rem);
+  line-height:1.2;letter-spacing:-0.015em;
+  margin-bottom:0.75rem;
+}
+.onboard-subtitle{
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.95rem;color:var(--text-soft);line-height:1.65;
+  max-width:520px;margin:0 auto;
+}
+
+.form-group{margin-bottom:2rem}
+.form-label{
+  display:block;font-family:var(--font);font-weight:700;
+  font-size:0.95rem;margin-bottom:0.5rem;
+}
+.form-hint{
+  display:block;font-family:var(--font-body);font-weight:500;
+  font-size:0.82rem;color:var(--text-muted);margin-bottom:0.5rem;
+}
+.form-input{
+  display:block;width:100%;
+  font-family:var(--font-body);font-weight:500;font-size:0.95rem;
+  color:var(--text);background:var(--bg);
+  border:1px solid var(--border);border-radius:var(--radius);
+  padding:12px 16px;
+  transition:border-color 0.2s;
+  outline:none;
+}
+.form-input::placeholder{color:var(--text-muted)}
+.form-input:focus{border-color:var(--gold)}
+textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
+
+.form-type-wrap{position:relative}
+.type-suggestions{
+  position:absolute;top:100%;left:0;right:0;z-index:10;
+  background:var(--bg-card);
+  border:1px solid var(--border);border-radius:var(--radius);
+  margin-top:4px;
+  max-height:260px;overflow-y:auto;
+  display:none;
+  box-shadow:var(--shadow-md);
+}
+.type-suggestions.show{display:block}
+.type-suggestion{
+  padding:10px 16px;
+  font-family:var(--font-body);font-weight:500;font-size:0.9rem;
+  color:var(--text-soft);cursor:pointer;
+  transition:background 0.15s,color 0.15s;
+}
+.type-suggestion:hover{
+  background:var(--gold-bg);color:var(--gold);
+}
+
+.form-chips{display:flex;flex-wrap:wrap;gap:0.5rem}
+.form-chip{
+  font-family:var(--font-body);font-weight:600;font-size:0.85rem;
+  color:var(--text-soft);
+  padding:8px 16px;border-radius:var(--radius-pill);
+  border:1px solid var(--border);
+  background:transparent;
+  cursor:pointer;
+  transition:background 0.2s,border-color 0.2s,color 0.2s;
+}
+.form-chip:hover{border-color:var(--gold-border);color:var(--text)}
+.form-chip.selected{
+  background:var(--gold-bg);
+  border-color:var(--gold);
+  color:var(--gold);
+}
+
+.form-submit{
+  display:block;width:100%;
+  font-family:var(--font);font-weight:700;font-size:1.05rem;
+  padding:16px 24px;border-radius:var(--radius-pill);
+  background:var(--gradient-gold);color:#08080f;
+  border:none;cursor:pointer;
+  transition:transform 0.25s var(--ease),box-shadow 0.25s;
+  margin-top:0.5rem;
+}
+.form-submit:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 32px rgba(212,168,67,0.35);
+}
+
+/* ==================== RESPONSIVE (onboard additions) ==================== */
+@media(max-width:768px){
+  .onboard{padding:0 1.5rem 80px}
+  .onboard-card{padding:2rem 1.5rem}
+}
+
 /* Reduced motion */
 @media(prefers-reduced-motion:reduce){
   *{transition:none !important;animation:none !important}
@@ -312,7 +425,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   <div class="nav-links">
     <a href="index.html" class="nav-link-text">Personal</a>
     <a href="#pricing" class="nav-link-text">Pricing</a>
-    <a href="#features" class="nav-cta">Get Started</a>
+    <a href="#get-started" class="nav-cta">Get Started</a>
   </div>
 </nav>
 
@@ -406,7 +519,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>PDF report downloads</li>
         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Progress tracking</li>
       </ul>
-      <a href="javascript:void(0)" id="biz-pay-monthly" target="_blank" rel="noopener" class="pricing-cta">Get Started</a>
+      <a href="#get-started" id="biz-pay-monthly" class="pricing-cta">Get Started</a>
     </div>
 
     <!-- Yearly (featured) -->
@@ -420,11 +533,240 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Save $101 vs monthly</li>
         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Priority support</li>
       </ul>
-      <a href="javascript:void(0)" id="biz-pay-yearly" target="_blank" rel="noopener" class="pricing-cta">Get Started</a>
+      <a href="#get-started" id="biz-pay-yearly" class="pricing-cta">Get Started</a>
     </div>
 
   </div>
 </section>
+
+<!-- Onboarding -->
+<section class="onboard" id="get-started">
+  <div class="onboard-card">
+    <div class="onboard-header">
+      <span class="onboard-badge">Your Profile</span>
+      <h2 class="onboard-title">Tell us about your business.</h2>
+      <p class="onboard-subtitle">This helps us generate reports tailored to your specific situation. You can update this anytime.</p>
+    </div>
+
+    <form id="onboard-form" autocomplete="off">
+      <div class="form-group">
+        <label class="form-label" for="ob-name">Business name</label>
+        <input class="form-input" type="text" id="ob-name" placeholder="The Local Kitchen">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="ob-desc">What does your business do?</label>
+        <span class="form-hint">Describe what you offer and where you're based.</span>
+        <textarea class="form-input" id="ob-desc" placeholder="We run a farm-to-table restaurant in downtown Austin, specializing in seasonal tasting menus and weekend brunch."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="ob-type">Business type</label>
+        <div class="form-type-wrap">
+          <input class="form-input" type="text" id="ob-type" placeholder="Start typing or pick one...">
+          <div class="type-suggestions" id="type-suggestions"></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="ob-customer">Who is your target customer?</label>
+        <textarea class="form-input" id="ob-customer" placeholder="Describe your ideal customer - age, interests, location, habits."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">What are your marketing goals?</label>
+        <div class="form-chips" data-field="marketingGoals">
+          <button type="button" class="form-chip" data-value="More foot traffic">More foot traffic</button>
+          <button type="button" class="form-chip" data-value="More online sales">More online sales</button>
+          <button type="button" class="form-chip" data-value="Brand awareness">Brand awareness</button>
+          <button type="button" class="form-chip" data-value="Land brand deals">Land brand deals</button>
+          <button type="button" class="form-chip" data-value="Grow following">Grow following</button>
+          <button type="button" class="form-chip" data-value="Promote deals/events">Promote deals/events</button>
+          <button type="button" class="form-chip" data-value="Launch new product">Launch new product</button>
+          <button type="button" class="form-chip" data-value="Get more bookings">Get more bookings</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="ob-diff">What makes you different from competitors?</label>
+        <textarea class="form-input" id="ob-diff" placeholder="Your unique selling points, specialties, or brand story."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">How do customers find you today?</label>
+        <div class="form-chips" data-field="customerSources">
+          <button type="button" class="form-chip" data-value="Word of mouth">Word of mouth</button>
+          <button type="button" class="form-chip" data-value="Instagram">Instagram</button>
+          <button type="button" class="form-chip" data-value="Google">Google</button>
+          <button type="button" class="form-chip" data-value="TikTok">TikTok</button>
+          <button type="button" class="form-chip" data-value="Walk-ins">Walk-ins</button>
+          <button type="button" class="form-chip" data-value="Other social">Other social</button>
+          <button type="button" class="form-chip" data-value="Paid ads">Paid ads</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="ob-challenge">What is your biggest challenge right now?</label>
+        <span class="form-hint">Be specific. The more detail, the better your report will be.</span>
+        <textarea class="form-input" id="ob-challenge" placeholder="Describe what is holding your business back right now."></textarea>
+      </div>
+
+      <button type="submit" class="form-submit">Save Profile and Continue</button>
+    </form>
+  </div>
+</section>
+
+<script>
+(function(){
+  /* === Type suggestions === */
+  var TYPE_OPTIONS = [
+    'Restaurant / Food & Beverage',
+    'Retail / E-commerce',
+    'Influencer / Content Creator',
+    'Local Service',
+    'Real Estate',
+    'Professional Services',
+    'Software / SaaS',
+    'Other'
+  ];
+
+  var typeInput = document.getElementById('ob-type');
+  var sugBox = document.getElementById('type-suggestions');
+  var blurTimer = null;
+
+  function renderSuggestions(filter) {
+    var q = (filter || '').toLowerCase();
+    var items = TYPE_OPTIONS.filter(function(t) {
+      return !q || t.toLowerCase().indexOf(q) !== -1;
+    });
+    sugBox.innerHTML = items.map(function(t) {
+      return '<div class="type-suggestion" data-value="' + t + '">' + t + '</div>';
+    }).join('');
+  }
+
+  function showSuggestions() {
+    renderSuggestions(typeInput.value);
+    sugBox.classList.add('show');
+  }
+
+  function hideSuggestions() {
+    sugBox.classList.remove('show');
+  }
+
+  typeInput.addEventListener('focus', showSuggestions);
+  typeInput.addEventListener('input', function() {
+    renderSuggestions(typeInput.value);
+    if (!sugBox.classList.contains('show')) sugBox.classList.add('show');
+  });
+  typeInput.addEventListener('blur', function() {
+    blurTimer = setTimeout(hideSuggestions, 150);
+  });
+  sugBox.addEventListener('mousedown', function(e) {
+    var item = e.target.closest('.type-suggestion');
+    if (!item) return;
+    e.preventDefault();
+    clearTimeout(blurTimer);
+    typeInput.value = item.getAttribute('data-value');
+    hideSuggestions();
+  });
+
+  /* === Chip toggle === */
+  document.querySelectorAll('.form-chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      chip.classList.toggle('selected');
+    });
+  });
+
+  /* === Collect selected chips for a field === */
+  function getChipValues(fieldName) {
+    var container = document.querySelector('.form-chips[data-field="' + fieldName + '"]');
+    if (!container) return [];
+    var selected = container.querySelectorAll('.form-chip.selected');
+    return Array.prototype.map.call(selected, function(c) { return c.getAttribute('data-value'); });
+  }
+
+  /* === Set chip selections from array === */
+  function setChipValues(fieldName, values) {
+    if (!values || !values.length) return;
+    var container = document.querySelector('.form-chips[data-field="' + fieldName + '"]');
+    if (!container) return;
+    container.querySelectorAll('.form-chip').forEach(function(c) {
+      if (values.indexOf(c.getAttribute('data-value')) !== -1) {
+        c.classList.add('selected');
+      } else {
+        c.classList.remove('selected');
+      }
+    });
+  }
+
+  /* === Build profile object === */
+  function buildProfile() {
+    return {
+      businessName: document.getElementById('ob-name').value.trim(),
+      description: document.getElementById('ob-desc').value.trim(),
+      businessType: document.getElementById('ob-type').value.trim(),
+      targetCustomer: document.getElementById('ob-customer').value.trim(),
+      marketingGoals: getChipValues('marketingGoals'),
+      differentiator: document.getElementById('ob-diff').value.trim(),
+      customerSources: getChipValues('customerSources'),
+      biggestChallenge: document.getElementById('ob-challenge').value.trim()
+    };
+  }
+
+  /* === Save profile === */
+  function saveProfile() {
+    var profile = buildProfile();
+    localStorage.setItem('flock-business:profile', JSON.stringify(profile));
+    return profile;
+  }
+
+  /* === Restore profile on load === */
+  function restoreProfile() {
+    var raw = localStorage.getItem('flock-business:profile');
+    if (!raw) return;
+    try {
+      var p = JSON.parse(raw);
+      if (p.businessName) document.getElementById('ob-name').value = p.businessName;
+      if (p.description) document.getElementById('ob-desc').value = p.description;
+      if (p.businessType) document.getElementById('ob-type').value = p.businessType;
+      if (p.targetCustomer) document.getElementById('ob-customer').value = p.targetCustomer;
+      if (p.differentiator) document.getElementById('ob-diff').value = p.differentiator;
+      if (p.biggestChallenge) document.getElementById('ob-challenge').value = p.biggestChallenge;
+      setChipValues('marketingGoals', p.marketingGoals);
+      setChipValues('customerSources', p.customerSources);
+    } catch(e) { /* ignore corrupt data */ }
+  }
+
+  restoreProfile();
+
+  /* === Get Started links === */
+  var onboardSection = document.getElementById('get-started');
+  document.querySelectorAll('a[href="#get-started"]').forEach(function(link) {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      onboardSection.classList.add('show');
+      onboardSection.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  /* === Form submit === */
+  document.getElementById('onboard-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var name = document.getElementById('ob-name').value.trim();
+    if (!name) {
+      document.getElementById('ob-name').focus();
+      return;
+    }
+    var profile = saveProfile();
+    var email = localStorage.getItem('flock-business:email');
+    if (email) {
+      console.log('[Flock] Profile saved. Email found, would show scan section.', profile);
+    } else {
+      console.log('[Flock] Profile saved. No email, would show verify section.', profile);
+    }
+  });
+})();
+</script>
 
 </body>
 </html>
