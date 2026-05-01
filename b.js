@@ -155,27 +155,42 @@
     return { users: body.users, nextCursor: body.next_max_id || null };
   }
 
-  // fetchPage does the actual HTTP call, with throttling.
+  // fetchPage does the actual HTTP call, with throttling and retry.
   // Returns {users, nextCursor} or throws.
   async function fetchPage(url, opts) {
     opts = opts || {};
-    if (!opts.skipThrottle) await throttle();
-    let resp;
-    try {
-      resp = await doFetch(url, {
-        credentials: 'include',
-        headers: { 'X-IG-App-ID': IG_APP_ID, 'Accept': 'application/json' },
-      });
-    } catch (e) {
-      throw new Error('network error: ' + e.message);
+    var maxRetries = 2;
+    for (var attempt = 0; attempt <= maxRetries; attempt++) {
+      if (!opts.skipThrottle || attempt > 0) await throttle();
+      // Extra backoff on retries
+      if (attempt > 0) await new Promise(function(r) { setTimeout(r, 2000 * attempt); });
+      var resp;
+      try {
+        resp = await doFetch(url, {
+          credentials: 'include',
+          headers: { 'X-IG-App-ID': IG_APP_ID, 'Accept': 'application/json' },
+        });
+      } catch (e) {
+        if (attempt < maxRetries) continue;
+        throw new Error('network error: ' + e.message);
+      }
+      // If Instagram returns a non-200 HTML page, retry before giving up
+      if (resp.status === 429 || resp.status === 401) {
+        throw new RateLimitError('http ' + resp.status);
+      }
+      var body;
+      try {
+        body = await resp.json();
+      } catch (e) {
+        if (attempt < maxRetries) {
+          console.warn('[flock] non-json response (attempt ' + (attempt + 1) + '), retrying...');
+          continue;
+        }
+        // After retries exhausted, treat as rate limit so progress is saved
+        throw new RateLimitError('non-json response after ' + (maxRetries + 1) + ' attempts');
+      }
+      return classifyResponse(resp.status, body);
     }
-    let body;
-    try {
-      body = await resp.json();
-    } catch (e) {
-      throw new Error('non-json response from instagram');
-    }
-    return classifyResponse(resp.status, body);
   }
 
   // ─── Pagination ──────────────────────────────────────────────────
