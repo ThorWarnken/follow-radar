@@ -18,9 +18,9 @@
   'use strict';
 
   const MAX_ACCOUNT_SIZE = 10000;
-  const THROTTLE_MS = 800;
-  const THROTTLE_JITTER_MS = 300;
-  const PAGE_SIZE = 200;
+  const THROTTLE_MS = 1500;
+  const THROTTLE_JITTER_MS = 800;
+  const PAGE_SIZE = 100;
   const IG_APP_ID = '936619743392459';
   const RESUME_MAX_AGE_MS = 24 * 60 * 60 * 1000;
   const FOLLOW_RADAR_URL = 'https://flockscan.org';
@@ -155,6 +155,14 @@
     return { users: body.users, nextCursor: body.next_max_id || null };
   }
 
+  // Standard headers that match Instagram's own web client requests
+  var igHeaders = {
+    'X-IG-App-ID': IG_APP_ID,
+    'X-IG-WWW-Claim': '0',
+    'X-Requested-With': 'XMLHttpRequest',
+    'Accept': '*/*',
+  };
+
   // fetchPage does the actual HTTP call, with throttling and retry.
   // Returns {users, nextCursor} or throws.
   async function fetchPage(url, opts) {
@@ -162,19 +170,19 @@
     var maxRetries = 2;
     for (var attempt = 0; attempt <= maxRetries; attempt++) {
       if (!opts.skipThrottle || attempt > 0) await throttle();
-      // Extra backoff on retries
-      if (attempt > 0) await new Promise(function(r) { setTimeout(r, 2000 * attempt); });
+      // Increasing backoff on retries: 3s, 6s
+      if (attempt > 0) await new Promise(function(r) { setTimeout(r, 3000 * attempt); });
       var resp;
       try {
         resp = await doFetch(url, {
           credentials: 'include',
-          headers: { 'X-IG-App-ID': IG_APP_ID, 'Accept': 'application/json' },
+          headers: igHeaders,
         });
       } catch (e) {
         if (attempt < maxRetries) continue;
         throw new Error('network error: ' + e.message);
       }
-      // If Instagram returns a non-200 HTML page, retry before giving up
+      // Rate limit responses — no point retrying these
       if (resp.status === 429 || resp.status === 401) {
         throw new RateLimitError('http ' + resp.status);
       }
@@ -220,7 +228,7 @@
     try {
       resp = await doFetch(buildMutualUrl(userId), {
         credentials: 'include',
-        headers: { 'X-IG-App-ID': IG_APP_ID, 'Accept': 'application/json' },
+        headers: igHeaders,
       });
     } catch (e) {
       return 0;
@@ -373,7 +381,7 @@
       try {
         const r = await doFetch('https://i.instagram.com/api/v1/accounts/current_user/?edit=true', {
           credentials: 'include',
-          headers: { 'X-IG-App-ID': IG_APP_ID, 'Accept': 'application/json' },
+          headers: igHeaders,
         });
         if (r.ok) {
           const j = await r.json();
@@ -388,7 +396,7 @@
     try {
       const r = await doFetch('https://www.instagram.com/api/v1/web/accounts/login/ajax/info/', {
         credentials: 'include',
-        headers: { 'X-IG-App-ID': IG_APP_ID, 'Accept': 'application/json' },
+        headers: igHeaders,
       });
       if (r.ok) {
         const j = await r.json();
@@ -402,7 +410,7 @@
       try {
         const r = await doFetch('https://i.instagram.com/api/v1/users/' + cookieUserId + '/info/', {
           credentials: 'include',
-          headers: { 'X-IG-App-ID': IG_APP_ID, 'Accept': 'application/json' },
+          headers: igHeaders,
         });
         if (r.ok) {
           const j = await r.json();
@@ -421,7 +429,7 @@
     const url = 'https://i.instagram.com/api/v1/users/web_profile_info/?username=' + encodeURIComponent(username);
     const r = await doFetch(url, {
       credentials: 'include',
-      headers: { 'X-IG-App-ID': IG_APP_ID, 'Accept': 'application/json' },
+      headers: igHeaders,
     });
     if (!r.ok) throw new Error('Could not fetch profile info: http ' + r.status);
     const j = await r.json();
@@ -596,7 +604,7 @@
       try {
         r = await doFetch(url, {
           credentials: 'include',
-          headers: { 'X-IG-App-ID': IG_APP_ID, 'Accept': 'application/json' },
+          headers: igHeaders,
         });
       } catch (e) {
         console.warn('[flock] post fetch network error:', e);
