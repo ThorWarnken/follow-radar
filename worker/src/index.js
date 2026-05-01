@@ -84,10 +84,8 @@ async function handleCheckoutCompleted(session, env) {
     expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
     ttl = 86400; // KV TTL in seconds
   } else if (mode === 'subscription') {
-    // Monthly or yearly — determine from the amount or interval
-    const amountTotal = session.amount_total || 0;
-    // $4 one-time, $5/mo = 500, $30/yr = 3000 (in cents)
-    // We'll also check subscription metadata if available
+    // Use amount_subtotal (before discounts) so promo codes don't break plan detection
+    const amountTotal = session.amount_subtotal || session.amount_total || 0;
     if (amountTotal >= 49000) {
       plan = 'business-yearly';
       expiresAt = Date.now() + 365 * 24 * 60 * 60 * 1000;
