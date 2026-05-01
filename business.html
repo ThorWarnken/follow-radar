@@ -1688,8 +1688,13 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
         scanSection.classList.add('show');
         scanSection.scrollIntoView({ behavior: 'smooth' });
       } else {
-        verifyError.textContent = 'No active Flock Business subscription found for this email.';
+        verifyError.innerHTML = 'No active subscription found for this email. <a href="#pricing" style="color:var(--gold);text-decoration:underline;font-weight:700">Subscribe here</a> to get started.';
         verifyError.classList.add('show');
+        verifyError.querySelector('a').addEventListener('click', function(ev) {
+          ev.preventDefault();
+          verifySection.classList.remove('show');
+          document.querySelector('.pricing').scrollIntoView({ behavior: 'smooth' });
+        });
       }
     } catch(err) {
       verifyError.textContent = 'Verification failed. Please try again.';
