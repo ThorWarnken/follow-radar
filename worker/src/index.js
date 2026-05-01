@@ -88,11 +88,11 @@ async function handleCheckoutCompleted(session, env) {
     const amountTotal = session.amount_total || 0;
     // $4 one-time, $5/mo = 500, $30/yr = 3000 (in cents)
     // We'll also check subscription metadata if available
-    if (amountTotal >= 40000) {
+    if (amountTotal >= 49000) {
       plan = 'business-yearly';
       expiresAt = Date.now() + 365 * 24 * 60 * 60 * 1000;
       ttl = 365 * 86400;
-    } else if (amountTotal >= 4000) {
+    } else if (amountTotal >= 4500) {
       plan = 'business-monthly';
       expiresAt = Date.now() + 31 * 24 * 60 * 60 * 1000;
       ttl = 31 * 86400;
@@ -246,6 +246,11 @@ Return your response as valid JSON matching the exact schema provided. Do not in
 
   const userPrompt = buildUserPrompt(profile, metrics);
 
+  if (!env.ANTHROPIC_API_KEY) {
+    console.error('ANTHROPIC_API_KEY not configured');
+    return json({ error: 'API key not configured' }, 500, corsHeaders);
+  }
+
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -275,10 +280,13 @@ Return your response as valid JSON matching the exact schema provided. Do not in
       return json({ error: 'AI returned empty response' }, 502, corsHeaders);
     }
 
-    // Extract JSON from Claude's response (handle potential markdown code fences)
+    // Extract JSON from Claude's response (handle markdown code fences and whitespace)
     let report;
     try {
-      const jsonStr = textContent.replace(/^```json\s*\n?/, '').replace(/\n?```\s*$/, '');
+      let jsonStr = textContent.trim();
+      // Remove markdown code fences if present
+      const fenceMatch = jsonStr.match(/```(?:json)?\s*\n?([\s\S]*?)\n?\s*```/);
+      if (fenceMatch) jsonStr = fenceMatch[1].trim();
       report = JSON.parse(jsonStr);
     } catch (e) {
       console.error('Failed to parse Claude JSON response:', e.message, textContent.slice(0, 200));
@@ -357,7 +365,7 @@ function computeMetrics(scan) {
   const engagementByHour = Object.entries(hourData)
     .map(([hour, d]) => ({
       hour: parseInt(hour),
-      avgEngagement: Math.round(d.totalEng / d.postCount),
+      avgEngagement: d.postCount > 0 ? Math.round(d.totalEng / d.postCount) : 0,
       postCount: d.postCount,
     }))
     .sort((a, b) => a.hour - b.hour);
