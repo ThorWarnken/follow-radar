@@ -407,6 +407,84 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
   .onboard-card{padding:2rem 1.5rem}
 }
 
+/* ==================== BOOKMARKLET / SCAN SECTION ==================== */
+.biz-scan{
+  display:none;padding:0 2rem 120px;
+  max-width:700px;margin:0 auto;
+}
+.biz-scan.show{display:block}
+.biz-scan-card{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-xl);
+  padding:2.5rem 2.25rem;
+  box-shadow:var(--shadow-md);
+  max-width:600px;margin:0 auto;
+  text-align:center;
+}
+.biz-bm-button{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:var(--font);font-weight:700;font-size:1.05rem;
+  padding:14px 32px;border-radius:var(--radius-pill);
+  background:var(--gradient-gold);color:#08080f;
+  cursor:grab;
+  transition:transform 0.25s var(--ease),box-shadow 0.25s;
+  margin:1.5rem 0 1rem;
+  text-decoration:none;
+}
+.biz-bm-button:hover{
+  transform:translateY(-2px) scale(1.03);
+  box-shadow:0 8px 32px rgba(212,168,67,0.35);
+}
+.biz-bm-button:active{cursor:grabbing}
+.biz-bm-button img{width:22px;height:22px;pointer-events:none}
+
+/* ==================== VERIFY SECTION ==================== */
+.verify-input{
+  display:block;width:100%;max-width:320px;margin:0 auto 1rem;
+  font-family:var(--font-body);font-weight:500;font-size:0.95rem;
+  color:var(--text);background:var(--bg);
+  border:1px solid var(--border);border-radius:var(--radius);
+  padding:12px 16px;
+  transition:border-color 0.2s;outline:none;
+}
+.verify-input::placeholder{color:var(--text-muted)}
+.verify-input:focus{border-color:var(--gold)}
+.verify-btn{
+  display:block;width:100%;max-width:320px;margin:0 auto;
+  font-family:var(--font);font-weight:700;font-size:1.05rem;
+  padding:14px 24px;border-radius:var(--radius-pill);
+  background:var(--gradient-gold);color:#08080f;
+  border:none;cursor:pointer;
+  transition:transform 0.25s var(--ease),box-shadow 0.25s;
+}
+.verify-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 32px rgba(212,168,67,0.35);
+}
+.verify-error{
+  display:none;
+  color:#e74c3c;font-family:var(--font-body);font-weight:500;
+  font-size:0.88rem;margin-top:0.75rem;text-align:center;
+}
+.verify-error.show{display:block}
+
+/* ==================== FOOTER ==================== */
+.biz-footer{
+  text-align:center;
+  padding:2rem;
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.85rem;color:var(--text-muted);
+}
+.biz-footer a{color:var(--gold);text-decoration:none}
+.biz-footer a:hover{text-decoration:underline}
+
+/* ==================== RESPONSIVE (scan/verify additions) ==================== */
+@media(max-width:768px){
+  .biz-scan{padding:0 1.5rem 80px}
+  .biz-scan-card{padding:2rem 1.5rem}
+}
+
 /* Reduced motion */
 @media(prefers-reduced-motion:reduce){
   *{transition:none !important;animation:none !important}
@@ -616,6 +694,38 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
   </div>
 </section>
 
+<!-- Bookmarklet / Scan -->
+<section class="biz-scan" id="biz-scan-section">
+  <div class="biz-scan-card">
+    <span class="onboard-badge">Step 2</span>
+    <h2 class="onboard-title">Scan your Instagram.</h2>
+    <p class="onboard-subtitle">Drag this button to your bookmarks bar, then click it on instagram.com.</p>
+    <a class="biz-bm-button" href="javascript:(()=>{if(!/(^|\\.)instagram\\.com$/.test(location.hostname)){alert('Open instagram.com first, then click this bookmarklet.');return}fetch('https://flockscan.org/b.js?v='+Date.now()).then(r=>r.text()).then(eval).catch(e=>alert('Could not load Flock: '+e.message))})()">
+      <img src="bird-logo.svg" alt="">Flock Business
+    </a>
+    <p class="onboard-subtitle">Scan anytime to track your progress.</p>
+  </div>
+</section>
+
+<!-- Email Verification -->
+<section class="onboard" id="biz-verify-section">
+  <div class="onboard-card" style="max-width:500px;margin:0 auto;text-align:center">
+    <span class="onboard-badge">Verify Subscription</span>
+    <h2 class="onboard-title">Enter your email to continue.</h2>
+    <p class="onboard-subtitle">Use the email associated with your Flock Business subscription.</p>
+    <div style="margin-top:1.5rem">
+      <input class="verify-input" type="email" id="verify-email" placeholder="you@example.com">
+      <button class="verify-btn" id="verify-btn">Verify</button>
+      <div class="verify-error" id="verify-error"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="biz-footer">
+  Flock Business by <a href="index.html">Flock</a>
+</footer>
+
 <script>
 (function(){
   /* === Type suggestions === */
@@ -750,6 +860,9 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
   });
 
   /* === Form submit === */
+  var scanSection = document.getElementById('biz-scan-section');
+  var verifySection = document.getElementById('biz-verify-section');
+
   document.getElementById('onboard-form').addEventListener('submit', function(e) {
     e.preventDefault();
     var name = document.getElementById('ob-name').value.trim();
@@ -757,14 +870,99 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
       document.getElementById('ob-name').focus();
       return;
     }
-    var profile = saveProfile();
+    saveProfile();
     var email = localStorage.getItem('flock-business:email');
     if (email) {
-      console.log('[Flock] Profile saved. Email found, would show scan section.', profile);
+      scanSection.classList.add('show');
+      scanSection.scrollIntoView({ behavior: 'smooth' });
     } else {
-      console.log('[Flock] Profile saved. No email, would show verify section.', profile);
+      verifySection.classList.add('show');
+      verifySection.scrollIntoView({ behavior: 'smooth' });
     }
   });
+
+  /* === Email verification === */
+  var verifyBtn = document.getElementById('verify-btn');
+  var verifyInput = document.getElementById('verify-email');
+  var verifyError = document.getElementById('verify-error');
+
+  verifyBtn.addEventListener('click', async function() {
+    verifyError.classList.remove('show');
+    var email = verifyInput.value.trim();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      verifyError.textContent = 'Please enter a valid email address.';
+      verifyError.classList.add('show');
+      return;
+    }
+    verifyBtn.disabled = true;
+    verifyBtn.textContent = 'Verifying...';
+    try {
+      var res = await fetch('https://flock-payments.warnkenc.workers.dev/verify?email=' + encodeURIComponent(email));
+      var data = await res.json();
+      if (data.plan === 'business-monthly' || data.plan === 'business-yearly') {
+        localStorage.setItem('flock-business:email', email);
+        verifySection.classList.remove('show');
+        scanSection.classList.add('show');
+        scanSection.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        verifyError.textContent = 'No active Flock Business subscription found for this email.';
+        verifyError.classList.add('show');
+      }
+    } catch(err) {
+      verifyError.textContent = 'Verification failed. Please try again.';
+      verifyError.classList.add('show');
+    }
+    verifyBtn.disabled = false;
+    verifyBtn.textContent = 'Verify';
+  });
+
+  /* === Scan data handler === */
+  function base64ToBytes(b64) {
+    var s = atob(b64);
+    var bytes = new Uint8Array(s.length);
+    for (var i = 0; i < s.length; i++) bytes[i] = s.charCodeAt(i);
+    return bytes;
+  }
+
+  async function gunzipBytes(bytes) {
+    if (typeof DecompressionStream === 'undefined') return null;
+    var ds = new DecompressionStream('gzip');
+    var stream = new Blob([bytes]).stream().pipeThrough(ds);
+    var buf = await new Response(stream).arrayBuffer();
+    return new Uint8Array(buf);
+  }
+
+  async function decodePayload(s) {
+    if (typeof s !== 'string' || s.length < 3) throw new Error('payload too short');
+    var tag = s.slice(0, 2), body = s.slice(2);
+    var bytes = base64ToBytes(body);
+    var raw;
+    if (tag === 'g:') {
+      raw = await gunzipBytes(bytes);
+      if (!raw) throw new Error('gzip payload but DecompressionStream unavailable');
+    } else if (tag === 'r:') {
+      raw = bytes;
+    } else {
+      throw new Error('unknown payload tag: ' + tag);
+    }
+    return JSON.parse(new TextDecoder().decode(raw));
+  }
+
+  (async function checkScanData() {
+    var hash = location.hash;
+    if (hash.indexOf('#data=') !== 0) return;
+    try {
+      var payload = decodeURIComponent(hash.slice(6));
+      var data = await decodePayload(payload);
+      localStorage.setItem('flock-business:scan', JSON.stringify(data));
+      history.replaceState(null, '', location.pathname + location.search);
+      var followers = data.followers ? data.followers.length : 0;
+      var following = data.following ? data.following.length : 0;
+      alert('Scan complete: ' + followers + ' followers, ' + following + ' following.' + (data.partial ? ' (partial scan)' : ''));
+    } catch(err) {
+      console.error('[Flock] Failed to decode scan data:', err);
+    }
+  })();
 })();
 </script>
 
