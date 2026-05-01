@@ -1766,9 +1766,12 @@ async function init(){
     card.addEventListener('click', () => {
       try {
         localStorage.setItem(RESULTS_KEY, JSON.stringify({
+          username: state.username || '',
           followers: state.followers,
           following: state.following,
+          posts: state.posts || [],
           partial: state.partial,
+          savedAt: Date.now(),
         }));
       } catch(e) {}
     });
@@ -1781,6 +1784,7 @@ async function init(){
     try { saved = JSON.parse(localStorage.getItem(RESULTS_KEY)); } catch(e) {}
     if (saved && saved.followers && saved.following) {
       loadPayload(saved);
+      checkGrowthAccess();
     } else {
       render();
     }
@@ -2288,6 +2292,7 @@ async function init(){
         }));
       } catch(e) {}
       loadPayload(payload);
+      checkGrowthAccess();
     } catch (e) {
       console.error('[follow radar] could not decode hash payload:', e);
       alert('Could not read results from URL: ' + e.message);
@@ -2302,6 +2307,8 @@ async function init(){
     try { saved = JSON.parse(localStorage.getItem(RESULTS_KEY)); } catch(e) {}
     if (saved && saved.followers && saved.following) {
       loadPayload(saved);
+      // Re-check growth access now that posts data is loaded
+      checkGrowthAccess();
       // Show previous scan indicator
       const when = saved.savedAt ? new Date(saved.savedAt) : null;
       let timeAgo = '';
