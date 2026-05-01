@@ -2249,11 +2249,6 @@ async function init(){
   }
 
   if (hash.indexOf('#data=') === 0){
-    // If user has a business profile, redirect scan data to business page
-    if (localStorage.getItem('flock-business:profile')) {
-      window.location.href = 'business.html' + hash;
-      return;
-    }
     // New scan data — clear any per-scan unlock so user must pay again
     try {
       const u = JSON.parse(localStorage.getItem(UNLOCK_KEY));
