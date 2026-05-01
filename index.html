@@ -1403,14 +1403,19 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
     <div class="paywall-cta">
       <svg class="lock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
       <h3 id="paywall-title">unlock all results</h3>
-      <div id="paid-section" style="text-align:center;margin-bottom:20px">
-        <p style="font-size:13px;color:rgba(255,255,255,0.55);margin:0 0 10px">Already purchased or have an active subscription? Enter the email associated with your account.</p>
-        <input type="email" id="paid-email" placeholder="email@example.com" style="width:100%;max-width:320px;padding:10px 14px;border:1px solid rgba(255,255,255,0.15);border-radius:8px;background:rgba(255,255,255,0.06);color:#fff;font:inherit;font-size:14px;margin-bottom:8px;outline:none" />
+      <div id="paid-section" style="text-align:center;margin-bottom:24px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:16px;padding:20px 24px">
+        <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:4px">Already paid?</div>
+        <p style="font-size:13px;color:rgba(255,255,255,0.55);margin:0 0 12px">Enter the email you used at checkout to unlock your results.</p>
+        <input type="email" id="paid-email" placeholder="email@example.com" style="width:100%;max-width:320px;padding:12px 16px;border:1px solid rgba(99,102,241,0.3);border-radius:10px;background:rgba(99,102,241,0.08);color:#fff;font:inherit;font-size:14px;margin-bottom:10px;outline:none" />
         <br>
-        <button class="paid-btn" id="paid-btn" type="button">verify and unlock</button>
-        <div id="paid-error" style="color:var(--pink);font-size:12px;margin-top:6px;display:none"></div>
+        <button class="paid-btn" id="paid-btn" type="button" style="padding:10px 32px;border-radius:100px;border:none;background:var(--gradient-primary);color:#fff;font:700 0.9rem/1 var(--font);cursor:pointer">Unlock My Results</button>
+        <div id="paid-error" style="color:var(--pink);font-size:12px;margin-top:8px;display:none"></div>
       </div>
-      <p style="font-size:13px;color:rgba(255,255,255,0.4);margin:0 0 14px">Or choose a plan to see everyone who doesn't follow you back.</p>
+      <div style="display:flex;align-items:center;gap:12px;margin:0 0 14px;justify-content:center">
+        <div style="flex:1;max-width:80px;height:1px;background:rgba(255,255,255,0.1)"></div>
+        <p style="font-size:12px;color:rgba(255,255,255,0.35);margin:0;text-transform:uppercase;letter-spacing:0.08em;font-weight:600">or choose a plan</p>
+        <div style="flex:1;max-width:80px;height:1px;background:rgba(255,255,255,0.1)"></div>
+      </div>
       <div class="pricing-cards">
         <a class="pricing-card" id="pay-scan" href="javascript:void(0)" target="_blank" rel="noopener">
           <div class="plan-name">this scan</div>
