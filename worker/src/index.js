@@ -85,7 +85,15 @@ async function handleCheckoutCompleted(session, env) {
     const amountTotal = session.amount_total || 0;
     // $4 one-time, $5/mo = 500, $30/yr = 3000 (in cents)
     // We'll also check subscription metadata if available
-    if (amountTotal >= 2000) {
+    if (amountTotal >= 40000) {
+      plan = 'business-yearly';
+      expiresAt = Date.now() + 365 * 24 * 60 * 60 * 1000;
+      ttl = 365 * 86400;
+    } else if (amountTotal >= 4000) {
+      plan = 'business-monthly';
+      expiresAt = Date.now() + 31 * 24 * 60 * 60 * 1000;
+      ttl = 31 * 86400;
+    } else if (amountTotal >= 2000) {
       plan = 'yearly';
       expiresAt = Date.now() + 365 * 24 * 60 * 60 * 1000;
       ttl = 365 * 86400;
