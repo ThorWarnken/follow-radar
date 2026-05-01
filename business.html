@@ -121,15 +121,16 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   font-family:var(--font);font-weight:900;
   font-size:clamp(3rem,6vw,5.5rem);
   line-height:1.1;letter-spacing:-0.025em;
-  background:linear-gradient(135deg,#D4A843 0%,#E8C76A 50%,#C49530 100%);
+  background:linear-gradient(135deg,#FFD700 0%,#FFC234 30%,#FFE066 60%,#FFD700 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   background-clip:text;
+  filter:drop-shadow(0 0 30px rgba(255,215,0,0.4)) drop-shadow(0 2px 4px rgba(0,0,0,0.5));
   opacity:0;transform:translateY(24px);
 }
 .hero-line:nth-child(2){animation:heroFadeUp 0.8s var(--ease) 0.2s forwards}
 .hero-line:nth-child(3){
   animation:heroFadeUp 0.8s var(--ease) 0.4s forwards;
-  background:linear-gradient(135deg,#E8C76A 0%,#D4A843 40%,#C49530 100%);
+  background:linear-gradient(135deg,#FFE066 0%,#FFD700 40%,#FFC234 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   background-clip:text;
 }
