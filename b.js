@@ -18,11 +18,14 @@
   'use strict';
 
   const MAX_ACCOUNT_SIZE = 10000;
-  const THROTTLE_MS = 1000;
-  const THROTTLE_JITTER_MS = 500;
-  const PAGE_SIZE = 200;
+  const SCAN_CAP = 5000;
+  const THROTTLE_MS = 3000;
+  const THROTTLE_JITTER_MS = 2000;
+  const PAGE_SIZE = 20;
   const IG_APP_ID = '936619743392459';
   const RESUME_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+  const COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000; // 3 days between scans
+  const COOLDOWN_KEY = 'flock:last-scan';
   const FOLLOW_RADAR_URL = 'https://flockscan.org';
   const RESUME_KEY = 'follow-radar:resume';
   const BIRD_LOGO_URI = 'data:image/svg+xml;base64,' + 'PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMTIgMjc2Ij48cGF0aCBmaWxsPSIjODU4MGQ0IiBkPSJtMjI3LjkgMTQ2LS4yLTQuOC0uOC0zLjJxMC0xLS4yLTIuOWwtLjctMi4xYTYzIDYzIDAgMCAwLTM1LjQtNDMuOGMtNy4yLTMuNS0xNS4yLTUuNC0yMy04bC00LjYtMS4zYzYuNi0yMi40IDM3LjMtNDIgNjIuNS00MC0xIDEtMi4xIDEuNC00LjYgMi40IDIuNyAxLjcgNC4yIDMgNiAzLjcgMi43IDEgNS44IDEuMyA4LjUgMi4yIDQgMS41IDYuNC42IDYuOS00IDMuNiAyLjYgNy45IDQuNyAxMC44IDggNCA0LjMgOCA4IDE0IDkuMiAyIC40IDMuOSAxLjcgNi4zIDNsMi42IDEuNSA0IDQuNy02IDEuMnEtNC42IDEuMi04IDIuM2wtNy4yIDMuNmMtNy4zIDYuOS05IDE0LTUuOCAyMi4zYTIzMSAyMzEgMCAwIDAgNiAxN2wyIDkgMS4yIDUgLjQgNC44LjUgMi4yLS4yIDE5LTEgNi44LS4yIDIuMy0xLjkgNi43LS4zIDIuMi0uOCAxLjgtLjQgMi4yLTEuNiAzLjktNCAxMGExMDQgMTA0IDAgMCAxLTQ0LjEgNDUuMyA4NyA4NyAwIDAgMS03MS4zIDUuOXEtLjQtMS0uMy0xLjEgMTAtMS42IDIwLjUtMi44YzMuNSA2LjUgNy40IDggMTUuMyA2bC0yLjgtMTEuNGguNXExLjEtLjYgMS41LTFoLjVxMS0uNSAxLjQtMSAwIC4xLjMuMSAxLjItLjUgMS43LTFoLjNxMS4yLS41IDEuNy0xYTExMyAxMTMgMCAwIDAgMjkuNy0yNC45IDkyIDkyIDAgMCAwIDE4LjQtMzYuOWwuMy0yLjIuOC0yLjhjLjItMS45LjItMyAuMi00LjJsLjgtNS44cTAtNC42LS4yLThtMi40LTc5LjhjMi45IDIgNiAyLjIgNy44LS44IDEtMS41LjgtNS4yLS4yLTZhOCA4IDAgMCAwLTctLjljLTMgMS40LTMgNC40LS42IDcuNyIvPjxwYXRoIGZpbGw9IiM4NTgwZDQiIGQ9Ik0yNDIgNDRjLS4yIDQuOC0yLjUgNS43LTYuNiA0LjItMi43LTEtNS44LTEuMi04LjUtMi4yLTEuOC0uNi0zLjMtMi02LTMuNyAyLjUtMSAzLjYtMS40IDUtMi4ycTggMS41IDE2LjEgNE0xNjkuNiAyMzQuOGExMjMgMTIzIDAgMCAxIDMuMiAxMS4zYy03LjkgMi4xLTExLjguNi0xNC45LTZxNS42LTIuOSAxMS43LTUuM204LTRxLS4yLjYtMS40IDEuMS4yLS42IDEuNC0xbS0yIDFxLS4yLjYtMS40IDEuMS4yLS41IDEuNC0xbS0yIDFxMCAuNS0xIDEgMC0uNCAxLTFtLTIgMXEwIC40LTEgMSAwLS42IDEtMU0xMzYuOCAyNDIuOXEuMy4zLjIgMS0uOC0uMS0xLjYtLjUuNS0uMyAxLjQtLjUiLz48cGF0aCBmaWxsPSIjYjhiNWYwIiBkPSJNMjA5IDEzNC42Yy02LjQgMC0xMi44LS41LTE5LjItLjYtMSAwLTEuOSAyLTIuOCAzLjVxLTcuNi0xLjYtMTUuNy00LjJjMS01LjggNS41LTQuMiA5LjEtNCAzIC4yIDUuOCAxLjMgOC42IDEgMi4xLS4yIDQtMiA2LTIuOGw4LjktMy42cTIuOSA1IDUuMSAxMC43TTE4OSAxNzRsLjUtMS4zYzMuNSAyLjcgNS45LTEgOS4yLTEuNyAzLjkgNy44IDIuNyAxNS0yIDIyLjVxLTQuNy02LjItOC42LTEyek0xMTAuNSAxOTIuMmMtMSA4LjQgMy4yIDEyLjkgMTEuNiAxMS42IDEtLjEgMS44LTEuOCAzLTIuMiAxLjMtLjUgMi44LS40IDQuMi0uNi0uNSAxLjItLjkgMy4yLTEuNyAzLjQtMy45IDEtNS4zIDMuMy02LjMgNy4yLS42IDIuNC0zLjggNC01LjUgNi4ycS0xLjYgMi41LTIuOCA2YTIzMyAyMzMgMCAwIDEtMjMtMTEuNXExLjUtOS43IDMtMTYuOWw2LTMuM3ptNy4zLjNxLTEuOC41LTQuNi4zIDEuOC0uNSA0LjYtLjMiLz48cGF0aCBmaWxsPSIjYjhiNWYwIiBkPSJNMTE4LjIgMTkyLjZxMTIuNy0yLjUgMjUuNC00LjdjMTEuNi0xLjkgMjMtMiAzMy44IDMuOXE2LjkgMy44IDguMiAxMS4xYy4zIDEuNC0uOCAzLjYtMiA0LjUtMjAuNSAxNy4zLTQzLjYgMjQuMS03MC4zIDE2LjZxLjgtMy44IDIuNS02LjJjMS43LTIuMiA1LTMuOCA1LjUtNi4yIDEtMy45IDIuNC02LjIgNi4zLTcuMi44LS4yIDEuMi0yLjIgMS43LTMuNC0xLjQuMi0zIDAtNC4yLjYtMS4yLjQtMiAyLTMgMi4yLTguNCAxLjMtMTIuNy0zLjItMTEuMS0xMS41cS42LS4xIDIgLjRjMiAuMyAzLjYgMCA1LjItLjFNOTQgMTM4YzEwLjcgMiAyMS40IDQuNiAzMi4yIDYgMTEuNiAxLjUgMjMuMyAxLjkgMzUgMi44cTYuMS42IDEyLjUgMmMtMS41IDMuNC0uMSA1LjMgMi4zIDYgMi42LjYgNS40LjQgNi4xLTMuMiAzLjcgMi44IDcuMyA1LjUgMTAuOSA5LTIuMSAzLjMtNC41IDYuMi0xLjMgOS4zIDMuMSAzIDMuOS0xLjUgNS44LTIuMnEuOCAxLjQgMS4xIDNjLTMuMiAxLTUuNiA0LjctOS4xIDJxLS4yLjYtLjggMS40bC01LjcgNGMtMTUtNy41LTMwLjQtNC42LTQ2LTIuNy0xNi43IDItMzMuMyAxLjItNDkuNy00LjVxLjctMy4zIDEuNi01LjYgMi4zLTcuMiA0LjEtMTQuNC44LTMuMy45LTYuN3pNMTE5IDg2LjhxMTkuMiA0LjggMzguMiA5LjljOS4yIDIuNSAxOC42IDQuOSAyNy41IDguNSA4LjUgMy40IDE0LjggMTAgMTkuMSAxOC40cS00LjcgMi4xLTguNyAzLjljLTIgLjktNCAyLjYtNiAyLjgtMi45LjMtNS44LS44LTguNy0xLTMuNi0uMi04LTEuOC05LjQgMy44cS0yLjYtLjItNS43LTEuMS0zLTQuMi00LjMgMC0xLjYgMC0zLjctLjljLS41LTQuMi0yLjgtNC44LTYuMy00LjdsMS4xIDVxLTEyLjctLjgtMjUuNi0yLjQgNi00LjQgMTEuNy03LjhjLTQuNi05LjEtMTUuMi02LjQtMjEuOC0xMi42IDUuNy0xLjIgOC00IDUtOC40LTIuOS00LjMtMi40LTguOC0yLjQtMTMuNG0zMy40IDE1LjQtMS42LTUtMS4zLS41Yy0uOCAyLjEtMi4zIDQuNC0yIDYuNC4yIDEuMiAzLjEgMiA1IDIuOC41LjIgMS41LS44IDIuMy0xLjJxLS43LTEtMi40LTIuNW03LjktLjEgMS41LS4yLS40LTEuM3EtLjYuMy0xLjEgMS41TTIwOSAxMzVhNDEgNDEgMCAwIDEgMSAyNyA1NiA1NiAwIDAgMC0yMi44LTI0LjJjLjctMS44IDEuNy0zLjggMi42LTMuOHE5LjYuMyAxOS4yIDEiLz48cGF0aCBmaWxsPSIjYjhiNWYwIiBkPSJNMTE4LjggODYuNmMuMiA0LjgtLjMgOS4zIDIuNiAxMy42IDMgNC4zLjcgNy4yLTUgOC40IDYuNiA2LjIgMTcuMiAzLjUgMjEuOCAxMi42bC0xMiA3LjVhNjY2IDY2NiAwIDAgMS00MC0xMC44cS0uMS0yLjIuNC0zLjQgMy01IDUuNy0xMGMyLjYtNS4xIDQuMy0xMC43IDcuNi0xNS4zIDEuOS0yLjYgNC45LTQuMyA0LjEtOC4yem0zMy43IDQ0LjlxLS45LTIuMy0xLjUtNWMzLjUtLjIgNS44LjQgNiA0LjVhMTQgMTQgMCAwIDEtNC41LjVtOC45LjdxLjgtNC40IDMuNi0uNGE5IDkgMCAwIDEtMy42LjRtLTguNy0yOS45cTEuNCAxLjQgMiAyLjRjLS43LjQtMS43IDEuNC0yLjIgMS4yLTEuOS0uNy00LjgtMS42LTUtMi44LS4zLTIgMS4yLTQuMyAyLTYuNGwxLjMuNXEuNyAyLjUgMiA1LjFtNy41LS41cS42LS44IDEuMi0xLjJsLjQgMS4zcS0uNy4xLTEuNi0uMU05My42IDEzOHEuNSAzIC4zIDYuMnQtLjkgNi43cS0xLjggNy4yLTQgMTQuNGwtMiA1LjRhNTMgNTMgMCAwIDEtMjUuOS0xMy42cS42LTMuOCAyLTYuNSA1LTkuNSAxMC0xOC45eiIvPjxwYXRoIGZpbGw9IiNiOGI1ZjAiIGQ9Ik0xMDMuNiA4MWMxLjIgNC0xLjggNS42LTMuNyA4LjItMy4zIDQuNi01IDEwLjItNy42IDE1LjJxLTIuNyA1LjEtNS43IDEwLS40IDEuNC0uNiAzLjMtMTIuMi02LTI0LjgtMTMuNiAxLjktNS42IDQuNC0xMC4zbDguNS0xNS41cTIuNy00LjggNS05LjZMOTguNyA3OXEyIC45IDUgMS44TTE5Ny40IDE2Ny40Yy0xLjggMS0yLjYgNS42LTUuNyAyLjUtMy4yLTMuMS0uOC02IDEuNC05cTIuMiAyLjcgNC4zIDYuNW0tOC43IDYuN3EwIDMuMy0uOCA3LTIuNi0xLjItNC43LTIuOCAyLjQtMi4yIDUuNS00LjJNMTgxLjkgMTUxLjNjLS41IDMuOS0zLjMgNC4xLTUuOSAzLjQtMi40LS42LTMuOC0yLjUtMi01LjZxMy45LjcgNy45IDIuMk05OC42IDE5MnEtMS44IDEuNC01LjcgMy40LTEuNCA3LjItMyAxNi43Yy0xMC02LjEtMTcuMS0xNS0yMy0yNS45eiIvPjxwYXRoIGZpbGw9IiNiOGI1ZjAiIGQ9Ik03OSA2OC40YTExMSAxMTEgMCAwIDEtNC45IDkuOWwtOC41IDE1LjVxLTIuNCA0LjgtNC42IDEwLTguNS03LjQtMTctMTYuNmMtMS42LTUgLjktOC4zIDMtMTEuNmwxMy4xLTE5Ljl6TTczIDEzMS40cS01IDkuOC0xMCAxOS4yYy0xIDEuOC0xLjQgMy45LTIgNi4ycS02LjUtNi0xMy0xMy43YzEtNi4yIDItMTEuNiAzLjQtMTcuMXEyLTEuNSAzLjYtMy4xIDkgNCAxOCA4LjVNNTMuNSA1MC41QzQ1IDUzLjUgNDEgNjAuNSAzOCA2OC4zcS0uNyAxLjgtMiAzLjdhMjcgMjcgMCAwIDEtMy03LjdjMS4xLTQuOCAzLjItOS4xIDIuNi0xMy4xLS44LTUuOCAxLjUtOS44IDQuMi0xNC4xcTYuNyA2LjQgMTMuNiAxMy40Ii8+PHBhdGggZmlsbD0iI2I4YjVmMCIgZD0ibTUxIDEyNi0zIDE2LjhhNjEgNjEgMCAwIDEtMTMtMzAuOWwxLS45cTUuOSAzLjYgMTEuOCA4ek02MCA1NS40cS02LjQgMTAuMy0xMyAyMC4yYy0yLjEgMy4zLTQuNiA2LjYtMyAxMS4zcS00LjItNi42LTgtMTQuNSAxLjQtMi40IDIuMS00LjFjMy03LjggNi45LTE0LjcgMTUuNS0xNy40ek0zOS44IDM2LjhjLTIuNiA0LjYtNSA4LjYtNC4xIDE0LjQuNiA0LTEuNSA4LjMtMi43IDEyLjdBNzEgNzEgMCAwIDEgMzEuNiAyOHoiLz48cGF0aCBmaWxsPSIjYjhiNWYwIiBkPSJNNTEuNCAxMjZxLTItMy0zLjQtNi43IDMuMyAxLjIgNi44IDMuMy0xLjMgMS44LTMuNCAzLjRNMjI3LjUgMTQ2cS43IDMuNi42IDcuNy0uNy0zLjYtLjYtNy42bS0uNSAxNHEuNCAxLjUgMCAzLjctLjMtMS42IDAtMy43bS0uMy0yMS44cS43IDEgLjkgMi42YTUgNSAwIDAgMS0xLTIuNk0yMjYgMTY3cS4yLjcgMCAxLjgtLjUtLjcgMC0xLjhtLS4zLTMzLjlxLjYuNi43IDEuNy0uNi0uNi0uNy0xLjdNMjMwIDY2Yy0yLTMtMi4xLTYgMS03LjQgMS45LS44IDUuMS0uMyA2LjkgMSAxIC43IDEuMSA0LjQuMiA2LTEuOSAzLTUgMi43LTggLjRNMjUzLjQgMTAwcS01LjQtMTIuMiA1LjMtMjJjLS4zIDItMS4xIDMuOS0xLjUgNS45LS43IDQtMSA4LTEuOCAxMmExMSAxMSAwIDAgMS0yIDRtNS45IDE2LjlhMTA2IDEwNiAwIDAgMS00LjQtMTEuNXEuNy0uNSAxLjUtLjNjLjUuMyAxLjMuNyAxLjMgMS4ycTEuMSA1LjIgMS42IDEwLjZtLTYuMiA3NnExLjMtNC42IDMuNi05LjcgMy42IDIuNS4yIDUuNGMtMS40IDEuMS0yLjMgMi45LTMuOCA0LjRtMTMuMi0xMTguNXEzLjEtMS41IDcuMy0yLjVjLS43IDQuOC00LjIgMi44LTcuMyAyLjVtLTMuOCA1Ni40cS0xLTEuOS0xLjMtNC41IDEuOC4xIDMuNi45em0tMy45IDQ4LjJxLS40LS43LjItMS44bDEuOC42cS0uOC42LTIgMS4ybTEuMS00cS0uMy0uNy4yLTEuOC4zLjctLjIgMS44bTIuMi05cS0uMy0uNyAwLTEuOC4zLjYgMCAxLjhtMS4yLTlxLS4zLS43LS4yLTEuOC40LjYuMiAxLjdtLjItMTkuMXEtLjYtLjYtLjUtMS43LjUuNi41IDEuN00yNzYgNjUuNnEtMS0uMS0yLjMtMS4xIDEgMCAyLjMgMSIvPjwvc3ZnPg==';
@@ -128,6 +131,50 @@
     s.removeItem(RESUME_KEY);
   }
 
+  // ─── Scan cooldown ────────────────────────────────────────────────
+
+  function checkCooldown(userId, storage) {
+    const s = storage || localStorage;
+    const raw = s.getItem(COOLDOWN_KEY);
+    if (!raw) return null;
+    let parsed;
+    try { parsed = JSON.parse(raw); } catch (e) { return null; }
+    if (!parsed || parsed.userId !== userId) return null;
+    const elapsed = Date.now() - parsed.timestamp;
+    if (elapsed >= COOLDOWN_MS) return null;
+    const remaining = COOLDOWN_MS - elapsed;
+    const days = Math.floor(remaining / (24 * 60 * 60 * 1000));
+    const hours = Math.ceil((remaining % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+    if (days > 0) return days + 'd ' + hours + 'h';
+    return hours + 'h';
+  }
+
+  function saveCooldown(userId, storage) {
+    const s = storage || localStorage;
+    s.setItem(COOLDOWN_KEY, JSON.stringify({ userId: userId, timestamp: Date.now() }));
+  }
+
+  // ─── Warm-up requests ────────────────────────────────────────────
+  // Make a few normal-looking requests before scanning to give the session
+  // realistic browsing activity (profile load + feed fetch).
+
+  async function warmUp(userId) {
+    try {
+      await doFetch('https://i.instagram.com/api/v1/users/' + userId + '/info/', {
+        credentials: 'include',
+        headers: igHeaders,
+      });
+    } catch (e) { /* non-critical */ }
+    await throttle();
+    try {
+      await doFetch('https://i.instagram.com/api/v1/feed/timeline/?count=12', {
+        credentials: 'include',
+        headers: igHeaders,
+      });
+    } catch (e) { /* non-critical */ }
+    await throttle();
+  }
+
   // ─── Fetch + classification ──────────────────────────────────────
 
   // doFetch is replaceable in tests via window.__followRadarTest.setFetch().
@@ -220,98 +267,8 @@
     return u;
   }
 
-  function buildMutualUrl(userId) {
-    return 'https://i.instagram.com/api/v1/friendships/' + userId + '/mutual_followers/';
-  }
-
-  async function fetchMutualCount(userId) {
-    await throttle();
-    let resp;
-    try {
-      resp = await doFetch(buildMutualUrl(userId), {
-        credentials: 'include',
-        headers: igHeaders,
-      });
-    } catch (e) {
-      return 0;
-    }
-    if (!resp.ok) return 0;
-    let body;
-    try {
-      body = await resp.json();
-    } catch (e) {
-      return 0;
-    }
-    // IG returns { users: [...], total_count: N } or similar
-    if (typeof body.total_count === 'number') return body.total_count;
-    if (Array.isArray(body.users)) return body.users.length;
-    return 0;
-  }
-
-  // Score how likely a username belongs to a real person (higher = more likely).
-  // Brands/bots tend to have: no full_name, lots of digits/underscores,
-  // keywords like "official", "shop", "store", "news", "daily", "memes".
-  function realPersonScore(u) {
-    let score = 0;
-    const name = u.username.toLowerCase();
-    const fullName = (u.full_name || '').toLowerCase();
-    // Private accounts are the strongest real-person signal
-    if (u.is_private) score += 4;
-    // Full name with first + last (space) is a good sign
-    if (u.full_name && u.full_name.includes(' ')) score += 2;
-    // Has any full name
-    if (u.full_name && u.full_name.trim().length > 0) score += 1;
-    // Verified accounts are almost always pages/brands/celebs
-    if (u.is_verified) score -= 6;
-    // Brand/bot/page patterns in username — strong penalty
-    if (/official|shop|store|brand|news|daily|memes|clips|repost|fanpage|promo|music|radio|podcast|media|studio|records|magazine|blog|tv|hq|worldwide|global|network|entertainment|production/.test(name)) score -= 5;
-    // Brand/page patterns in full name — strong penalty
-    if (/music|records|studio|magazine|podcast|media|clothing|apparel|official|brand|inc\b|llc\b|co\b|entertainment|production|worldwide|gallery|collective|agency|management/.test(fullName)) score -= 5;
-    // Username starts with digits — page/bot pattern
-    if (/^\d/.test(name)) score -= 3;
-    // Excessive digits
-    const digitRatio = (name.match(/\d/g) || []).length / name.length;
-    if (digitRatio > 0.3) score -= 3;
-    // Excessive underscores
-    if ((name.match(/_/g) || []).length >= 3) score -= 2;
-    // Very short usernames are often brands
-    if (name.length <= 3) score -= 1;
-    return score;
-  }
-
-  // Sample non-followers, prioritizing real-looking people, and fetch mutual counts.
-  async function fetchSampledMutualCounts(followerSet, following, sampleSize, onProgress) {
-    const nonFollowers = [];
-    for (const u of following) {
-      if (!followerSet.has(u.username.toLowerCase())) {
-        nonFollowers.push(u);
-      }
-    }
-    // Sort by real-person score descending, then shuffle within score tiers
-    // so we prioritize real people but still get variety
-    nonFollowers.sort((a, b) => realPersonScore(b) - realPersonScore(a));
-    // Take top candidates (2x sample size), then shuffle those for variety
-    const candidates = nonFollowers.slice(0, Math.min(sampleSize * 2, nonFollowers.length));
-    for (let i = candidates.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      const tmp = candidates[i]; candidates[i] = candidates[j]; candidates[j] = tmp;
-    }
-    const sample = candidates.slice(0, Math.min(sampleSize, candidates.length));
-    let done = 0;
-    const total = sample.length;
-    const countMap = new Map();
-    for (const u of sample) {
-      const pk = u.pk || u.userId || u.username;
-      const count = await fetchMutualCount(pk);
-      countMap.set(u.username.toLowerCase(), count);
-      done++;
-      if (onProgress) onProgress(done, total);
-    }
-    return countMap;
-  }
-
   // Reduce IG's account shape to ours.
-  function trimUser(u, mutualCount) {
+  function trimUser(u) {
     const obj = {
       username: u.username,
       full_name: u.full_name || '',
@@ -319,7 +276,6 @@
     };
     if (u.is_verified) obj.is_verified = true;
     if (typeof u.follower_count === 'number') obj.follower_count = u.follower_count;
-    if (typeof mutualCount === 'number') obj.mutual_count = mutualCount;
     return obj;
   }
 
@@ -346,6 +302,7 @@
       }
       for (const u of page.users) all.push(trimUser(u));
       if (onProgress) onProgress(all.length, cursor);
+      if (all.length >= SCAN_CAP) break;
       if (!page.nextCursor) break;
       cursor = page.nextCursor;
     }
@@ -691,6 +648,16 @@
     let initialCursor = (resume && resume.cursor) || null;
     let phase = (resume && resume.phase) || 'followers';
 
+    // Cooldown check — applies to fresh scans AND resumes.
+    const cooldownLeft = checkCooldown(user.userId);
+    if (cooldownLeft) {
+      alert(
+        "You scanned recently. To keep your account safe, Flock limits scans to once every 3 days.\n\n" +
+        "You can scan again in " + cooldownLeft + "."
+      );
+      return;
+    }
+
     // Size check (only on fresh runs, not on resume).
     if (!resume) {
       try {
@@ -703,29 +670,51 @@
           );
           return;
         }
+        // Estimate scan time for the overlay
+        var totalPages = Math.ceil(Math.min(sizes.followers, SCAN_CAP) / PAGE_SIZE) +
+                         Math.ceil(Math.min(sizes.following, SCAN_CAP) / PAGE_SIZE);
+        var estMinutes = Math.ceil(totalPages * (THROTTLE_MS + THROTTLE_JITTER_MS / 2) / 60000);
       } catch (e) {
         alert("Could not check account size: " + e.message);
         return;
       }
     }
 
+    // Confirmation dialog on fresh scans.
+    if (!resume) {
+      var timeMsg = estMinutes ? 'This scan takes about ' + estMinutes + ' minutes. ' : '';
+      var ok = confirm(
+        timeMsg + 'Flock scans your follower list directly in your browser — nothing is shared with us or any server.\n\n' +
+        'We use careful pacing to keep everything smooth, but like any third-party tool, there\'s a small chance Instagram may temporarily limit some activity on your account.\n\n' +
+        'Ready to scan?'
+      );
+      if (!ok) return;
+    }
+
     createOverlay();
+
+    // Warm up the session with normal-looking requests before scanning.
+    if (!resume) {
+      updateOverlay('Loading your profile\u2026', 0);
+      await warmUp(user.userId);
+    }
 
     let followers = initialFollowers || [];
     let following = initialFollowing || [];
 
     try {
       if (phase === 'followers') {
-        updateOverlay('Scanning followers… ' + followers.length, 0);
+        var timeNote = estMinutes ? ' (~' + estMinutes + ' min total)' : '';
+        updateOverlay('Scanning followers\u2026 ' + followers.length + timeNote, 0);
         followers = await scrapeFollowers(user.userId, followers, initialCursor, (n) => {
-          updateOverlay('Scanning followers… ' + n, 0.1 + Math.min(0.4, n / 10000));
+          updateOverlay('Scanning followers\u2026 ' + n + timeNote, 0.1 + Math.min(0.4, n / SCAN_CAP));
         });
         phase = 'following';
         initialCursor = null;
       }
-      updateOverlay('Scanning following… ' + following.length, 0.5);
+      updateOverlay('Scanning following\u2026 ' + following.length, 0.5);
       following = await scrapeFollowing(user.userId, following, phase === 'following' ? initialCursor : null, (n) => {
-        updateOverlay('Scanning following… ' + n, 0.5 + Math.min(0.5, n / 10000));
+        updateOverlay('Scanning following\u2026 ' + n, 0.5 + Math.min(0.5, n / SCAN_CAP));
       });
     } catch (e) {
       destroyOverlay();
@@ -764,20 +753,7 @@
       return;
     }
 
-    // Phase 3: sample mutual follower counts for non-followers
-    // Check 25 random non-followers to find the most connected ones quickly
-    const followerSet = new Set(followers.map(u => u.username.toLowerCase()));
-    let mutualCounts = new Map();
-    try {
-      updateOverlay('Checking mutual connections\u2026', 0.85);
-      mutualCounts = await fetchSampledMutualCounts(followerSet, following, 25, (done, total) => {
-        updateOverlay('Checking mutual connections\u2026 ' + done + '/' + total, 0.85 + 0.15 * (done / total));
-      });
-    } catch (e) {
-      console.warn('[follow radar] mutual count fetch failed:', e);
-    }
-
-    // Phase 4: scrape recent posts for growth analytics
+    // Phase 3: scrape recent posts for growth analytics
     let posts = [];
     try {
       updateOverlay('Analyzing your posts\u2026', 0.92);
@@ -789,19 +765,14 @@
 
     destroyOverlay();
     clearResumeState();
-
-    // Attach mutual_count to each following user
-    const followingWithMutuals = following.map(u => {
-      const mc = mutualCounts.get(u.username.toLowerCase()) || 0;
-      return trimUser(u, mc);
-    });
+    saveCooldown(user.userId);
 
     const payload = {
       username: user.username,
       userId: user.userId,
       scrapedAt: new Date().toISOString(),
       followers: followers,
-      following: followingWithMutuals,
+      following: following,
       posts: posts,
     };
     try {
@@ -815,22 +786,23 @@
   if (typeof window !== 'undefined' && window.__followRadarTest) {
     window.__followRadarTest.RateLimitError = RateLimitError;
     window.__followRadarTest.constants = {
-      MAX_ACCOUNT_SIZE, THROTTLE_MS, THROTTLE_JITTER_MS, PAGE_SIZE,
-      IG_APP_ID, RESUME_MAX_AGE_MS, FOLLOW_RADAR_URL, RESUME_KEY
+      MAX_ACCOUNT_SIZE, SCAN_CAP, THROTTLE_MS, THROTTLE_JITTER_MS, PAGE_SIZE,
+      IG_APP_ID, RESUME_MAX_AGE_MS, COOLDOWN_MS, COOLDOWN_KEY,
+      FOLLOW_RADAR_URL, RESUME_KEY
     };
     window.__followRadarTest.encodePayload = encodePayload;
     window.__followRadarTest.decodePayload = decodePayload;
     window.__followRadarTest.saveResumeState = saveResumeState;
     window.__followRadarTest.loadResumeState = loadResumeState;
     window.__followRadarTest.clearResumeState = clearResumeState;
+    window.__followRadarTest.checkCooldown = checkCooldown;
+    window.__followRadarTest.saveCooldown = saveCooldown;
+    window.__followRadarTest.warmUp = warmUp;
     window.__followRadarTest.classifyResponse = classifyResponse;
     window.__followRadarTest.fetchPage = fetchPage;
     window.__followRadarTest.setFetch = function (fn) { doFetch = fn; };
     window.__followRadarTest.buildFollowersUrl = buildFollowersUrl;
     window.__followRadarTest.buildFollowingUrl = buildFollowingUrl;
-    window.__followRadarTest.buildMutualUrl = buildMutualUrl;
-    window.__followRadarTest.fetchMutualCount = fetchMutualCount;
-    window.__followRadarTest.fetchSampledMutualCounts = fetchSampledMutualCounts;
     window.__followRadarTest.trimUser = trimUser;
     window.__followRadarTest.scrapeFollowers = scrapeFollowers;
     window.__followRadarTest.scrapeFollowing = scrapeFollowing;
