@@ -1632,8 +1632,30 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
 
   restoreProfile();
 
-  /* === Get Started links === */
+  /* === Auto-verify returning subscribers === */
+  var scanSection = document.getElementById('biz-scan-section');
+  var verifySection = document.getElementById('biz-verify-section');
   var onboardSection = document.getElementById('get-started');
+
+  (async function() {
+    var savedEmail = localStorage.getItem('flock-business:email');
+    var savedProfile = localStorage.getItem('flock-business:profile');
+    if (!savedEmail || !savedProfile) return;
+    try {
+      var res = await fetch('https://flock-payments.warnkenc.workers.dev/verify?email=' + encodeURIComponent(savedEmail));
+      var data = await res.json();
+      if (data.plan === 'business-monthly' || data.plan === 'business-yearly') {
+        // Active subscriber returning - skip pricing/form, show scan directly
+        scanSection.classList.add('show');
+        // Scroll past the hero to the scan section after a short delay
+        setTimeout(function() {
+          scanSection.scrollIntoView({ behavior: 'smooth' });
+        }, 500);
+      }
+    } catch(e) { /* silent fail, they can verify manually */ }
+  })();
+
+  /* === Get Started links === */
   document.querySelectorAll('a[href="#get-started"]').forEach(function(link) {
     link.addEventListener('click', function(e) {
       e.preventDefault();
@@ -1643,8 +1665,6 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
   });
 
   /* === Form submit === */
-  var scanSection = document.getElementById('biz-scan-section');
-  var verifySection = document.getElementById('biz-verify-section');
 
   document.getElementById('onboard-form').addEventListener('submit', function(e) {
     e.preventDefault();
