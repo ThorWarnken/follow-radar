@@ -23,6 +23,9 @@ export default {
       if (url.pathname === '/verify' && request.method === 'GET') {
         return await handleVerify(url, env, corsHeaders);
       }
+      if (url.pathname === '/report' && request.method === 'POST') {
+        return await handleReport(request, env, corsHeaders);
+      }
       return json({ error: 'not found' }, 404, corsHeaders);
     } catch (err) {
       console.error('Unhandled error:', err);
@@ -187,6 +190,340 @@ async function handleVerify(url, env, corsHeaders) {
     expiresAt: record.expiresAt,
     igUsername: record.igUsername || null,
   }, 200, corsHeaders);
+}
+
+// ─── Report endpoint ──────────────────────────────────────────
+
+async function handleReport(request, env, corsHeaders) {
+  // 1. Parse and validate request
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: 'invalid JSON body' }, 400, corsHeaders);
+  }
+
+  const { email, profile, scan } = body;
+  if (!email || !profile || !scan) {
+    return json({ error: 'email, profile, and scan are required' }, 400, corsHeaders);
+  }
+
+  // 2. Verify subscription
+  const normalizedEmail = email.toLowerCase().trim();
+  const raw = await env.FLOCK_PAYMENTS.get(normalizedEmail);
+  if (!raw) {
+    return json({ error: 'no active subscription found' }, 403, corsHeaders);
+  }
+
+  let record;
+  try {
+    record = JSON.parse(raw);
+  } catch {
+    return json({ error: 'invalid subscription record' }, 403, corsHeaders);
+  }
+
+  if (record.expiresAt && Date.now() > record.expiresAt) {
+    return json({ error: 'subscription expired' }, 403, corsHeaders);
+  }
+
+  if (record.plan !== 'business-monthly' && record.plan !== 'business-yearly') {
+    return json({ error: 'business plan required' }, 403, corsHeaders);
+  }
+
+  // 3. Compute metrics from scan data
+  const metrics = computeMetrics(scan);
+
+  // 4. Build prompt and call Claude API
+  const systemPrompt = `You are an expert Instagram growth strategist who helps businesses increase their revenue through social media. You analyze Instagram data and generate specific, actionable recommendations tailored to each business's type, audience, and challenges.
+
+Your recommendations must be:
+- Specific to this business (reference their data, their type, their challenge)
+- Actionable (step-by-step, not vague advice)
+- Tied to revenue impact (not just engagement)
+- Realistic and grounded in their actual metrics
+
+Return your response as valid JSON matching the exact schema provided. Do not include any text outside the JSON.`;
+
+  const userPrompt = buildUserPrompt(profile, metrics);
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6-20250514',
+        max_tokens: 4096,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }],
+      }),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error('Claude API error:', response.status, errText);
+      return json({ error: 'AI report generation failed' }, 502, corsHeaders);
+    }
+
+    const result = await response.json();
+    const textContent = result.content?.[0]?.text;
+    if (!textContent) {
+      console.error('Claude API returned no text content');
+      return json({ error: 'AI returned empty response' }, 502, corsHeaders);
+    }
+
+    // Extract JSON from Claude's response (handle potential markdown code fences)
+    let report;
+    try {
+      const jsonStr = textContent.replace(/^```json\s*\n?/, '').replace(/\n?```\s*$/, '');
+      report = JSON.parse(jsonStr);
+    } catch (e) {
+      console.error('Failed to parse Claude JSON response:', e.message, textContent.slice(0, 200));
+      return json({ error: 'AI returned invalid JSON' }, 502, corsHeaders);
+    }
+
+    return json({ success: true, metrics, report }, 200, corsHeaders);
+  } catch (err) {
+    console.error('Claude API request failed:', err);
+    return json({ error: 'AI report generation failed' }, 502, corsHeaders);
+  }
+}
+
+function computeMetrics(scan) {
+  const posts = scan.posts || [];
+  const followers = scan.followers || [];
+  const following = scan.following || [];
+  const followerCount = followers.length;
+  const followingCount = following.length;
+  const postsAnalyzed = posts.length;
+
+  // Basic engagement averages
+  const totalLikes = posts.reduce((sum, p) => sum + (p.like_count || 0), 0);
+  const totalComments = posts.reduce((sum, p) => sum + (p.comment_count || 0), 0);
+  const avgLikes = postsAnalyzed > 0 ? Math.round(totalLikes / postsAnalyzed) : 0;
+  const avgComments = postsAnalyzed > 0 ? Math.round((totalComments / postsAnalyzed) * 10) / 10 : 0;
+  const engagementRate = followerCount > 0 && postsAnalyzed > 0
+    ? Math.round(((totalLikes + totalComments) / postsAnalyzed / followerCount) * 10000) / 100
+    : 0;
+  const likeToFollowerRatio = followerCount > 0 && postsAnalyzed > 0
+    ? Math.round((totalLikes / postsAnalyzed / followerCount) * 10000) / 100
+    : 0;
+
+  // Post type breakdown (1=Photo, 2=Reel, 8=Carousel)
+  const typeNames = { 1: 'Photo', 2: 'Reel', 8: 'Carousel' };
+  const typeGroups = {};
+  for (const p of posts) {
+    const t = p.media_type || 0;
+    if (!typeGroups[t]) typeGroups[t] = { count: 0, totalEng: 0 };
+    typeGroups[t].count++;
+    typeGroups[t].totalEng += (p.like_count || 0) + (p.comment_count || 0);
+  }
+  const postTypeBreakdown = {};
+  for (const [type, data] of Object.entries(typeGroups)) {
+    const name = typeNames[type] || `Type ${type}`;
+    postTypeBreakdown[name] = {
+      count: data.count,
+      avgEngagement: Math.round(data.totalEng / data.count),
+    };
+  }
+
+  // Engagement by day of week and hour
+  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const dayData = Array.from({ length: 7 }, (_, i) => ({ day: dayNames[i], totalEng: 0, postCount: 0 }));
+  const hourData = {};
+
+  for (const p of posts) {
+    if (!p.taken_at) continue;
+    const date = new Date(p.taken_at * 1000);
+    const eng = (p.like_count || 0) + (p.comment_count || 0);
+    const dow = date.getUTCDay();
+    dayData[dow].totalEng += eng;
+    dayData[dow].postCount++;
+    const hour = date.getUTCHours();
+    if (!hourData[hour]) hourData[hour] = { totalEng: 0, postCount: 0 };
+    hourData[hour].totalEng += eng;
+    hourData[hour].postCount++;
+  }
+
+  const engagementByDayOfWeek = dayData.map(d => ({
+    day: d.day,
+    avgEngagement: d.postCount > 0 ? Math.round(d.totalEng / d.postCount) : 0,
+    postCount: d.postCount,
+  }));
+
+  const engagementByHour = Object.entries(hourData)
+    .map(([hour, d]) => ({
+      hour: parseInt(hour),
+      avgEngagement: Math.round(d.totalEng / d.postCount),
+      postCount: d.postCount,
+    }))
+    .sort((a, b) => a.hour - b.hour);
+
+  // Best posting time and day
+  const bestHourEntry = engagementByHour.length > 0
+    ? engagementByHour.reduce((best, cur) => cur.avgEngagement > best.avgEngagement ? cur : best)
+    : null;
+  const bestPostingTime = bestHourEntry ? bestHourEntry.hour : null;
+
+  const bestDayEntry = engagementByDayOfWeek.reduce((best, cur) =>
+    cur.avgEngagement > best.avgEngagement ? cur : best
+  );
+  const bestPostingDay = bestDayEntry.postCount > 0 ? bestDayEntry.day : null;
+
+  // Post frequency (posts per week)
+  let postFrequency = 0;
+  if (postsAnalyzed >= 2) {
+    const timestamps = posts.filter(p => p.taken_at).map(p => p.taken_at).sort((a, b) => a - b);
+    if (timestamps.length >= 2) {
+      const spanSeconds = timestamps[timestamps.length - 1] - timestamps[0];
+      const spanWeeks = spanSeconds / (7 * 24 * 60 * 60);
+      postFrequency = spanWeeks > 0 ? Math.round((timestamps.length / spanWeeks) * 10) / 10 : 0;
+    }
+  }
+
+  // Engagement trend (older half vs newer half)
+  let engagementTrend = 0;
+  if (postsAnalyzed >= 4) {
+    const sorted = [...posts].sort((a, b) => (a.taken_at || 0) - (b.taken_at || 0));
+    const mid = Math.floor(sorted.length / 2);
+    const olderHalf = sorted.slice(0, mid);
+    const newerHalf = sorted.slice(mid);
+    const olderAvg = olderHalf.reduce((s, p) => s + (p.like_count || 0) + (p.comment_count || 0), 0) / olderHalf.length;
+    const newerAvg = newerHalf.reduce((s, p) => s + (p.like_count || 0) + (p.comment_count || 0), 0) / newerHalf.length;
+    engagementTrend = olderAvg > 0
+      ? Math.round(((newerAvg - olderAvg) / olderAvg) * 10000) / 100
+      : 0;
+  }
+
+  // Caption analysis
+  const shortCaptions = posts.filter(p => (p.caption_length || 0) < 100);
+  const longCaptions = posts.filter(p => (p.caption_length || 0) >= 100);
+  const captionAnalysis = {
+    short: {
+      count: shortCaptions.length,
+      avgEngagement: shortCaptions.length > 0
+        ? Math.round(shortCaptions.reduce((s, p) => s + (p.like_count || 0) + (p.comment_count || 0), 0) / shortCaptions.length)
+        : 0,
+    },
+    long: {
+      count: longCaptions.length,
+      avgEngagement: longCaptions.length > 0
+        ? Math.round(longCaptions.reduce((s, p) => s + (p.like_count || 0) + (p.comment_count || 0), 0) / longCaptions.length)
+        : 0,
+    },
+  };
+
+  // Top 3 posts by total engagement
+  const topPosts = [...posts]
+    .map(p => ({
+      likeCount: p.like_count || 0,
+      commentCount: p.comment_count || 0,
+      totalEngagement: (p.like_count || 0) + (p.comment_count || 0),
+      mediaType: typeNames[p.media_type] || `Type ${p.media_type}`,
+      captionLength: p.caption_length || 0,
+      takenAt: p.taken_at ? new Date(p.taken_at * 1000).toISOString() : null,
+    }))
+    .sort((a, b) => b.totalEngagement - a.totalEngagement)
+    .slice(0, 3);
+
+  return {
+    followerCount,
+    followingCount,
+    postsAnalyzed,
+    avgLikes,
+    avgComments,
+    engagementRate,
+    likeToFollowerRatio,
+    postTypeBreakdown,
+    engagementByDayOfWeek,
+    engagementByHour,
+    bestPostingTime,
+    bestPostingDay,
+    postFrequency,
+    engagementTrend,
+    captionAnalysis,
+    topPosts,
+  };
+}
+
+function buildUserPrompt(profile, metrics) {
+  return `Analyze this Instagram business account and generate a detailed growth report.
+
+BUSINESS PROFILE:
+- Business Name: ${profile.businessName}
+- Description: ${profile.description}
+- Business Type: ${profile.businessType}
+- Target Customer: ${profile.targetCustomer}
+- Marketing Goals: ${(profile.marketingGoals || []).join(', ')}
+- Differentiator: ${profile.differentiator}
+- Customer Sources: ${(profile.customerSources || []).join(', ')}
+- Biggest Challenge: ${profile.biggestChallenge}
+
+ACCOUNT METRICS:
+- Followers: ${metrics.followerCount}
+- Following: ${metrics.followingCount}
+- Posts Analyzed: ${metrics.postsAnalyzed}
+- Average Likes per Post: ${metrics.avgLikes}
+- Average Comments per Post: ${metrics.avgComments}
+- Engagement Rate: ${metrics.engagementRate}%
+- Like-to-Follower Ratio: ${metrics.likeToFollowerRatio}%
+- Post Frequency: ${metrics.postFrequency} posts/week
+- Engagement Trend (older vs newer posts): ${metrics.engagementTrend > 0 ? '+' : ''}${metrics.engagementTrend}%
+- Best Posting Day: ${metrics.bestPostingDay || 'N/A'}
+- Best Posting Hour (UTC): ${metrics.bestPostingTime !== null ? metrics.bestPostingTime + ':00' : 'N/A'}
+
+POST TYPE BREAKDOWN:
+${JSON.stringify(metrics.postTypeBreakdown, null, 2)}
+
+ENGAGEMENT BY DAY OF WEEK:
+${JSON.stringify(metrics.engagementByDayOfWeek, null, 2)}
+
+ENGAGEMENT BY HOUR:
+${JSON.stringify(metrics.engagementByHour, null, 2)}
+
+CAPTION ANALYSIS:
+- Short captions (<100 chars): ${metrics.captionAnalysis.short.count} posts, avg engagement ${metrics.captionAnalysis.short.avgEngagement}
+- Long captions (>=100 chars): ${metrics.captionAnalysis.long.count} posts, avg engagement ${metrics.captionAnalysis.long.avgEngagement}
+
+TOP 3 POSTS:
+${JSON.stringify(metrics.topPosts, null, 2)}
+
+Generate a report as JSON matching this exact schema. Make the actionPlan the most detailed section with 5-8 items ranked by revenue impact. Reference specific numbers from the data above in your recommendations. Consider their business type (${profile.businessType}) and tailor advice to that industry.
+
+{
+  "whatsWorking": [
+    { "title": "string", "detail": "string", "dataPoint": "string" }
+  ],
+  "opportunities": [
+    { "title": "string", "why": "string", "what": "string", "impact": "string", "metric": "string" }
+  ],
+  "contentCalendar": [
+    { "day": "string", "time": "string", "format": "string", "topic": "string", "why": "string" }
+  ],
+  "revenueLevers": [
+    { "title": "string", "detail": "string", "estimatedImpact": "string" }
+  ],
+  "actionPlan": [
+    {
+      "priority": 1,
+      "recommendation": "string",
+      "whyItMatters": "string",
+      "steps": ["string"],
+      "expectedImpact": "string",
+      "howToMeasure": "string",
+      "timeline": "string"
+    }
+  ],
+  "competitivePosition": {
+    "engagementVsBenchmark": "string",
+    "frequencyVsRecommended": "string",
+    "contentMixAssessment": "string",
+    "overallAssessment": "string"
+  }
+}`;
 }
 
 // ─── Stripe signature verification ─────────────────────────────
