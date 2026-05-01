@@ -191,6 +191,94 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   font-size:0.92rem;color:var(--text-soft);line-height:1.65;
 }
 
+/* ==================== PRICING ==================== */
+.pricing{
+  padding:0 2rem 120px;
+  max-width:700px;margin:0 auto;
+}
+.pricing-header{
+  text-align:center;margin-bottom:3rem;
+}
+.pricing-label{
+  display:inline-block;font-family:var(--font);font-weight:700;
+  font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--gold);padding:6px 14px;
+  background:var(--gold-bg);border:1px solid var(--gold-border);
+  border-radius:var(--radius-pill);margin-bottom:1rem;
+}
+.pricing-title{
+  font-family:var(--font);font-weight:800;
+  font-size:clamp(1.8rem,3.5vw,2.6rem);
+  line-height:1.2;letter-spacing:-0.015em;
+  margin-bottom:0.75rem;
+}
+.pricing-subtitle{
+  font-family:var(--font-body);font-weight:500;
+  font-size:1rem;color:var(--text-soft);
+}
+.pricing-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1.5rem;
+}
+.pricing-card{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-xl);
+  padding:2.25rem 2rem;
+  position:relative;
+  display:flex;flex-direction:column;
+}
+.pricing-card.featured{
+  border-color:var(--gold-border);
+  background:linear-gradient(160deg,rgba(212,168,67,0.06) 0%,var(--bg-card) 50%);
+  box-shadow:0 4px 32px rgba(212,168,67,0.08);
+}
+.pricing-badge{
+  position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+  font-family:var(--font);font-weight:700;font-size:0.75rem;
+  letter-spacing:0.04em;
+  background:var(--gradient-gold);color:#08080f;
+  padding:5px 16px;border-radius:var(--radius-pill);
+  white-space:nowrap;
+}
+.pricing-plan{
+  font-family:var(--font);font-weight:700;
+  font-size:1.1rem;color:var(--text-soft);margin-bottom:0.5rem;
+}
+.pricing-price{
+  font-family:var(--font);font-weight:900;
+  font-size:2.5rem;letter-spacing:-0.02em;
+  line-height:1.1;margin-bottom:0.35rem;
+}
+.pricing-billed{
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.85rem;color:var(--text-muted);margin-bottom:1.5rem;
+}
+.pricing-features{
+  list-style:none;display:flex;flex-direction:column;gap:0.75rem;
+  margin-bottom:2rem;flex:1;
+}
+.pricing-features li{
+  display:flex;align-items:flex-start;gap:0.6rem;
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.9rem;color:var(--text-soft);line-height:1.5;
+}
+.pricing-features li svg{
+  width:18px;height:18px;flex-shrink:0;margin-top:2px;color:var(--gold);
+}
+.pricing-cta{
+  display:block;text-align:center;
+  font-family:var(--font);font-weight:700;font-size:1rem;
+  padding:14px 24px;border-radius:var(--radius-pill);
+  background:var(--gradient-gold);color:#08080f;
+  transition:transform 0.25s var(--ease),box-shadow 0.25s;
+}
+.pricing-cta:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 32px rgba(212,168,67,0.35);
+}
+
 /* ==================== RESPONSIVE ==================== */
 @media(max-width:768px){
   .nav{padding:0 1.25rem}
@@ -198,6 +286,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   .hero{padding:100px 1.5rem 60px}
   .features{padding:60px 1.5rem 80px}
   .features-grid{grid-template-columns:1fr;gap:1.25rem}
+  .pricing{padding:0 1.5rem 80px}
+  .pricing-grid{grid-template-columns:1fr}
 }
 @media(max-width:480px){
   .nav-links a.nav-link-text{display:none}
@@ -290,6 +380,47 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
       </div>
       <h3>Revenue Levers</h3>
       <p>The three highest-impact things you can do to make more money from your Instagram. Specific, actionable, and backed by your account data.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- Pricing -->
+<section class="pricing" id="pricing">
+  <div class="pricing-header">
+    <span class="pricing-label">Pricing</span>
+    <h2 class="pricing-title">Invest in your growth.</h2>
+    <p class="pricing-subtitle">Unlimited scans. Unlimited reports. Cancel anytime.</p>
+  </div>
+  <div class="pricing-grid">
+
+    <!-- Monthly -->
+    <div class="pricing-card">
+      <div class="pricing-plan">Monthly</div>
+      <div class="pricing-price">$50/mo</div>
+      <div class="pricing-billed">Billed monthly</div>
+      <ul class="pricing-features">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Unlimited AI growth reports</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Personalized action plans</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Content calendar</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>PDF report downloads</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Progress tracking</li>
+      </ul>
+      <a href="javascript:void(0)" id="biz-pay-monthly" target="_blank" rel="noopener" class="pricing-cta">Get Started</a>
+    </div>
+
+    <!-- Yearly (featured) -->
+    <div class="pricing-card featured">
+      <span class="pricing-badge">Save $101/year</span>
+      <div class="pricing-plan">Yearly</div>
+      <div class="pricing-price">$499/yr</div>
+      <div class="pricing-billed">$41.58/month, billed annually</div>
+      <ul class="pricing-features">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Everything in Monthly</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Save $101 vs monthly</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Priority support</li>
+      </ul>
+      <a href="javascript:void(0)" id="biz-pay-yearly" target="_blank" rel="noopener" class="pricing-cta">Get Started</a>
     </div>
 
   </div>
