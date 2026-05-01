@@ -542,7 +542,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 /* ==================== PRICING SECTION (STANDALONE) ==================== */
 .pricing-section{
   position:relative;z-index:3;
-  max-width:800px;margin:0 auto;padding:6rem 2rem;
+  max-width:1100px;margin:0 auto;padding:6rem 2rem;
   text-align:center;
   background:var(--bg-alt);
 }
@@ -551,9 +551,128 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   font-family:var(--font);font-weight:900;
   font-size:clamp(2rem,4vw,2.8rem);letter-spacing:-0.03em;line-height:1.1;
 }
+.pricing-head p.pricing-subtitle{
+  color:var(--text-muted);font-size:1rem;margin-top:0.75rem;
+}
 .pricing-head .section-badge{margin-bottom:1rem}
+
+/* Toggle */
+.pricing-toggle-wrap{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:3rem}
+.pricing-toggle{
+  display:flex;position:relative;background:var(--bg-card);border:1px solid var(--border);
+  border-radius:12px;padding:4px;gap:4px;
+}
+.pricing-toggle-btn{
+  position:relative;z-index:1;padding:10px 24px;border-radius:10px;border:none;
+  background:none;color:var(--text-muted);font-family:var(--font-body);
+  font-size:0.9rem;font-weight:600;cursor:pointer;transition:color 0.25s;
+}
+.pricing-toggle-btn.active{color:#fff}
+.pricing-toggle-pill{
+  position:absolute;top:4px;bottom:4px;border-radius:10px;
+  background:var(--gradient-primary);
+  transition:left 0.3s ease,width 0.3s ease;
+  pointer-events:none;
+}
+.pricing-save-badge{
+  display:inline-block;padding:4px 12px;border-radius:var(--radius-pill);
+  font-size:0.75rem;font-weight:700;color:var(--green);
+  background:var(--green-bg);border:1px solid rgba(52,199,89,0.2);
+  transition:opacity 0.3s,transform 0.3s;
+}
+.pricing-save-badge.hidden{opacity:0;transform:scale(0.8);pointer-events:none}
+
+/* Card grid */
 .pricing-grid{
-  display:flex;gap:1.25rem;justify-content:center;flex-wrap:wrap;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;
+  align-items:stretch;
+}
+.pricing-card-new{
+  display:flex;flex-direction:column;
+  padding:2rem 1.75rem;border-radius:var(--radius-lg);
+  background:var(--bg-card);border:2px solid var(--border);
+  text-align:left;text-decoration:none;color:inherit;
+  transition:transform 0.3s var(--ease),border-color 0.3s,box-shadow 0.3s;
+  position:relative;overflow:hidden;
+}
+.pricing-card-new:hover{
+  transform:translateY(-4px);border-color:var(--border-hover);
+  box-shadow:0 12px 40px rgba(0,0,0,0.2);
+}
+.pricing-card-new.featured{
+  border-color:var(--indigo);
+  background:linear-gradient(135deg,rgba(99,102,241,0.08),rgba(217,70,239,0.04));
+}
+.pricing-card-new.featured:hover{
+  box-shadow:0 12px 40px rgba(99,102,241,0.15);
+}
+.pricing-card-new .popular-badge{
+  position:absolute;top:16px;right:16px;
+  padding:4px 12px;border-radius:var(--radius-pill);
+  font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;
+  background:var(--gradient-primary);color:#fff;
+}
+.pricing-card-new .card-plan-name{
+  font-family:var(--font);font-weight:800;font-size:1.1rem;
+  margin-bottom:1rem;letter-spacing:-0.01em;
+}
+.pricing-card-new .card-price{
+  font-family:var(--font);font-weight:900;font-size:2.5rem;
+  letter-spacing:-0.03em;line-height:1;margin-bottom:0.25rem;
+}
+.pricing-card-new .card-price .price-amount{
+  display:inline-block;transition:opacity 0.25s,transform 0.25s;
+}
+.pricing-card-new .card-price .price-amount.fade-out{
+  opacity:0;transform:translateY(-6px);
+}
+.pricing-card-new .card-price span.price-period{
+  font-size:1rem;font-weight:500;color:var(--text-muted);
+}
+.pricing-card-new .card-subtitle{
+  font-size:0.85rem;color:var(--text-muted);margin-bottom:1.5rem;
+  min-height:1.3em;
+  transition:opacity 0.25s;
+}
+.pricing-card-new .card-subtitle.fade-out{opacity:0}
+.pricing-card-new .card-features{
+  list-style:none;margin:0 0 2rem;padding:0;flex:1;
+}
+.pricing-card-new .card-features li{
+  display:flex;align-items:flex-start;gap:10px;
+  font-size:0.88rem;color:var(--text-soft);line-height:1.5;
+  margin-bottom:0.65rem;
+}
+.pricing-card-new .card-features li .check-icon{
+  flex-shrink:0;width:20px;height:20px;border-radius:50%;
+  background:var(--indigo-bg);display:flex;align-items:center;justify-content:center;
+  margin-top:2px;
+}
+.pricing-card-new .card-features li .check-icon svg{
+  width:12px;height:12px;color:var(--indigo-soft);
+}
+.pricing-card-new .card-btn{
+  display:block;width:100%;padding:12px;border-radius:var(--radius);
+  font-family:var(--font-body);font-size:0.9rem;font-weight:700;
+  text-align:center;text-decoration:none;cursor:pointer;
+  transition:background 0.2s,border-color 0.2s,transform 0.15s;border:none;
+}
+.pricing-card-new .card-btn:active{transform:scale(0.97)}
+.card-btn-outline{
+  background:none;border:2px solid var(--border)!important;color:var(--text-soft);
+}
+.card-btn-outline:hover{border-color:var(--indigo)!important;color:#fff}
+.card-btn-primary{
+  background:var(--gradient-primary);color:#fff;border:2px solid transparent!important;
+}
+.card-btn-primary:hover{box-shadow:0 4px 20px rgba(99,102,241,0.3)}
+
+@media(max-width:900px){
+  .pricing-grid{grid-template-columns:1fr;max-width:400px;margin-left:auto;margin-right:auto}
+}
+@media(max-width:480px){
+  .pricing-section{padding:4rem 1.25rem}
+  .pricing-toggle-btn{padding:8px 18px;font-size:0.82rem}
 }
 
 /* ==================== PRIVACY ==================== */
@@ -993,7 +1112,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .faq-item:not([open]) .faq-body{opacity:0}
 .faq-item[open] .faq-body{opacity:1}
 
-/* Pricing card hover glow */
+/* Pricing card hover glow (legacy, kept for paywall cards) */
 .pricing-card.featured:hover{
   box-shadow:0 8px 30px rgba(99,102,241,0.15);
 }
@@ -1259,26 +1378,65 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 <!-- PRICING -->
 <section class="pricing-section reveal" id="pricing">
   <div class="pricing-head">
-    <div class="section-badge badge-magenta">Pricing</div>
+    <div class="section-badge badge-indigo">Pricing</div>
     <h2>Simple, transparent pricing.</h2>
+    <p class="pricing-subtitle">Choose the plan that fits your needs.</p>
   </div>
+
+  <div class="pricing-toggle-wrap">
+    <div class="pricing-toggle" id="pricing-toggle">
+      <div class="pricing-toggle-pill" id="toggle-pill"></div>
+      <button class="pricing-toggle-btn active" data-plan="monthly" type="button">Monthly</button>
+      <button class="pricing-toggle-btn" data-plan="yearly" type="button">Yearly</button>
+    </div>
+    <span class="pricing-save-badge hidden" id="save-badge">Save 20%</span>
+  </div>
+
   <div class="pricing-grid">
-    <a class="pricing-card" href="https://buy.stripe.com/5kQdR89lx8589Sn8IX0co02" target="_blank" rel="noopener">
-      <div class="plan-name">This Scan</div>
-      <div class="price">$4</div>
-      <div class="plan-sub">one-time</div>
-    </a>
-    <a class="pricing-card featured" href="https://buy.stripe.com/8x2aEWapBbhk6Gb4sH0co00" target="_blank" rel="noopener">
-      <div class="plan-name">Monthly</div>
-      <div class="price">$6</div>
-      <div class="plan-sub">per month</div>
-    </a>
-    <a class="pricing-card" href="https://buy.stripe.com/fZudR869l5X04y34sH0co01" target="_blank" rel="noopener">
-      <div class="best-value">Best Value</div>
-      <div class="plan-name">Yearly</div>
-      <div class="price">$25</div>
-      <div class="plan-sub">per year</div>
-    </a>
+    <!-- This Scan -->
+    <div class="pricing-card-new">
+      <div class="card-plan-name">This Scan</div>
+      <div class="card-price"><span class="price-amount">$4</span></div>
+      <div class="card-subtitle">One-time</div>
+      <ul class="card-features">
+        <li><span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>See who doesn't follow you back</li>
+        <li><span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Sort by mutual connections</li>
+        <li><span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>CSV export</li>
+        <li><span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>24-hour access</li>
+      </ul>
+      <a class="card-btn card-btn-outline" href="https://buy.stripe.com/5kQdR89lx8589Sn8IX0co02" target="_blank" rel="noopener">Get Started</a>
+    </div>
+
+    <!-- Monthly / Yearly (toggleable) -->
+    <div class="pricing-card-new featured" id="recurring-card">
+      <div class="popular-badge">Popular</div>
+      <div class="card-plan-name" id="recurring-name">Monthly</div>
+      <div class="card-price"><span class="price-amount" id="recurring-price">$6</span><span class="price-period" id="recurring-period">/mo</span></div>
+      <div class="card-subtitle" id="recurring-subtitle">Billed monthly</div>
+      <ul class="card-features">
+        <li><span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Everything in This Scan</li>
+        <li><span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Potential Growth analytics</li>
+        <li><span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Best time to post insights</li>
+        <li><span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Engagement trend analysis</li>
+        <li><span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Unlimited scans</li>
+      </ul>
+      <a class="card-btn card-btn-primary" id="recurring-btn" href="https://buy.stripe.com/8x2aEWapBbhk6Gb4sH0co00" target="_blank" rel="noopener">Get Started</a>
+    </div>
+
+    <!-- Business -->
+    <div class="pricing-card-new">
+      <div class="card-plan-name">Business</div>
+      <div class="card-price"><span class="price-amount">Custom</span></div>
+      <div class="card-subtitle">For teams and businesses</div>
+      <ul class="card-features">
+        <li><span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>AI-powered growth reports</li>
+        <li><span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Personalized action plans</li>
+        <li><span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Content calendar</li>
+        <li><span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Revenue strategy</li>
+        <li><span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>PDF downloads</li>
+      </ul>
+      <a class="card-btn card-btn-outline" href="business.html">Learn More</a>
+    </div>
   </div>
 </section>
 
@@ -1868,6 +2026,67 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   requestAnimationFrame(tick);
   // Fade in
   requestAnimationFrame(() => el.classList.add('visible'));
+})();
+</script>
+
+<!-- Pricing toggle -->
+<script>
+(()=>{
+  const toggle = document.getElementById('pricing-toggle');
+  if (!toggle) return;
+  const pill = document.getElementById('toggle-pill');
+  const btns = toggle.querySelectorAll('.pricing-toggle-btn');
+  const badge = document.getElementById('save-badge');
+  const nameEl = document.getElementById('recurring-name');
+  const priceEl = document.getElementById('recurring-price');
+  const periodEl = document.getElementById('recurring-period');
+  const subtitleEl = document.getElementById('recurring-subtitle');
+  const btnEl = document.getElementById('recurring-btn');
+
+  function positionPill(btn){
+    pill.style.left = btn.offsetLeft + 'px';
+    pill.style.width = btn.offsetWidth + 'px';
+  }
+
+  // Init pill position
+  requestAnimationFrame(()=> positionPill(btns[0]));
+  window.addEventListener('resize', ()=>{
+    const active = toggle.querySelector('.pricing-toggle-btn.active');
+    if (active) positionPill(active);
+  });
+
+  btns.forEach(btn => {
+    btn.addEventListener('click', ()=>{
+      const plan = btn.dataset.plan;
+      btns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      positionPill(btn);
+
+      // Animate price change
+      priceEl.classList.add('fade-out');
+      subtitleEl.classList.add('fade-out');
+
+      setTimeout(()=>{
+        if (plan === 'yearly') {
+          nameEl.textContent = 'Yearly';
+          priceEl.textContent = '$25';
+          periodEl.textContent = '/yr';
+          subtitleEl.textContent = 'Billed annually';
+          btnEl.href = 'https://buy.stripe.com/fZudR869l5X04y34sH0co01';
+          badge.classList.remove('hidden');
+        } else {
+          nameEl.textContent = 'Monthly';
+          priceEl.textContent = '$6';
+          periodEl.textContent = '/mo';
+          subtitleEl.textContent = 'Billed monthly';
+          btnEl.href = 'https://buy.stripe.com/8x2aEWapBbhk6Gb4sH0co00';
+          badge.classList.add('hidden');
+        }
+        priceEl.classList.remove('fade-out');
+        subtitleEl.classList.remove('fade-out');
+      }, 200);
+    });
+  });
 })();
 </script>
 
