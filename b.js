@@ -18,9 +18,9 @@
   'use strict';
 
   const MAX_ACCOUNT_SIZE = 10000;
-  const THROTTLE_MS = 1500;
-  const THROTTLE_JITTER_MS = 800;
-  const PAGE_SIZE = 100;
+  const THROTTLE_MS = 1000;
+  const THROTTLE_JITTER_MS = 500;
+  const PAGE_SIZE = 200;
   const IG_APP_ID = '936619743392459';
   const RESUME_MAX_AGE_MS = 24 * 60 * 60 * 1000;
   const FOLLOW_RADAR_URL = 'https://flockscan.org';
