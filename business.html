@@ -485,6 +485,464 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
   .biz-scan-card{padding:2rem 1.5rem}
 }
 
+/* ==================== REPORT ==================== */
+#report-section{
+  display:none;
+  padding:100px 2rem 80px;
+  max-width:1100px;margin:0 auto;
+}
+#report-section.show{display:block}
+
+.report-header{
+  text-align:center;margin-bottom:3rem;padding-bottom:2rem;
+  border-bottom:1px solid var(--border);
+}
+.report-header h1{
+  font-family:var(--font);font-weight:900;
+  font-size:clamp(1.8rem,3.5vw,2.6rem);
+  line-height:1.2;letter-spacing:-0.015em;margin-bottom:0.25rem;
+}
+.report-header .report-handle{
+  font-family:var(--font-body);font-weight:600;
+  font-size:1.1rem;color:var(--gold);margin-bottom:0.5rem;
+}
+.report-header .report-date{
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.88rem;color:var(--text-muted);margin-bottom:1.5rem;
+}
+.report-download-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--font);font-weight:700;font-size:0.9rem;
+  padding:10px 24px;border-radius:var(--radius-pill);
+  border:1px solid var(--gold-border);
+  background:var(--gold-bg);color:var(--gold);
+  cursor:pointer;transition:background 0.2s,border-color 0.2s;
+}
+.report-download-btn:hover{
+  background:rgba(212,168,67,0.15);border-color:var(--gold);
+}
+.report-download-btn svg{width:16px;height:16px}
+
+.report-section-title{
+  font-family:var(--font);font-weight:800;
+  font-size:clamp(1.3rem,2.5vw,1.8rem);
+  line-height:1.2;letter-spacing:-0.01em;
+  margin-bottom:1.5rem;padding-top:2.5rem;
+  display:flex;align-items:center;gap:0.75rem;
+}
+.report-section-title .section-badge{
+  display:inline-block;font-family:var(--font);font-weight:700;
+  font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;
+  color:var(--gold);padding:4px 10px;
+  background:var(--gold-bg);border:1px solid var(--gold-border);
+  border-radius:var(--radius-pill);flex-shrink:0;
+}
+
+/* Stat cards */
+.report-stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:1.25rem;margin-bottom:1rem;
+}
+.report-stat-card{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:1.5rem;text-align:center;
+  position:relative;overflow:hidden;
+}
+.report-stat-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--gradient-gold);
+}
+.report-stat-card .stat-value{
+  font-family:var(--font);font-weight:900;
+  font-size:clamp(1.5rem,3vw,2.2rem);
+  letter-spacing:-0.02em;line-height:1.1;
+  margin-bottom:0.3rem;
+}
+.report-stat-card .stat-label{
+  font-family:var(--font-body);font-weight:600;
+  font-size:0.82rem;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:0.06em;
+}
+
+/* Bar chart */
+.report-chart{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:1.75rem;margin-bottom:1.25rem;
+}
+.report-chart h3{
+  font-family:var(--font);font-weight:700;
+  font-size:1.1rem;margin-bottom:1.25rem;
+}
+.chart-row{
+  display:flex;align-items:center;gap:0.75rem;
+  margin-bottom:0.75rem;
+}
+.chart-row:last-child{margin-bottom:0}
+.chart-label{
+  font-family:var(--font-body);font-weight:600;
+  font-size:0.82rem;color:var(--text-soft);
+  width:80px;flex-shrink:0;text-align:right;
+}
+.chart-bar-wrap{
+  flex:1;height:28px;
+  background:rgba(255,255,255,0.04);
+  border-radius:6px;overflow:hidden;position:relative;
+}
+.chart-bar{
+  height:100%;border-radius:6px;
+  background:linear-gradient(90deg,#D4A843,#C49530);
+  min-width:2px;
+  transition:width 0.8s var(--ease);
+}
+.chart-value{
+  font-family:var(--font);font-weight:700;
+  font-size:0.82rem;color:var(--text-soft);
+  width:70px;flex-shrink:0;
+}
+
+/* Report card (whats working, opportunities) */
+.report-card{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:1.75rem;margin-bottom:1.25rem;
+  position:relative;overflow:hidden;
+}
+.report-card::before{
+  content:'';position:absolute;top:0;left:0;bottom:0;width:3px;
+}
+.report-card.green::before{background:#2ecc71}
+.report-card.gold::before{background:var(--gold)}
+.report-card.blue::before{background:#3498db}
+.report-card h4{
+  font-family:var(--font);font-weight:700;
+  font-size:1.05rem;margin-bottom:0.5rem;
+}
+.report-card p{
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.92rem;color:var(--text-soft);line-height:1.65;
+  margin-bottom:0.5rem;
+}
+.report-card p:last-child{margin-bottom:0}
+.report-card .data-point{
+  display:inline-block;font-family:var(--font);font-weight:700;
+  font-size:0.8rem;color:var(--gold);
+  background:var(--gold-bg);border:1px solid var(--gold-border);
+  border-radius:var(--radius-pill);padding:3px 10px;
+  margin-top:0.4rem;
+}
+.report-card .impact-tag{
+  display:inline-block;font-family:var(--font);font-weight:700;
+  font-size:0.78rem;color:#2ecc71;
+  background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.2);
+  border-radius:var(--radius-pill);padding:3px 10px;
+  margin-top:0.4rem;
+}
+.report-card .card-label{
+  font-family:var(--font);font-weight:700;
+  font-size:0.72rem;letter-spacing:0.06em;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:0.25rem;
+}
+
+/* Cards grid for whats working / opportunities */
+.report-cards-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  gap:1.25rem;
+}
+
+/* Action card (centerpiece) */
+.action-card{
+  background:var(--bg-card);
+  border:1px solid var(--gold-border);
+  border-radius:var(--radius-xl);
+  padding:2.25rem;margin-bottom:1.75rem;
+  position:relative;overflow:hidden;
+  box-shadow:0 4px 32px rgba(212,168,67,0.06);
+}
+.action-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--gradient-gold);
+}
+.action-card-header{
+  display:flex;align-items:flex-start;gap:1.25rem;
+  margin-bottom:1.5rem;
+}
+.action-priority{
+  width:48px;height:48px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--gradient-gold);
+  border-radius:var(--radius);
+  font-family:var(--font);font-weight:900;font-size:1.3rem;
+  color:#08080f;
+}
+.action-card-header h3{
+  font-family:var(--font);font-weight:800;
+  font-size:1.25rem;line-height:1.3;letter-spacing:-0.01em;
+  flex:1;padding-top:0.15rem;
+}
+.action-why{
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.95rem;color:var(--text-soft);line-height:1.7;
+  margin-bottom:1.5rem;padding-left:0.5rem;
+  border-left:2px solid var(--gold-border);
+}
+.action-steps{
+  list-style:none;margin-bottom:1.5rem;
+  counter-reset:action-step;
+}
+.action-steps li{
+  counter-increment:action-step;
+  display:flex;align-items:flex-start;gap:0.75rem;
+  margin-bottom:0.75rem;
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.92rem;color:var(--text-soft);line-height:1.6;
+}
+.action-steps li::before{
+  content:counter(action-step);
+  display:flex;align-items:center;justify-content:center;
+  min-width:26px;height:26px;flex-shrink:0;
+  font-family:var(--font);font-weight:700;font-size:0.78rem;
+  color:var(--gold);
+  background:var(--gold-bg);border:1px solid var(--gold-border);
+  border-radius:50%;margin-top:1px;
+}
+.action-meta{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:1rem;
+  padding-top:1.25rem;
+  border-top:1px solid var(--border);
+}
+.action-meta-item .meta-label{
+  font-family:var(--font);font-weight:700;
+  font-size:0.7rem;letter-spacing:0.06em;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:0.3rem;
+}
+.action-meta-item .meta-value{
+  font-family:var(--font-body);font-weight:600;
+  font-size:0.88rem;color:var(--text-soft);line-height:1.5;
+}
+.action-meta-item .meta-value.timeline-badge{
+  display:inline-block;
+  font-family:var(--font);font-weight:700;font-size:0.78rem;
+  color:var(--gold);
+  background:var(--gold-bg);border:1px solid var(--gold-border);
+  border-radius:var(--radius-pill);padding:3px 12px;
+}
+
+/* Calendar grid */
+.calendar-grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:1rem;margin-bottom:1rem;
+}
+.calendar-day{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:1.25rem 1rem;
+  display:flex;flex-direction:column;
+  position:relative;overflow:hidden;
+}
+.calendar-day::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--gradient-gold);
+}
+.calendar-day .cal-day{
+  font-family:var(--font);font-weight:800;
+  font-size:0.9rem;color:var(--gold);margin-bottom:0.5rem;
+}
+.calendar-day .cal-time{
+  font-family:var(--font-body);font-weight:600;
+  font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem;
+}
+.calendar-day .cal-format{
+  display:inline-block;font-family:var(--font);font-weight:700;
+  font-size:0.68rem;letter-spacing:0.04em;text-transform:uppercase;
+  color:var(--gold);
+  background:var(--gold-bg);border:1px solid var(--gold-border);
+  border-radius:var(--radius-pill);padding:2px 8px;
+  margin-bottom:0.6rem;align-self:flex-start;
+}
+.calendar-day .cal-topic{
+  font-family:var(--font);font-weight:700;
+  font-size:0.88rem;line-height:1.4;margin-bottom:0.4rem;
+  flex:1;
+}
+.calendar-day .cal-why{
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.78rem;color:var(--text-muted);line-height:1.5;
+}
+
+/* Revenue lever cards */
+.revenue-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:1.25rem;
+}
+.revenue-card{
+  background:var(--bg-card);
+  border:2px solid var(--gold-border);
+  border-radius:var(--radius-xl);
+  padding:2rem;position:relative;overflow:hidden;
+}
+.revenue-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--gradient-gold);
+}
+.revenue-card h4{
+  font-family:var(--font);font-weight:800;
+  font-size:1.1rem;margin-bottom:0.75rem;
+}
+.revenue-card p{
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.92rem;color:var(--text-soft);line-height:1.65;
+  margin-bottom:0.75rem;
+}
+.revenue-impact{
+  display:inline-block;font-family:var(--font);font-weight:700;
+  font-size:0.82rem;color:var(--gold);
+  background:var(--gold-bg);border:1px solid var(--gold-border);
+  border-radius:var(--radius-pill);padding:4px 14px;
+}
+
+/* Competitive position */
+.competitive-card{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-xl);
+  padding:2rem;
+}
+.competitive-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1.25rem;
+}
+.competitive-item .comp-label{
+  font-family:var(--font);font-weight:700;
+  font-size:0.72rem;letter-spacing:0.06em;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:0.3rem;
+}
+.competitive-item .comp-value{
+  font-family:var(--font-body);font-weight:600;
+  font-size:0.95rem;color:var(--text-soft);line-height:1.5;
+}
+.competitive-overall{
+  margin-top:1.5rem;padding-top:1.25rem;
+  border-top:1px solid var(--border);
+}
+.competitive-overall .comp-label{
+  font-family:var(--font);font-weight:700;
+  font-size:0.72rem;letter-spacing:0.06em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:0.4rem;
+}
+.competitive-overall .comp-value{
+  font-family:var(--font-body);font-weight:600;
+  font-size:1rem;color:var(--text);line-height:1.6;
+}
+
+/* Loading overlay */
+.report-loading{
+  display:none;
+  position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;
+  background:rgba(8,8,15,0.92);backdrop-filter:blur(8px);
+  flex-direction:column;align-items:center;justify-content:center;
+  gap:1.5rem;
+}
+.report-loading.show{display:flex}
+.report-spinner{
+  width:48px;height:48px;
+  border:3px solid var(--border);
+  border-top-color:var(--gold);
+  border-radius:50%;
+  animation:report-spin 0.8s linear infinite;
+}
+@keyframes report-spin{to{transform:rotate(360deg)}}
+.report-loading p{
+  font-family:var(--font);font-weight:700;
+  font-size:1.1rem;color:var(--text);
+}
+.report-loading .loading-sub{
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.9rem;color:var(--text-muted);margin-top:-0.75rem;
+}
+
+/* Report error */
+.report-error{
+  display:none;
+  text-align:center;padding:3rem 2rem;
+  max-width:500px;margin:120px auto 0;
+}
+.report-error.show{display:block}
+.report-error h2{
+  font-family:var(--font);font-weight:800;
+  font-size:1.4rem;margin-bottom:0.75rem;color:#e74c3c;
+}
+.report-error p{
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.95rem;color:var(--text-soft);line-height:1.6;
+}
+
+/* Report bottom note */
+.report-bottom-note{
+  text-align:center;
+  padding:3rem 0 1rem;
+  font-family:var(--font-body);font-weight:600;
+  font-size:0.95rem;color:var(--text-muted);
+}
+
+/* Caption comparison */
+.caption-compare{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1.25rem;margin-bottom:1.25rem;
+}
+.caption-card{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:1.5rem;text-align:center;
+}
+.caption-card .caption-type{
+  font-family:var(--font);font-weight:700;
+  font-size:0.85rem;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:0.06em;
+  margin-bottom:0.5rem;
+}
+.caption-card .caption-value{
+  font-family:var(--font);font-weight:900;
+  font-size:1.8rem;letter-spacing:-0.02em;
+  line-height:1.1;margin-bottom:0.2rem;
+}
+.caption-card .caption-count{
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.82rem;color:var(--text-muted);
+}
+
+/* ==================== RESPONSIVE (report) ==================== */
+@media(max-width:1024px){
+  .calendar-grid{grid-template-columns:repeat(4,1fr)}
+}
+@media(max-width:768px){
+  #report-section{padding:90px 1.5rem 60px}
+  .report-stats{grid-template-columns:repeat(2,1fr)}
+  .calendar-grid{grid-template-columns:repeat(2,1fr)}
+  .action-meta{grid-template-columns:1fr}
+  .competitive-grid{grid-template-columns:1fr}
+  .report-cards-grid{grid-template-columns:1fr}
+  .caption-compare{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .report-stats{grid-template-columns:1fr}
+  .calendar-grid{grid-template-columns:1fr}
+}
+
 /* Reduced motion */
 @media(prefers-reduced-motion:reduce){
   *{transition:none !important;animation:none !important}
@@ -721,6 +1179,25 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
   </div>
 </section>
 
+<!-- Report Loading -->
+<div class="report-loading" id="report-loading">
+  <div class="report-spinner"></div>
+  <p>Generating your growth report...</p>
+  <p class="loading-sub">This takes about 30 seconds.</p>
+</div>
+
+<!-- Report Error -->
+<div class="report-error" id="report-error">
+  <h2>Report generation failed.</h2>
+  <p id="report-error-msg">Something went wrong. Please try scanning again.</p>
+</div>
+
+<!-- Report Section -->
+<section id="report-section">
+  <div class="report-header" id="report-header"></div>
+  <div id="report-body"></div>
+</section>
+
 <!-- Footer -->
 <footer class="biz-footer">
   Flock Business by <a href="index.html">Flock</a>
@@ -948,19 +1425,291 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
     return JSON.parse(new TextDecoder().decode(raw));
   }
 
+  function esc(str) {
+    var d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+  }
+
+  function fmtNum(n) {
+    if (n == null) return '0';
+    if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+    if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+    return String(Math.round(n * 100) / 100);
+  }
+
+  function renderBarChart(containerId, items) {
+    var container = document.getElementById(containerId);
+    if (!container || !items || !items.length) return;
+    var max = Math.max.apply(null, items.map(function(d) { return d.value || 0; }));
+    if (max === 0) max = 1;
+    var html = '';
+    items.forEach(function(item) {
+      var pct = Math.round((item.value / max) * 100);
+      html += '<div class="chart-row">'
+        + '<span class="chart-label">' + esc(item.label) + '</span>'
+        + '<div class="chart-bar-wrap"><div class="chart-bar" style="width:' + pct + '%"></div></div>'
+        + '<span class="chart-value">' + esc(item.display) + '</span>'
+        + '</div>';
+    });
+    container.innerHTML = html;
+  }
+
+  function renderReport(metrics, report, scanData) {
+    var m = metrics;
+    var r = report;
+    var profileRaw = localStorage.getItem('flock-business:profile');
+    var profile = profileRaw ? JSON.parse(profileRaw) : {};
+    var username = scanData && scanData.username ? scanData.username : '';
+    var scanDate = scanData && scanData.scrapedAt
+      ? new Date(scanData.scrapedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+      : new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    /* Header */
+    var headerEl = document.getElementById('report-header');
+    headerEl.innerHTML =
+      '<h1>' + esc(profile.businessName || 'Growth Report') + '</h1>'
+      + (username ? '<div class="report-handle">@' + esc(username) + '</div>' : '')
+      + '<div class="report-date">' + esc(scanDate) + '</div>'
+      + '<button class="report-download-btn" onclick="window.print()">'
+      + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>'
+      + 'Download Report</button>';
+
+    /* Build body */
+    var html = '';
+
+    /* === Account Health Snapshot === */
+    html += '<h2 class="report-section-title"><span class="section-badge">Overview</span> Account Health Snapshot</h2>';
+    html += '<div class="report-stats">';
+    html += '<div class="report-stat-card"><div class="stat-value">' + fmtNum(m.followerCount) + '</div><div class="stat-label">Followers</div></div>';
+    html += '<div class="report-stat-card"><div class="stat-value">' + fmtNum(m.engagementRate) + '%</div><div class="stat-label">Engagement Rate</div></div>';
+    html += '<div class="report-stat-card"><div class="stat-value">' + fmtNum(m.avgLikes) + '</div><div class="stat-label">Avg Likes</div></div>';
+    html += '<div class="report-stat-card"><div class="stat-value">' + fmtNum(m.postsAnalyzed) + '</div><div class="stat-label">Posts Analyzed</div></div>';
+    html += '</div>';
+
+    /* === Content Performance === */
+    html += '<h2 class="report-section-title"><span class="section-badge">Performance</span> Content Performance</h2>';
+
+    /* Post type breakdown */
+    if (m.postTypeBreakdown) {
+      html += '<div class="report-chart"><h3>Engagement by Post Type</h3><div id="chart-post-type"></div></div>';
+    }
+
+    /* Day of week */
+    if (m.engagementByDayOfWeek && m.engagementByDayOfWeek.length) {
+      html += '<div class="report-chart"><h3>Engagement by Day of Week</h3><div id="chart-day"></div></div>';
+    }
+
+    /* Hour */
+    if (m.engagementByHour && m.engagementByHour.length) {
+      html += '<div class="report-chart"><h3>Best Posting Hours</h3><div id="chart-hour"></div></div>';
+    }
+
+    /* Caption analysis */
+    if (m.captionAnalysis) {
+      var ca = m.captionAnalysis;
+      html += '<div class="caption-compare">';
+      html += '<div class="caption-card"><div class="caption-type">Short Captions</div><div class="caption-value">' + fmtNum(ca.shortAvg) + '%</div><div class="caption-count">' + (ca.shortCount || 0) + ' posts</div></div>';
+      html += '<div class="caption-card"><div class="caption-type">Long Captions</div><div class="caption-value">' + fmtNum(ca.longAvg) + '%</div><div class="caption-count">' + (ca.longCount || 0) + ' posts</div></div>';
+      html += '</div>';
+    }
+
+    /* === What's Working === */
+    if (r.whatsWorking && r.whatsWorking.length) {
+      html += '<h2 class="report-section-title"><span class="section-badge">Strengths</span> What\'s Working</h2>';
+      html += '<div class="report-cards-grid">';
+      r.whatsWorking.forEach(function(item) {
+        html += '<div class="report-card green"><h4>' + esc(item.title) + '</h4>';
+        html += '<p>' + esc(item.detail) + '</p>';
+        if (item.dataPoint) html += '<span class="data-point">' + esc(item.dataPoint) + '</span>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+
+    /* === Opportunities === */
+    if (r.opportunities && r.opportunities.length) {
+      html += '<h2 class="report-section-title"><span class="section-badge">Growth</span> Opportunities</h2>';
+      html += '<div class="report-cards-grid">';
+      r.opportunities.forEach(function(item) {
+        html += '<div class="report-card blue">';
+        html += '<h4>' + esc(item.title) + '</h4>';
+        if (item.why) html += '<p><span class="card-label">Why</span><br>' + esc(item.why) + '</p>';
+        if (item.what) html += '<p><span class="card-label">What to do</span><br>' + esc(item.what) + '</p>';
+        if (item.impact) html += '<span class="impact-tag">' + esc(item.impact) + '</span> ';
+        if (item.metric) html += '<span class="data-point">' + esc(item.metric) + '</span>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+
+    /* === Content Calendar === */
+    if (r.contentCalendar && r.contentCalendar.length) {
+      html += '<h2 class="report-section-title"><span class="section-badge">Plan</span> Content Calendar</h2>';
+      html += '<div class="calendar-grid">';
+      r.contentCalendar.forEach(function(item) {
+        html += '<div class="calendar-day">';
+        html += '<div class="cal-day">' + esc(item.day) + '</div>';
+        html += '<div class="cal-time">' + esc(item.time) + '</div>';
+        html += '<span class="cal-format">' + esc(item.format) + '</span>';
+        html += '<div class="cal-topic">' + esc(item.topic) + '</div>';
+        if (item.why) html += '<div class="cal-why">' + esc(item.why) + '</div>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+
+    /* === Revenue Levers === */
+    if (r.revenueLevers && r.revenueLevers.length) {
+      html += '<h2 class="report-section-title"><span class="section-badge">Revenue</span> Revenue Levers</h2>';
+      html += '<div class="revenue-grid">';
+      r.revenueLevers.forEach(function(item) {
+        html += '<div class="revenue-card">';
+        html += '<h4>' + esc(item.title) + '</h4>';
+        html += '<p>' + esc(item.detail) + '</p>';
+        if (item.estimatedImpact) html += '<span class="revenue-impact">' + esc(item.estimatedImpact) + '</span>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+
+    /* === Action Plan (centerpiece) === */
+    if (r.actionPlan && r.actionPlan.length) {
+      html += '<h2 class="report-section-title"><span class="section-badge">Action Plan</span> Your Growth Playbook</h2>';
+      r.actionPlan.forEach(function(item, idx) {
+        html += '<div class="action-card">';
+        html += '<div class="action-card-header">';
+        html += '<div class="action-priority">' + (item.priority || (idx + 1)) + '</div>';
+        html += '<h3>' + esc(item.recommendation) + '</h3>';
+        html += '</div>';
+        if (item.whyItMatters) html += '<div class="action-why">' + esc(item.whyItMatters) + '</div>';
+        if (item.steps && item.steps.length) {
+          html += '<ol class="action-steps">';
+          item.steps.forEach(function(step) {
+            html += '<li>' + esc(step) + '</li>';
+          });
+          html += '</ol>';
+        }
+        html += '<div class="action-meta">';
+        html += '<div class="action-meta-item"><div class="meta-label">Expected Impact</div><div class="meta-value">' + esc(item.expectedImpact || '-') + '</div></div>';
+        html += '<div class="action-meta-item"><div class="meta-label">How to Measure</div><div class="meta-value">' + esc(item.howToMeasure || '-') + '</div></div>';
+        html += '<div class="action-meta-item"><div class="meta-label">Timeline</div><div class="meta-value timeline-badge">' + esc(item.timeline || '-') + '</div></div>';
+        html += '</div>';
+        html += '</div>';
+      });
+    }
+
+    /* === Competitive Position === */
+    if (r.competitivePosition) {
+      var cp = r.competitivePosition;
+      html += '<h2 class="report-section-title"><span class="section-badge">Benchmark</span> Competitive Position</h2>';
+      html += '<div class="competitive-card">';
+      html += '<div class="competitive-grid">';
+      html += '<div class="competitive-item"><div class="comp-label">Engagement vs Benchmark</div><div class="comp-value">' + esc(cp.engagementVsBenchmark) + '</div></div>';
+      html += '<div class="competitive-item"><div class="comp-label">Post Frequency vs Recommended</div><div class="comp-value">' + esc(cp.frequencyVsRecommended) + '</div></div>';
+      html += '<div class="competitive-item"><div class="comp-label">Content Mix</div><div class="comp-value">' + esc(cp.contentMixAssessment) + '</div></div>';
+      html += '</div>';
+      if (cp.overallAssessment) {
+        html += '<div class="competitive-overall"><div class="comp-label">Overall Assessment</div><div class="comp-value">' + esc(cp.overallAssessment) + '</div></div>';
+      }
+      html += '</div>';
+    }
+
+    /* Bottom note */
+    html += '<div class="report-bottom-note">Scan anytime to track your progress.</div>';
+
+    document.getElementById('report-body').innerHTML = html;
+
+    /* Render bar charts after DOM is populated */
+    if (m.postTypeBreakdown) {
+      var ptItems = [];
+      Object.keys(m.postTypeBreakdown).forEach(function(key) {
+        var d = m.postTypeBreakdown[key];
+        ptItems.push({ label: key, value: d.avgEngagement || 0, display: fmtNum(d.avgEngagement || 0) + '% avg' });
+      });
+      renderBarChart('chart-post-type', ptItems);
+    }
+
+    if (m.engagementByDayOfWeek && m.engagementByDayOfWeek.length) {
+      var dayItems = m.engagementByDayOfWeek.map(function(d) {
+        return { label: d.day, value: d.avgEngagement || 0, display: fmtNum(d.avgEngagement || 0) + ' avg' };
+      });
+      renderBarChart('chart-day', dayItems);
+    }
+
+    if (m.engagementByHour && m.engagementByHour.length) {
+      var hourItems = m.engagementByHour
+        .slice()
+        .sort(function(a, b) { return (b.avgEngagement || 0) - (a.avgEngagement || 0); })
+        .slice(0, 6)
+        .map(function(d) {
+          var h = d.hour;
+          var label = h === 0 ? '12 AM' : h < 12 ? h + ' AM' : h === 12 ? '12 PM' : (h - 12) + ' PM';
+          return { label: label, value: d.avgEngagement || 0, display: fmtNum(d.avgEngagement || 0) + ' avg' };
+        });
+      renderBarChart('chart-hour', hourItems);
+    }
+  }
+
+  function showReportError(msg) {
+    document.getElementById('report-loading').classList.remove('show');
+    document.getElementById('report-error-msg').textContent = msg || 'Something went wrong. Please try scanning again.';
+    document.getElementById('report-error').classList.add('show');
+  }
+
+  function hideAllSections() {
+    ['hero', 'features', 'pricing', 'get-started', 'biz-scan-section', 'biz-verify-section'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) { el.style.display = 'none'; el.classList.remove('show'); }
+    });
+    document.querySelector('.hero').style.display = 'none';
+    document.querySelector('.features').style.display = 'none';
+    document.querySelector('.pricing').style.display = 'none';
+  }
+
   (async function checkScanData() {
     var hash = location.hash;
     if (hash.indexOf('#data=') !== 0) return;
     try {
       var payload = decodeURIComponent(hash.slice(6));
-      var data = await decodePayload(payload);
-      localStorage.setItem('flock-business:scan', JSON.stringify(data));
+      var scanData = await decodePayload(payload);
+      localStorage.setItem('flock-business:scan', JSON.stringify(scanData));
       history.replaceState(null, '', location.pathname + location.search);
-      var followers = data.followers ? data.followers.length : 0;
-      var following = data.following ? data.following.length : 0;
-      alert('Scan complete: ' + followers + ' followers, ' + following + ' following.' + (data.partial ? ' (partial scan)' : ''));
+
+      /* Show loading */
+      document.getElementById('report-loading').classList.add('show');
+
+      var profileRaw = localStorage.getItem('flock-business:profile');
+      var profile = profileRaw ? JSON.parse(profileRaw) : {};
+      var email = localStorage.getItem('flock-business:email') || '';
+
+      /* Call report endpoint */
+      var res = await fetch('https://flock-payments.warnkenc.workers.dev/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, profile: profile, scan: scanData })
+      });
+
+      if (!res.ok) {
+        var errText = '';
+        try { var errData = await res.json(); errText = errData.error || ''; } catch(e) {}
+        throw new Error(errText || 'Server returned ' + res.status);
+      }
+
+      var result = await res.json();
+      if (!result.success) throw new Error(result.error || 'Report generation failed.');
+
+      /* Hide loading, hide other sections, show report */
+      document.getElementById('report-loading').classList.remove('show');
+      hideAllSections();
+      var reportSection = document.getElementById('report-section');
+      reportSection.classList.add('show');
+      renderReport(result.metrics, result.report, scanData);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
     } catch(err) {
-      console.error('[Flock] Failed to decode scan data:', err);
+      console.error('[Flock] Report error:', err);
+      showReportError(err.message || 'Something went wrong. Please try scanning again.');
     }
   })();
 })();
