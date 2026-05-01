@@ -1804,6 +1804,8 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
       ease: 'power2.in'
     }, 90);
 
+    window._flockHeroTl = masterTl;
+
     // --- Mouse tracking for card sheen + phone tilt ---
     heroCard.addEventListener('mousemove', function(e){
       var rect = heroCard.getBoundingClientRect();
@@ -2025,7 +2027,15 @@ function loadPayload(p){
   anim(el.sm, mutuals.length);
 
   document.querySelectorAll('.how, .bm-section, .privacy, .faq').forEach(s => { s.style.display = 'none'; });
-  setTimeout(() => el.res.scrollIntoView({behavior:'smooth', block:'start'}), 80);
+  // Kill cinematic hero so it doesn't block scrolling to results
+  if (window._flockHeroTl) {
+    window._flockHeroTl.scrollTrigger && window._flockHeroTl.scrollTrigger.kill();
+    window._flockHeroTl.kill();
+  }
+  var heroSec = document.getElementById('cinematic-hero');
+  if (heroSec) heroSec.style.display = 'none';
+  if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
+  setTimeout(() => el.res.scrollIntoView({behavior:'smooth', block:'start'}), 200);
 }
 
 function doSort(){
