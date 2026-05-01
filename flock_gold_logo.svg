@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">Flock gold bird emblem</title>
+  <desc id="desc">A warm gold Flock bird logo inside a glowing amber ring on a clean dark brown background.</desc>
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#2b1507"/>
+      <stop offset="58%" stop-color="#120906"/>
+      <stop offset="100%" stop-color="#060303"/>
+    </radialGradient>
+
+    <linearGradient id="ringGrad" x1="168" y1="108" x2="856" y2="916" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fff07a"/>
+      <stop offset="28%" stop-color="#ffd12b"/>
+      <stop offset="58%" stop-color="#f6a20a"/>
+      <stop offset="100%" stop-color="#ffcf4a"/>
+    </linearGradient>
+
+    <linearGradient id="wingGold" x1="210" y1="250" x2="660" y2="760" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fff466"/>
+      <stop offset="35%" stop-color="#ffc400"/>
+      <stop offset="73%" stop-color="#e88900"/>
+      <stop offset="100%" stop-color="#b96700"/>
+    </linearGradient>
+
+    <linearGradient id="bodyGold" x1="565" y1="275" x2="790" y2="800" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fff6bf"/>
+      <stop offset="48%" stop-color="#ffd974"/>
+      <stop offset="100%" stop-color="#f2b431"/>
+    </linearGradient>
+
+    <filter id="ringGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 1  0 0.64 0 0 0.43  0 0 0.05 0 0  0 0 0 0.75 0" result="goldGlow"/>
+      <feMerge>
+        <feMergeNode in="goldGlow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="softLogoGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3.5" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 1  0 0.72 0 0 0.46  0 0 0.12 0 0  0 0 0 0.45 0" result="warm"/>
+      <feMerge>
+        <feMergeNode in="warm"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="innerShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#5b2600" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+
+  <circle cx="512" cy="512" r="454" fill="none" stroke="url(#ringGrad)" stroke-width="11" filter="url(#ringGlow)"/>
+  <circle cx="512" cy="512" r="445" fill="none" stroke="#ffd35a" stroke-width="2" opacity="0.6"/>
+
+  <g filter="url(#softLogoGlow)">
+    <!-- Main bird body and head -->
+    <path d="M530 382
+             C552 324 612 287 683 289
+             C733 290 775 311 794 347
+             C823 346 855 357 876 382
+             C843 379 812 391 795 416
+             C780 438 778 467 784 497
+             C801 582 781 697 727 767
+             C684 823 616 849 530 835
+             C595 827 633 792 655 739
+             C680 679 682 606 662 547
+             C645 495 611 457 568 430
+             C553 421 537 414 519 409
+             C523 399 526 390 530 382 Z"
+          fill="url(#bodyGold)" stroke="#fff3b5" stroke-width="3" filter="url(#innerShadow)"/>
+
+    <!-- Top wing -->
+    <path d="M212 255
+             C296 356 412 414 563 441
+             C623 452 664 484 675 545
+             C624 503 558 509 476 494
+             C338 469 239 405 211 322
+             C202 295 204 272 212 255 Z"
+          fill="url(#wingGold)" stroke="#fff178" stroke-width="3" filter="url(#innerShadow)"/>
+
+    <!-- Middle wing -->
+    <path d="M216 464
+             C296 534 410 570 558 565
+             C612 563 654 590 666 651
+             C612 611 551 621 470 620
+             C340 619 250 575 219 511
+             C211 493 211 476 216 464 Z"
+          fill="url(#wingGold)" stroke="#ffe668" stroke-width="3" filter="url(#innerShadow)"/>
+
+    <!-- Lower wing -->
+    <path d="M287 651
+             C368 696 455 712 544 683
+             C595 666 637 690 641 732
+             C583 768 496 765 413 740
+             C350 720 305 688 287 651 Z"
+          fill="url(#wingGold)" stroke="#ffd658" stroke-width="3" filter="url(#innerShadow)"/>
+
+    <!-- Eye cutout -->
+    <circle cx="704" cy="338" r="18" fill="#0c0705"/>
+    <circle cx="704" cy="338" r="19.5" fill="none" stroke="#fff5c8" stroke-width="2" opacity="0.55"/>
+  </g>
+</svg>
