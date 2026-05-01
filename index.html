@@ -10,6 +10,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -90,140 +92,298 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   .nav-links a:not(.nav-cta){display:none}
 }
 
-/* ==================== HERO ==================== */
-.hero{
-  position:relative;z-index:3;min-height:100vh;
+/* ==================== CINEMATIC HERO ==================== */
+.gsap-reveal{visibility:hidden}
+
+.cinematic-hero{
+  position:relative;z-index:3;
+  width:100%;height:100vh;
+  overflow:hidden;
+  background:var(--bg);
+}
+.cinematic-hero-inner{
+  position:relative;width:100%;height:100vh;
   display:flex;align-items:center;justify-content:center;
-  padding:6rem 2rem 4rem;
-  max-width:1200px;margin:0 auto;
-  gap:4rem;
+  flex-direction:column;
 }
-.hero::before{
-  content:'';position:absolute;inset:0;
-  background-image:radial-gradient(rgba(99,102,241,0.08) 1px, transparent 1px);
-  background-size:24px 24px;
-  pointer-events:none;z-index:-1;
-}
-.hero-left{flex:1;max-width:560px}
-.hero-right{flex:1;max-width:440px;display:flex;justify-content:center}
 
-.hero-tag{
-  display:inline-flex;align-items:center;gap:8px;
-  padding:6px 16px;border-radius:var(--radius-pill);
-  background:var(--indigo-bg);color:var(--indigo-soft);
-  font-size:0.8rem;font-weight:600;margin-bottom:1.5rem;
-  border:1px solid rgba(99,102,241,0.15);
+.film-grain{
+  position:absolute;inset:0;width:100%;height:100%;
+  pointer-events:none;z-index:50;opacity:0.05;mix-blend-mode:overlay;
+  background:url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)"/></svg>');
 }
-.hero-tag svg{width:14px;height:14px}
 
-.hero h1{
+.bg-grid-theme{
+  position:absolute;inset:0;
+  background-size:60px 60px;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+  mask-image:radial-gradient(ellipse at center, black 0%, transparent 70%);
+  -webkit-mask-image:radial-gradient(ellipse at center, black 0%, transparent 70%);
+  pointer-events:none;
+}
+
+/* Phase 1: Big text */
+.hero-text-block{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:10;pointer-events:none;
+}
+.hero-line1{
   font-family:var(--font);font-weight:900;
-  font-size:clamp(2.8rem,5.5vw,4.2rem);line-height:1.08;
-  letter-spacing:-0.03em;margin-bottom:1.5rem;
+  font-size:clamp(3rem,7vw,5.5rem);line-height:1.1;
+  letter-spacing:-0.03em;
   color:#fff;
+  text-shadow:0 10px 30px rgba(255,255,255,0.15), 0 2px 4px rgba(255,255,255,0.08);
 }
-.hero h1 strong{
-  background:var(--gradient-primary);
+.hero-line2{
+  font-family:var(--font);font-weight:900;
+  font-size:clamp(3rem,7vw,5.5rem);line-height:1.1;
+  letter-spacing:-0.03em;
+  background:linear-gradient(180deg, #FFFFFF 0%, rgba(255,255,255,0.4) 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   background-clip:text;
+  filter:drop-shadow(0px 10px 20px rgba(255,255,255,0.1));
+  clip-path:inset(0 100% 0 0);
 }
 
-.hero p.subtitle{
-  font-size:1.1rem;color:var(--text-muted);
-  max-width:440px;line-height:1.7;font-weight:400;margin-bottom:2rem;
+/* Phase 2-3: Deep card */
+.hero-deep-card{
+  position:absolute;
+  width:85vw;height:85vh;
+  border-radius:32px;
+  background:linear-gradient(145deg, #1a1f37 0%, #0a0e1a 100%);
+  box-shadow:
+    0 40px 100px -20px rgba(0,0,0,0.9),
+    0 20px 40px -20px rgba(0,0,0,0.8),
+    inset 0 1px 2px rgba(255,255,255,0.1),
+    inset 0 -2px 4px rgba(0,0,0,0.8);
+  border:1px solid rgba(255,255,255,0.04);
+  z-index:20;
+  overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
 }
 
-.hero-cta{
-  display:inline-flex;align-items:center;gap:10px;
-  padding:14px 32px;border-radius:var(--radius-pill);
-  background:var(--indigo);color:#fff;font-family:var(--font);font-weight:700;font-size:1rem;
-  transition:all 0.3s ease;box-shadow:var(--shadow-glow);
+.card-sheen{
+  position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:50;
+  background:radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.04) 0%, transparent 40%);
 }
-.hero-cta:hover{background:#5558E6;transform:translateY(-2px);box-shadow:0 8px 32px rgba(99,102,241,0.35)}
-.hero-cta svg{width:18px;height:18px}
 
-.hero-trust{
-  margin-top:1rem;display:flex;align-items:center;gap:6px;
-  color:var(--text-muted);font-size:0.8rem;font-weight:500;
+/* Card inner layout */
+.card-content{
+  position:relative;z-index:10;
+  width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+  padding:3rem;
+  gap:2rem;
+  opacity:0;
 }
-.hero-trust svg{width:14px;height:14px;color:var(--green)}
+.card-left{
+  flex:0 0 220px;
+  display:flex;flex-direction:column;gap:1rem;
+}
+.card-left h2{
+  font-family:var(--font);font-weight:900;
+  font-size:clamp(1.4rem,2.5vw,2rem);line-height:1.15;
+  letter-spacing:-0.02em;color:#fff;
+}
+.card-left p{
+  font-size:0.9rem;color:var(--text-muted);line-height:1.6;
+}
 
-/* Hero phone mockup */
-.hero-phone{
-  position:relative;width:100%;max-width:300px;
+.card-center{
+  flex:0 0 auto;
+  position:relative;
+  perspective:1200px;
 }
-.hero-phone-frame{
-  background:var(--bg-card);border:1px solid var(--border);
-  border-radius:32px;padding:12px;
-  box-shadow:0 24px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(99,102,241,0.08),0 0 60px rgba(99,102,241,0.1);
+
+.card-right{
+  flex:0 0 180px;
+  display:flex;align-items:center;justify-content:center;
 }
-.hero-phone-notch{
-  width:100px;height:24px;background:var(--bg);
-  border-radius:0 0 16px 16px;margin:0 auto 16px;
+.card-right-brand{
+  font-family:var(--font);font-weight:900;
+  font-size:clamp(3rem,5vw,5rem);
+  letter-spacing:-0.04em;
+  background:linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  writing-mode:vertical-lr;
+  text-orientation:mixed;
 }
-.hero-phone-content{
-  background:var(--bg);border-radius:20px;padding:20px 16px;
-  min-height:360px;display:flex;flex-direction:column;
+
+/* iPhone mockup - cinematic version */
+.iphone-wrap{
+  transform-style:preserve-3d;
+  will-change:transform;
 }
-.hero-phone-header{
-  display:flex;align-items:center;gap:10px;margin-bottom:20px;
+.iphone-bezel{
+  width:280px;
+  background-color:#111;
+  border-radius:40px;
+  padding:12px;
+  box-shadow:inset 0 0 0 2px #52525B, inset 0 0 0 7px #000, 0 40px 80px -15px rgba(0,0,0,0.9);
 }
-.hero-phone-header img{width:28px;height:28px}
-.hero-phone-title{font-family:var(--font);font-weight:700;font-size:0.95rem}
-.hero-phone-stats{
-  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;
+.iphone-notch{
+  width:100px;height:24px;background:#000;
+  border-radius:0 0 16px 16px;margin:0 auto 12px;
 }
-.hero-stat{
-  padding:12px;border-radius:var(--radius);
-  border:1px solid var(--border);text-align:center;
+.iphone-screen{
+  background:var(--bg);border-radius:28px;padding:16px 14px;
+  min-height:440px;display:flex;flex-direction:column;
 }
-.hero-stat-num{
-  font-family:var(--font);font-weight:800;font-size:1.3rem;
+.iphone-header{
+  display:flex;align-items:center;gap:8px;margin-bottom:14px;
+}
+.iphone-header img{width:24px;height:24px}
+.iphone-header-title{font-family:var(--font);font-weight:700;font-size:0.85rem;color:#fff}
+
+.iphone-stats{
+  display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;
+}
+.iphone-stat{
+  padding:10px 8px;border-radius:10px;text-align:center;
+  background:linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  box-shadow:0 10px 20px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.03);
+}
+.widget-depth{
+  background:linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  box-shadow:0 10px 20px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.03);
+}
+.iphone-stat.highlight{
+  border-color:rgba(217,70,239,0.2);
+  background:linear-gradient(180deg, rgba(217,70,239,0.08) 0%, rgba(217,70,239,0.02) 100%);
+}
+.iphone-stat-num{
+  font-family:var(--font);font-weight:800;font-size:1.1rem;
   background:var(--gradient-primary);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   background-clip:text;line-height:1.2;
 }
-.hero-stat-label{font-size:0.65rem;color:var(--text-muted);margin-top:2px}
-.hero-phone-rows{flex:1;display:flex;flex-direction:column;gap:0}
-.hero-phone-row{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 0;border-bottom:1px solid rgba(42,47,71,0.4);
+.iphone-stat-label{font-size:0.58rem;color:var(--text-muted);margin-top:2px}
+
+.iphone-rows{flex:1;display:flex;flex-direction:column;gap:0}
+.iphone-row{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 0;border-bottom:1px solid rgba(42,47,71,0.4);
 }
-.hero-phone-row:last-child{border-bottom:none}
-.hero-phone-av{
-  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+.iphone-row:last-child{border-bottom:none}
+.iphone-av{
+  width:28px;height:28px;border-radius:50%;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
-  font-family:var(--font);font-weight:700;font-size:0.75rem;color:#fff;
+  font-family:var(--font);font-weight:700;font-size:0.65rem;color:#fff;
 }
-.hero-phone-user{font-family:var(--font);font-weight:600;font-size:0.8rem;flex:1;min-width:0}
-.hero-phone-tag{
-  font-size:0.6rem;font-weight:600;padding:3px 8px;border-radius:var(--radius-pill);
+.iphone-user{font-family:var(--font);font-weight:600;font-size:0.72rem;flex:1;min-width:0;color:#fff}
+.iphone-tag{
+  font-size:0.55rem;font-weight:600;padding:2px 7px;border-radius:var(--radius-pill);
   background:rgba(217,70,239,0.12);color:#D946EF;
 }
-/* Floating accents around phone */
-.hero-phone::before,.hero-phone::after{
-  content:'';position:absolute;border-radius:50%;pointer-events:none;
+
+/* Progress ring */
+.iphone-ring-wrap{
+  display:flex;align-items:center;justify-content:center;
+  padding:10px 0 4px;
 }
-.hero-phone::before{
-  width:200px;height:200px;top:-40px;right:-60px;
-  background:radial-gradient(circle,rgba(99,102,241,0.12),transparent 70%);
-  animation:hero-orb 6s ease-in-out infinite;
+.iphone-ring-wrap svg{width:64px;height:64px}
+.ring-bg{fill:none;stroke:rgba(255,255,255,0.06);stroke-width:6}
+.ring-fg{fill:none;stroke:url(#ringGrad);stroke-width:6;stroke-linecap:round;
+  stroke-dasharray:163.36;stroke-dashoffset:163.36;
+  transform:rotate(-90deg);transform-origin:center;
 }
-.hero-phone::after{
-  width:160px;height:160px;bottom:-30px;left:-50px;
-  background:radial-gradient(circle,rgba(217,70,239,0.1),transparent 70%);
-  animation:hero-orb 6s ease-in-out 3s infinite;
-}
-@keyframes hero-orb{
-  0%,100%{transform:translate(0,0) scale(1)}
-  50%{transform:translate(8px,-8px) scale(1.1)}
+.ring-text{
+  font-family:var(--font);font-weight:800;font-size:0.7rem;fill:#fff;
+  text-anchor:middle;dominant-baseline:central;
 }
 
-@media(max-width:768px){
-  .hero{flex-direction:column;text-align:center;padding:7rem 1.5rem 3rem;gap:2.5rem}
-  .hero-left{display:flex;flex-direction:column;align-items:center}
-  .hero p.subtitle{max-width:100%}
-  .hero-right{max-width:320px}
+/* Floating badges */
+.floating-ui-badge{
+  position:absolute;
+  padding:10px 16px;border-radius:14px;
+  background:linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.01) 100%);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  box-shadow:0 0 0 1px rgba(255,255,255,0.1), 0 25px 50px -12px rgba(0,0,0,0.8);
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--font);font-weight:600;font-size:0.8rem;color:#fff;
+  white-space:nowrap;z-index:30;
+}
+.badge-icon{font-size:1.1rem;line-height:1}
+.badge-top-left{top:12%;left:-60px}
+.badge-bottom-right{bottom:15%;right:-70px}
+
+/* Phase 4: CTA */
+.hero-cta-wrapper{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:15;pointer-events:none;opacity:0;
+}
+.hero-cta-wrapper h2{
+  font-family:var(--font);font-weight:900;
+  font-size:clamp(2.5rem,5vw,4rem);line-height:1.1;
+  letter-spacing:-0.03em;color:#fff;
+  margin-bottom:1rem;text-align:center;
+}
+.hero-cta-wrapper p{
+  font-size:1rem;color:var(--text-muted);
+  max-width:480px;text-align:center;line-height:1.7;
+  margin-bottom:2rem;
+}
+.hero-cta-buttons{
+  display:flex;gap:1rem;pointer-events:auto;
+}
+
+.btn-modern-light{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:14px 32px;border-radius:var(--radius-pill);
+  background:linear-gradient(180deg, #FFFFFF 0%, #F1F5F9 100%);
+  color:#0F172A;font-family:var(--font);font-weight:700;font-size:0.95rem;
+  box-shadow:0 0 0 1px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.1), 0 12px 24px -4px rgba(0,0,0,0.3);
+  transition:transform 0.2s ease, box-shadow 0.2s ease;
+  text-decoration:none;
+}
+.btn-modern-light:hover{transform:translateY(-3px);box-shadow:0 0 0 1px rgba(0,0,0,0.05), 0 4px 8px rgba(0,0,0,0.15), 0 16px 32px -4px rgba(0,0,0,0.35)}
+.btn-modern-light:active{transform:translateY(1px)}
+
+.btn-modern-dark{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:14px 32px;border-radius:var(--radius-pill);
+  background:linear-gradient(180deg, #27272A 0%, #18181B 100%);
+  color:#FFFFFF;font-family:var(--font);font-weight:700;font-size:0.95rem;
+  box-shadow:0 0 0 1px rgba(255,255,255,0.1), 0 2px 4px rgba(0,0,0,0.6), 0 12px 24px -4px rgba(0,0,0,0.9);
+  transition:transform 0.2s ease, box-shadow 0.2s ease;
+  text-decoration:none;
+}
+.btn-modern-dark:hover{transform:translateY(-3px)}
+.btn-modern-dark:active{transform:translateY(1px)}
+
+/* Responsive */
+@media(max-width:900px){
+  .card-content{flex-direction:column;padding:2rem 1.5rem;gap:1.5rem}
+  .card-left{flex:0 0 auto;text-align:center;align-items:center}
+  .card-right{display:none}
+  .badge-top-left{left:10px;top:5%}
+  .badge-bottom-right{right:10px;bottom:8%}
+  .iphone-bezel{width:240px}
+  .iphone-screen{min-height:380px}
+}
+@media(max-width:480px){
+  .floating-ui-badge{display:none}
+  .hero-cta-buttons{flex-direction:column;gap:0.75rem}
+}
+
+/* Reduced motion: show static layout */
+@media(prefers-reduced-motion:reduce){
+  .cinematic-hero{height:auto;min-height:100vh}
+  .cinematic-hero-inner{height:auto;min-height:100vh;padding:6rem 2rem 4rem}
+  .gsap-reveal{visibility:visible!important}
+  .hero-text-block{position:relative;margin-bottom:2rem}
+  .hero-line2{clip-path:none!important}
+  .hero-deep-card{position:relative;width:90vw;height:auto;min-height:60vh}
+  .card-content{opacity:1!important}
+  .hero-cta-wrapper{position:relative;opacity:1!important;pointer-events:auto;padding:3rem 0}
+  .film-grain,.bg-grid-theme{display:none}
 }
 
 /* ==================== FEATURES ==================== */
@@ -745,14 +905,7 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
 .how-card.reveal{transform:translateY(30px) scale(0.97)}
 .how-card.reveal.visible{transform:translateY(0) scale(1)}
 
-/* Hero entrance */
-.hero .hero-tag{animation:heroIn 0.8s var(--ease) 0.1s both}
-.hero h1{animation:heroIn 0.8s var(--ease) 0.2s both}
-.hero .subtitle{animation:heroIn 0.6s var(--ease) 0.35s both}
-.hero .hero-cta{animation:heroIn 0.6s var(--ease) 0.45s both}
-.hero .hero-trust{animation:heroIn 0.6s var(--ease) 0.55s both}
-.hero-right{animation:heroIn 0.8s var(--ease) 0.3s both}
-@keyframes heroIn{from{opacity:0;transform:translateY(24px)}}
+/* Hero entrance handled by GSAP */
 
 /* Stat card stagger */
 .stats .stat:nth-child(1){animation:fadeUp 0.5s var(--ease) 0.1s both}
@@ -873,68 +1026,115 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
   </div>
 </nav>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-left">
-    <div class="hero-tag">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      Free to try
+<!-- CINEMATIC HERO -->
+<section class="cinematic-hero" id="cinematic-hero">
+  <div class="cinematic-hero-inner">
+    <div class="film-grain"></div>
+    <div class="bg-grid-theme"></div>
+
+    <!-- Phase 1: Big text -->
+    <div class="hero-text-block" id="heroTextBlock">
+      <div class="hero-line1 gsap-reveal" id="heroLine1">See who's not</div>
+      <div class="hero-line2 gsap-reveal" id="heroLine2">following you back.</div>
     </div>
-    <h1>See who <strong>isn't</strong> following you back. Grow smarter.</h1>
-    <p class="subtitle">Scan your Instagram to find non-followers, get engagement insights, and discover your best times to post. One click. No login. No server.</p>
-    <a href="#get" class="hero-cta">
-      Get Started
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
-    </a>
-    <div class="hero-trust">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-      Runs entirely in your browser
-    </div>
-  </div>
-  <div class="hero-right">
-    <div class="hero-phone">
-      <div class="hero-phone-frame">
-        <div class="hero-phone-notch"></div>
-        <div class="hero-phone-content">
-          <div class="hero-phone-header">
-            <img src="bird-logo.svg" alt="">
-            <div class="hero-phone-title">Flock Results</div>
+
+    <!-- Phase 2-4: Deep card -->
+    <div class="hero-deep-card gsap-reveal" id="heroCard">
+      <div class="card-sheen" id="cardSheen"></div>
+
+      <!-- Phase 3: Card content -->
+      <div class="card-content" id="cardContent">
+        <div class="card-left gsap-reveal" id="cardLeft">
+          <h2>Your Instagram, analyzed.</h2>
+          <p>Flock scans your followers and following lists in seconds. See who doesn't follow you back, track engagement, and discover growth patterns.</p>
+        </div>
+
+        <div class="card-center" id="cardCenter">
+          <!-- Floating badges -->
+          <div class="floating-ui-badge badge-top-left gsap-reveal" id="badgeTopLeft">
+            <span class="badge-icon" aria-hidden="true">&#128293;</span>
+            <span>184 not following back</span>
           </div>
-          <div class="hero-phone-stats">
-            <div class="hero-stat">
-              <div class="hero-stat-num">1,247</div>
-              <div class="hero-stat-label">Followers</div>
-            </div>
-            <div class="hero-stat">
-              <div class="hero-stat-num">72</div>
-              <div class="hero-stat-label">Don't follow back</div>
-            </div>
-            <div class="hero-stat">
-              <div class="hero-stat-num">1,175</div>
-              <div class="hero-stat-label">Mutuals</div>
-            </div>
-            <div class="hero-stat">
-              <div class="hero-stat-num">1,319</div>
-              <div class="hero-stat-label">Following</div>
+          <div class="floating-ui-badge badge-bottom-right gsap-reveal" id="badgeBottomRight">
+            <span class="badge-icon" aria-hidden="true">&#128339;</span>
+            <span>Best time: 7 PM</span>
+          </div>
+
+          <!-- iPhone mockup -->
+          <div class="iphone-wrap gsap-reveal" id="iphoneWrap">
+            <div class="iphone-bezel">
+              <div class="iphone-notch"></div>
+              <div class="iphone-screen">
+                <div class="iphone-header">
+                  <img src="bird-logo.svg" alt="" width="24" height="24">
+                  <div class="iphone-header-title">Flock Results</div>
+                </div>
+                <div class="iphone-stats">
+                  <div class="iphone-stat widget-depth">
+                    <div class="iphone-stat-num">1,247</div>
+                    <div class="iphone-stat-label">Followers</div>
+                  </div>
+                  <div class="iphone-stat highlight widget-depth">
+                    <div class="iphone-stat-num">72</div>
+                    <div class="iphone-stat-label">Not Following Back</div>
+                  </div>
+                  <div class="iphone-stat widget-depth">
+                    <div class="iphone-stat-num">4.2%</div>
+                    <div class="iphone-stat-label">Engagement</div>
+                  </div>
+                  <div class="iphone-stat widget-depth">
+                    <div class="iphone-stat-num">1,175</div>
+                    <div class="iphone-stat-label">Mutuals</div>
+                  </div>
+                </div>
+                <div class="iphone-rows">
+                  <div class="iphone-row">
+                    <div class="iphone-av" style="background:linear-gradient(135deg,#6366F1,#818CF8)">J</div>
+                    <div class="iphone-user">@jake_designs</div>
+                    <div class="iphone-tag">Not following</div>
+                  </div>
+                  <div class="iphone-row">
+                    <div class="iphone-av" style="background:linear-gradient(135deg,#D946EF,#E879F9)">M</div>
+                    <div class="iphone-user">@maya.creates</div>
+                    <div class="iphone-tag">Not following</div>
+                  </div>
+                  <div class="iphone-row">
+                    <div class="iphone-av" style="background:linear-gradient(135deg,#6366F1,#D946EF)">R</div>
+                    <div class="iphone-user">@riley_photo</div>
+                    <div class="iphone-tag">Not following</div>
+                  </div>
+                </div>
+                <!-- Progress ring -->
+                <div class="iphone-ring-wrap">
+                  <svg viewBox="0 0 64 64">
+                    <defs>
+                      <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#6366F1"/>
+                        <stop offset="100%" stop-color="#D946EF"/>
+                      </linearGradient>
+                    </defs>
+                    <circle class="ring-bg" cx="32" cy="32" r="26"/>
+                    <circle class="ring-fg" id="ringFg" cx="32" cy="32" r="26"/>
+                    <text class="ring-text" x="32" y="32">4.2%</text>
+                  </svg>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="hero-phone-rows">
-            <div class="hero-phone-row">
-              <div class="hero-phone-av" style="background:linear-gradient(135deg,#6366F1,#818CF8)">J</div>
-              <div class="hero-phone-user">@jake_designs</div>
-              <div class="hero-phone-tag">Not following</div>
-            </div>
-            <div class="hero-phone-row">
-              <div class="hero-phone-av" style="background:linear-gradient(135deg,#D946EF,#E879F9)">M</div>
-              <div class="hero-phone-user">@maya.creates</div>
-              <div class="hero-phone-tag">Not following</div>
-            </div>
-            <div class="hero-phone-row">
-              <div class="hero-phone-av" style="background:linear-gradient(135deg,#6366F1,#D946EF)">R</div>
-              <div class="hero-phone-user">@riley_photo</div>
-              <div class="hero-phone-tag">Not following</div>
-            </div>
-          </div>
+        </div>
+
+        <div class="card-right gsap-reveal" id="cardRight">
+          <div class="card-right-brand">Flock</div>
+        </div>
+      </div>
+
+      <!-- Phase 4: CTA -->
+      <div class="hero-cta-wrapper" id="heroCta">
+        <h2>Start scanning.</h2>
+        <p>One click. See who doesn't follow you back. Get growth insights. No login required.</p>
+        <div class="hero-cta-buttons">
+          <a href="#get" class="btn-modern-light">Get Started</a>
+          <a href="business.html" class="btn-modern-dark">For Business</a>
         </div>
       </div>
     </div>
@@ -1404,6 +1604,238 @@ input{font-family:inherit;border:none;background:none;color:inherit;outline:none
     <p>Questions? Open an issue on <a href="https://github.com/ThorWarnken/follow-radar" target="_blank" rel="noopener">GitHub</a>.</p>
   </div>
 </section>
+
+<!-- Cinematic Hero GSAP Animations -->
+<script>
+(function(){
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.addEventListener('DOMContentLoaded', function(){
+    var heroSection = document.getElementById('cinematic-hero');
+    var heroLine1 = document.getElementById('heroLine1');
+    var heroLine2 = document.getElementById('heroLine2');
+    var heroTextBlock = document.getElementById('heroTextBlock');
+    var heroCard = document.getElementById('heroCard');
+    var cardContent = document.getElementById('cardContent');
+    var cardLeft = document.getElementById('cardLeft');
+    var cardRight = document.getElementById('cardRight');
+    var iphoneWrap = document.getElementById('iphoneWrap');
+    var badgeTopLeft = document.getElementById('badgeTopLeft');
+    var badgeBottomRight = document.getElementById('badgeBottomRight');
+    var ringFg = document.getElementById('ringFg');
+    var heroCta = document.getElementById('heroCta');
+    var cardSheen = document.getElementById('cardSheen');
+
+    // --- Intro animation (no scroll needed) ---
+    var introTl = gsap.timeline({ delay: 0.3 });
+
+    introTl.to(heroLine1, {
+      autoAlpha: 1,
+      y: 0,
+      duration: 0.9,
+      ease: 'power3.out'
+    }, 0);
+
+    introTl.fromTo(heroLine1, {
+      y: 40,
+      scale: 0.95,
+      rotationX: 8,
+      filter: 'blur(6px)'
+    }, {
+      y: 0,
+      scale: 1,
+      rotationX: 0,
+      filter: 'blur(0px)',
+      duration: 0.9,
+      ease: 'power3.out'
+    }, 0);
+
+    introTl.to(heroLine2, {
+      autoAlpha: 1,
+      duration: 0.01
+    }, 0.3);
+
+    introTl.to(heroLine2, {
+      clipPath: 'inset(0 0% 0 0)',
+      duration: 1.0,
+      ease: 'power2.inOut'
+    }, 0.4);
+
+    // --- ScrollTrigger master timeline ---
+    var masterTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: heroSection,
+        start: 'top top',
+        end: '+=6000',
+        pin: true,
+        scrub: 1,
+        anticipatePin: 1
+      }
+    });
+
+    // Phase 2 (0-20%): Text scales up and blurs away, card rises
+    masterTl.to(heroTextBlock, {
+      scale: 1.15,
+      filter: 'blur(12px)',
+      autoAlpha: 0,
+      duration: 20,
+      ease: 'none'
+    }, 0);
+
+    // Card starts below viewport, rises up
+    gsap.set(heroCard, { autoAlpha: 1, y: window.innerHeight + 200 });
+    masterTl.to(heroCard, {
+      y: 0,
+      duration: 20,
+      ease: 'power2.out'
+    }, 0);
+
+    // Phase 2-3 (20-35%): Card expands to fill viewport
+    masterTl.to(heroCard, {
+      width: '100vw',
+      height: '100vh',
+      borderRadius: 0,
+      duration: 15,
+      ease: 'power2.inOut'
+    }, 20);
+
+    // Phase 3 (35-60%): Content reveals inside card
+    masterTl.to(cardContent, {
+      opacity: 1,
+      duration: 5,
+      ease: 'none'
+    }, 35);
+
+    // Phone flies in with 3D rotation
+    gsap.set(iphoneWrap, { autoAlpha: 0, y: 120, rotationY: -25, rotationX: 10, scale: 0.85 });
+    masterTl.to(iphoneWrap, {
+      autoAlpha: 1,
+      y: 0,
+      rotationY: 0,
+      rotationX: 0,
+      scale: 1,
+      duration: 20,
+      ease: 'power3.out'
+    }, 35);
+
+    // Left text
+    gsap.set(cardLeft, { autoAlpha: 0, x: -40 });
+    masterTl.to(cardLeft, {
+      autoAlpha: 1,
+      x: 0,
+      duration: 15,
+      ease: 'power2.out'
+    }, 38);
+
+    // Right brand text
+    gsap.set(cardRight, { autoAlpha: 0, x: 40 });
+    masterTl.to(cardRight, {
+      autoAlpha: 1,
+      x: 0,
+      duration: 15,
+      ease: 'power2.out'
+    }, 38);
+
+    // Floating badges
+    gsap.set(badgeTopLeft, { autoAlpha: 0, y: 20, scale: 0.8 });
+    masterTl.to(badgeTopLeft, {
+      autoAlpha: 1,
+      y: 0,
+      scale: 1,
+      duration: 10,
+      ease: 'back.out(1.7)'
+    }, 42);
+
+    gsap.set(badgeBottomRight, { autoAlpha: 0, y: 20, scale: 0.8 });
+    masterTl.to(badgeBottomRight, {
+      autoAlpha: 1,
+      y: 0,
+      scale: 1,
+      duration: 10,
+      ease: 'back.out(1.7)'
+    }, 45);
+
+    // Progress ring animates
+    masterTl.to(ringFg, {
+      strokeDashoffset: 163.36 * (1 - 0.042),
+      duration: 15,
+      ease: 'power2.out'
+    }, 40);
+
+    // Phase 4 (60-70%): pause for viewing - nothing happens
+
+    // Phase 4 (70-80%): card content fades, card shrinks, CTA appears
+    masterTl.to(cardContent, {
+      opacity: 0,
+      duration: 8,
+      ease: 'none'
+    }, 70);
+
+    masterTl.to(heroCard, {
+      width: '85vw',
+      height: '85vh',
+      borderRadius: 32,
+      duration: 10,
+      ease: 'power2.inOut'
+    }, 70);
+
+    masterTl.to(heroCta, {
+      opacity: 1,
+      duration: 8,
+      ease: 'none'
+    }, 72);
+
+    masterTl.set(heroCta, { pointerEvents: 'auto' }, 75);
+
+    // Phase 5 (80-90%): CTA visible, pause
+
+    // Phase 5 (90-100%): card flies away upward
+    masterTl.to(heroCta, {
+      opacity: 0,
+      duration: 4,
+      ease: 'none'
+    }, 90);
+
+    masterTl.to(heroCard, {
+      y: -(window.innerHeight + 300),
+      duration: 10,
+      ease: 'power2.in'
+    }, 90);
+
+    // --- Mouse tracking for card sheen + phone tilt ---
+    heroCard.addEventListener('mousemove', function(e){
+      var rect = heroCard.getBoundingClientRect();
+      var x = ((e.clientX - rect.left) / rect.width) * 100;
+      var y = ((e.clientY - rect.top) / rect.height) * 100;
+      cardSheen.style.setProperty('--mouse-x', x + '%');
+      cardSheen.style.setProperty('--mouse-y', y + '%');
+
+      // Phone tilt
+      var tiltX = ((e.clientY - rect.top) / rect.height - 0.5) * 8;
+      var tiltY = ((e.clientX - rect.left) / rect.width - 0.5) * -8;
+      gsap.to(iphoneWrap, {
+        rotationX: tiltX,
+        rotationY: tiltY,
+        duration: 0.6,
+        ease: 'power2.out'
+      });
+    });
+
+    heroCard.addEventListener('mouseleave', function(){
+      cardSheen.style.setProperty('--mouse-x', '50%');
+      cardSheen.style.setProperty('--mouse-y', '50%');
+      gsap.to(iphoneWrap, {
+        rotationX: 0,
+        rotationY: 0,
+        duration: 0.6,
+        ease: 'power2.out'
+      });
+    });
+  });
+})();
+</script>
 
 <!-- Animated gradient background (ported from React AnimatedGradientBackground) -->
 <script>
