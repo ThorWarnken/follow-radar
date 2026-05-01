@@ -85,50 +85,91 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 
 /* ==================== HERO ==================== */
 .hero{
+  position:relative;overflow:hidden;
   min-height:100vh;display:flex;flex-direction:column;
   align-items:center;justify-content:center;text-align:center;
-  padding:120px 2rem 80px;position:relative;overflow:hidden;
+  padding:120px 2rem 80px;
 }
-.hero::before{
-  content:'';position:absolute;top:-40%;left:50%;transform:translateX(-50%);
-  width:800px;height:800px;
-  background:radial-gradient(circle,rgba(212,168,67,0.06) 0%,transparent 70%);
-  pointer-events:none;
+#shader-bg{
+  position:absolute;inset:0;width:100%;height:100%;display:block;
 }
-.hero-headline{
+@media(prefers-reduced-motion:reduce){
+  #shader-bg{display:none}
+  .hero{background:radial-gradient(ellipse at 50% 40%,rgba(212,168,67,0.10) 0%,var(--bg) 70%)}
+}
+.hero-content{
+  position:relative;z-index:2;
+  display:flex;flex-direction:column;align-items:center;
+  max-width:860px;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--font);font-weight:700;font-size:0.8rem;
+  letter-spacing:0.04em;
+  color:var(--gold);padding:8px 18px;
+  background:rgba(212,168,67,0.06);
+  border:1px solid rgba(212,168,67,0.22);
+  border-radius:var(--radius-pill);margin-bottom:2rem;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  opacity:0;transform:translateY(-18px);
+  animation:heroFadeDown 0.8s var(--ease) forwards;
+}
+.hero-badge svg{width:16px;height:16px;color:var(--gold)}
+@keyframes heroFadeDown{to{opacity:1;transform:translateY(0)}}
+@keyframes heroFadeUp{to{opacity:1;transform:translateY(0)}}
+.hero-line{
   font-family:var(--font);font-weight:900;
-  font-size:clamp(2.4rem,5.5vw,4.2rem);
-  line-height:1.15;letter-spacing:-0.02em;
-  max-width:800px;margin-bottom:1.5rem;
-  position:relative;
+  font-size:clamp(3rem,6vw,5.5rem);
+  line-height:1.1;letter-spacing:-0.025em;
+  background:linear-gradient(135deg,#D4A843 0%,#E8C76A 50%,#C49530 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  opacity:0;transform:translateY(24px);
 }
-.hero-headline .gold-text{
-  background:var(--gradient-gold);
+.hero-line:nth-child(2){animation:heroFadeUp 0.8s var(--ease) 0.2s forwards}
+.hero-line:nth-child(3){
+  animation:heroFadeUp 0.8s var(--ease) 0.4s forwards;
+  background:linear-gradient(135deg,#E8C76A 0%,#D4A843 40%,#C49530 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   background-clip:text;
 }
 .hero-subtitle{
   font-family:var(--font-body);font-weight:500;
   font-size:clamp(1rem,2vw,1.25rem);
-  color:var(--text-soft);max-width:560px;
-  margin-bottom:2.5rem;line-height:1.7;
+  color:var(--text-soft);max-width:580px;
+  margin:1.5rem 0 2.5rem;line-height:1.7;
+  opacity:0;transform:translateY(24px);
+  animation:heroFadeUp 0.8s var(--ease) 0.6s forwards;
 }
-.hero-cta{
+.hero-buttons{
+  display:flex;align-items:center;gap:1rem;flex-wrap:wrap;justify-content:center;
+  opacity:0;transform:translateY(24px);
+  animation:heroFadeUp 0.8s var(--ease) 0.8s forwards;
+}
+.hero-cta-primary{
   display:inline-flex;align-items:center;gap:8px;
   font-family:var(--font);font-weight:700;font-size:1.05rem;
   padding:14px 36px;border-radius:var(--radius-pill);
   background:var(--gradient-gold);color:#08080f;
   transition:transform 0.25s var(--ease),box-shadow 0.25s;
-  position:relative;
 }
-.hero-cta:hover{
+.hero-cta-primary:hover{
   transform:translateY(-2px);
   box-shadow:0 8px 32px rgba(212,168,67,0.35);
 }
-.hero-cta svg{width:18px;height:18px}
-.hero-trust{
-  margin-top:2rem;font-size:0.85rem;font-weight:500;
-  color:var(--text-muted);letter-spacing:0.01em;
+.hero-cta-secondary{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--font);font-weight:700;font-size:1.05rem;
+  padding:14px 36px;border-radius:var(--radius-pill);
+  background:rgba(212,168,67,0.06);color:var(--gold);
+  border:1px solid rgba(212,168,67,0.25);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  transition:transform 0.25s var(--ease),box-shadow 0.25s,background 0.25s;
+}
+.hero-cta-secondary:hover{
+  transform:translateY(-2px);
+  background:rgba(212,168,67,0.12);
+  box-shadow:0 8px 32px rgba(212,168,67,0.15);
 }
 
 /* ==================== FEATURES ==================== */
@@ -284,6 +325,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   .nav{padding:0 1.25rem}
   .nav-links{gap:1.25rem}
   .hero{padding:100px 1.5rem 60px}
+  .hero-line{font-size:clamp(2.2rem,5vw,3.5rem)}
   .features{padding:60px 1.5rem 80px}
   .features-grid{grid-template-columns:1fr;gap:1.25rem}
   .pricing{padding:0 1.5rem 80px}
@@ -291,7 +333,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 }
 @media(max-width:480px){
   .nav-links a.nav-link-text{display:none}
-  .hero-headline{font-size:2rem}
+  .hero-line{font-size:2rem}
 }
 
 /* ==================== ONBOARDING ==================== */
@@ -1224,18 +1266,23 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
 </nav>
 
 <!-- Hero -->
-<section class="hero">
-  <h1 class="hero-headline">
-    Turn your Instagram into a <span class="gold-text">revenue engine.</span>
-  </h1>
-  <p class="hero-subtitle">
-    AI-powered growth reports that tell you exactly what to post, who to engage, and how to convert followers into customers.
-  </p>
-  <a href="#pricing" class="hero-cta">
-    Start Growing
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-  </a>
-  <p class="hero-trust">Unlimited scans and reports. Cancel anytime.</p>
+<section class="hero" id="hero">
+  <canvas id="shader-bg"></canvas>
+  <div class="hero-content">
+    <span class="hero-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z"/></svg>
+      Trusted by forward-thinking businesses
+    </span>
+    <h1 class="hero-line">Turn Your Instagram</h1>
+    <h1 class="hero-line">Into a Revenue Engine</h1>
+    <p class="hero-subtitle">
+      AI-powered growth reports that tell you exactly what to post, when to post it, and how to turn followers into paying customers.
+    </p>
+    <div class="hero-buttons">
+      <a href="#get-started" class="hero-cta-primary">Start Growing</a>
+      <a href="#pricing" class="hero-cta-secondary">See Pricing</a>
+    </div>
+  </div>
 </section>
 
 <!-- Features -->
@@ -2056,6 +2103,127 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
       showReportError(err.message || 'Something went wrong. Please try scanning again.');
     }
   })();
+})();
+</script>
+
+<!-- WebGL Shader Background -->
+<script>
+(function(){
+  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reducedMotion) return;
+
+  var canvas = document.getElementById('shader-bg');
+  if (!canvas) return;
+  var gl = canvas.getContext('webgl2');
+  if (!gl) return;
+
+  var vertSrc = '#version 300 es\nprecision highp float;\nin vec4 position;\nvoid main(){gl_Position=position;}';
+
+  var fragSrc = [
+    '#version 300 es',
+    'precision highp float;',
+    'out vec4 O;',
+    'uniform vec2 resolution;',
+    'uniform float time;',
+    '#define FC gl_FragCoord.xy',
+    '#define T time',
+    '#define R resolution',
+    '#define MN min(R.x,R.y)',
+    'float rnd(vec2 p){',
+    '  p=fract(p*vec2(12.9898,78.233));',
+    '  p+=dot(p,p+34.56);',
+    '  return fract(p.x*p.y);',
+    '}',
+    'float noise(in vec2 p){',
+    '  vec2 i=floor(p),f=fract(p),u=f*f*(3.-2.*f);',
+    '  float a=rnd(i),b=rnd(i+vec2(1,0)),c=rnd(i+vec2(0,1)),d=rnd(i+1.);',
+    '  return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);',
+    '}',
+    'float fbm(vec2 p){',
+    '  float t=.0,a=1.; mat2 m=mat2(1.,-.5,.2,1.2);',
+    '  for(int i=0;i<5;i++){t+=a*noise(p);p*=2.*m;a*=.5;}',
+    '  return t;',
+    '}',
+    'float clouds(vec2 p){',
+    '  float d=1.,t=.0;',
+    '  for(float i=.0;i<3.;i++){',
+    '    float a=d*fbm(i*10.+p.x*.2+.2*(1.+i)*p.y+d+i*i+p);',
+    '    t=mix(t,d,a); d=a; p*=2./(i+1.);',
+    '  }',
+    '  return t;',
+    '}',
+    'void main(void){',
+    '  vec2 uv=(FC-.5*R)/MN,st=uv*vec2(2,1);',
+    '  vec3 col=vec3(0);',
+    '  float bg=clouds(vec2(st.x+T*.5,-st.y));',
+    '  uv*=1.-.3*(sin(T*.2)*.5+.5);',
+    '  for(float i=1.;i<12.;i++){',
+    '    uv+=.1*cos(i*vec2(.1+.01*i,.8)+i*i+T*.5+.1*uv.x);',
+    '    vec2 p=uv;',
+    '    float d=length(p);',
+    '    col+=.00125/d*(cos(sin(i)*vec3(1,2,3))+1.);',
+    '    float b=noise(i+p+bg*1.731);',
+    '    col+=.002*b/length(max(p,vec2(b*p.x*.02,p.y)));',
+    '    col=mix(col,vec3(bg*.25,bg*.137,bg*.05),d);',
+    '  }',
+    '  O=vec4(col,1);',
+    '}'
+  ].join('\n');
+
+  function compile(type, src) {
+    var s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+      console.error('Shader compile error:', gl.getShaderInfoLog(s));
+      gl.deleteShader(s);
+      return null;
+    }
+    return s;
+  }
+
+  var vs = compile(gl.VERTEX_SHADER, vertSrc);
+  var fs = compile(gl.FRAGMENT_SHADER, fragSrc);
+  if (!vs || !fs) return;
+
+  var prog = gl.createProgram();
+  gl.attachShader(prog, vs);
+  gl.attachShader(prog, fs);
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+    console.error('Program link error:', gl.getProgramInfoLog(prog));
+    return;
+  }
+  gl.useProgram(prog);
+
+  var posLoc = gl.getAttribLocation(prog, 'position');
+  var resLoc = gl.getUniformLocation(prog, 'resolution');
+  var timeLoc = gl.getUniformLocation(prog, 'time');
+
+  var buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(posLoc);
+  gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+  function resize() {
+    var dpr = Math.max(1, 0.5 * window.devicePixelRatio);
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  var start = performance.now();
+  function frame() {
+    var t = (performance.now() - start) / 1000;
+    gl.uniform2f(resLoc, canvas.width, canvas.height);
+    gl.uniform1f(timeLoc, t);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
 })();
 </script>
 
