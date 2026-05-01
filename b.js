@@ -448,6 +448,16 @@
 
   function createOverlay() {
     if (overlayEl) return;
+
+    // Detect business mode from redirect URL
+    const isBiz = FOLLOW_RADAR_URL.indexOf('business') !== -1;
+    const accentColor = isBiz ? '#D4A843' : '#6366F1';
+    const accentColor2 = isBiz ? '#E8C76A' : '#A855F7';
+    const accentColor3 = isBiz ? '#C49530' : '#D946EF';
+    const brandName = isBiz ? 'Flock Business' : 'Flock';
+    const borderColor = isBiz ? 'rgba(212,168,67,0.25)' : 'rgba(99,102,241,0.2)';
+    const bgTint = isBiz ? 'rgba(20,16,8,0.92)' : 'rgba(12,14,36,0.92)';
+
     // Inject animations
     const style = document.createElement('style');
     style.textContent = [
@@ -463,10 +473,10 @@
     overlayEl.setAttribute('style', [
       'position:fixed','bottom:20px','right:20px','z-index:2147483647',
       'width:260px','border-radius:14px',
-      'background:rgba(12,14,36,0.92)',
+      'background:' + bgTint,
       'backdrop-filter:blur(16px)','-webkit-backdrop-filter:blur(16px)',
-      'border:1px solid rgba(99,102,241,0.2)',
-      'box-shadow:0 4px 24px rgba(0,0,0,0.5),0 0 0 1px rgba(99,102,241,0.08)',
+      'border:1px solid ' + borderColor,
+      'box-shadow:0 4px 24px rgba(0,0,0,0.5),0 0 0 1px ' + borderColor,
       'font:500 13px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
       'color:#fff','overflow:hidden',
       'animation:fr-in 0.35s cubic-bezier(0.16,1,0.3,1)',
@@ -484,8 +494,8 @@
     const spinner = document.createElement('div');
     spinner.setAttribute('style', [
       'width:28px','height:28px','border-radius:50%','flex-shrink:0',
-      'border:2.5px solid rgba(99,102,241,0.15)',
-      'border-top-color:#6366F1','border-right-color:#A855F7',
+      'border:2.5px solid rgba(255,255,255,0.08)',
+      'border-top-color:' + accentColor,'border-right-color:' + accentColor2,
       'animation:fr-spin 1s linear infinite',
     ].join(';'));
 
@@ -494,7 +504,7 @@
     titleCol.setAttribute('style', 'flex:1;min-width:0');
     const title = document.createElement('div');
     title.setAttribute('style', 'font-weight:700;font-size:13px;letter-spacing:0.02em;color:#fff');
-    title.textContent = 'Flock';
+    title.textContent = brandName;
     const subtitle = document.createElement('div');
     subtitle.setAttribute('style', 'font-size:10px;color:rgba(255,255,255,0.4);margin-top:1px;text-transform:uppercase;letter-spacing:0.06em');
     subtitle.textContent = 'Scanning';
@@ -506,14 +516,14 @@
     badge.setAttribute('style', [
       'display:flex','align-items:center','gap:3px',
       'padding:3px 8px','border-radius:20px',
-      'background:rgba(99,102,241,0.12)',
+      'background:' + (isBiz ? 'rgba(212,168,67,0.12)' : 'rgba(99,102,241,0.12)'),
       'flex-shrink:0',
     ].join(';'));
     for (let i = 0; i < 3; i++) {
       const d = document.createElement('div');
       d.setAttribute('style', [
         'width:4px','height:4px','border-radius:50%',
-        'background:#6366F1',
+        'background:' + accentColor,
         'animation:fr-dots 1.2s ease-in-out ' + (i * 0.15) + 's infinite',
       ].join(';'));
       badge.appendChild(d);
@@ -536,7 +546,7 @@
     overlayBarEl = document.createElement('div');
     overlayBarEl.setAttribute('style', [
       'height:100%','width:0%','border-radius:2px',
-      'background:linear-gradient(90deg,#6366F1,#A855F7,#D946EF)',
+      'background:linear-gradient(90deg,' + accentColor + ',' + accentColor2 + ',' + accentColor3 + ')',
       'background-size:200% 100%',
       'animation:fr-shimmer 2s linear infinite',
       'transition:width 0.4s cubic-bezier(0.16,1,0.3,1)',
@@ -550,7 +560,7 @@
     const accent = document.createElement('div');
     accent.setAttribute('style', [
       'height:2px',
-      'background:linear-gradient(90deg,#6366F1,#A855F7,#D946EF,#6366F1)',
+      'background:linear-gradient(90deg,' + accentColor + ',' + accentColor2 + ',' + accentColor3 + ',' + accentColor + ')',
       'background-size:200% 100%',
       'animation:fr-shimmer 3s linear infinite',
     ].join(';'));
