@@ -328,8 +328,36 @@
     if (!target) throw new Error('Could not find ' + type + ' link on profile page.');
     target.click();
 
-    // Wait for modal (role="dialog") to appear
-    await waitForEl(doc, '[role="dialog"]', 10000);
+    // Wait for modal — Instagram may use different selectors across versions
+    var modalSelectors = [
+      '[role="dialog"]',
+      'div[style*="position: fixed"] div[style*="overflow"]',
+      'div[aria-label="Followers"], div[aria-label="Following"]',
+    ];
+    var modalFound = false;
+    var deadline = Date.now() + 12000;
+    while (Date.now() < deadline) {
+      for (var s = 0; s < modalSelectors.length; s++) {
+        if (doc.querySelector(modalSelectors[s])) {
+          modalFound = true;
+          break;
+        }
+      }
+      if (modalFound) break;
+      // Also check if a new scrollable overlay appeared (generic fallback)
+      var overlays = doc.querySelectorAll('div[role="presentation"], div[role="dialog"], div[tabindex="-1"]');
+      for (var ov = 0; ov < overlays.length; ov++) {
+        var ovRect = overlays[ov].getBoundingClientRect();
+        if (ovRect.width > 200 && ovRect.height > 200) {
+          modalFound = true;
+          break;
+        }
+      }
+      if (modalFound) break;
+      await sleep(300);
+    }
+
+    if (!modalFound) throw new Error('Could not detect ' + type + ' modal after clicking. Instagram may have changed their UI.');
     // Settle for content to render inside the modal
     await sleep(1500);
   }
@@ -388,9 +416,33 @@
     };
   }
 
+  function findModal(doc) {
+    // Try multiple selectors for the modal container
+    var modal = doc.querySelector('[role="dialog"]');
+    if (modal) return modal;
+
+    // Fallback: look for presentation overlay
+    var pres = doc.querySelectorAll('div[role="presentation"], div[tabindex="-1"]');
+    for (var i = 0; i < pres.length; i++) {
+      var rect = pres[i].getBoundingClientRect();
+      if (rect.width > 200 && rect.height > 200) return pres[i];
+    }
+
+    // Fallback: find a fixed/absolute positioned overlay with scrollable content
+    var divs = doc.querySelectorAll('div[style*="position: fixed"], div[style*="position: absolute"]');
+    for (var j = 0; j < divs.length; j++) {
+      var r = divs[j].getBoundingClientRect();
+      if (r.width > 200 && r.height > 200 && divs[j].querySelectorAll('a[href]').length > 3) {
+        return divs[j];
+      }
+    }
+
+    return null;
+  }
+
   async function scrapeModal(popup, cap, onProgress) {
     var doc = popup.document;
-    var modal = doc.querySelector('[role="dialog"]');
+    var modal = findModal(doc);
     if (!modal) throw new Error('No modal found.');
 
     var users = [];
