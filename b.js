@@ -419,6 +419,65 @@
     return users;
   }
 
+  // ─── Post grid scraping ─────────────────────────────────────────
+
+  function readPostTile(linkEl, href) {
+    var container = linkEl.closest('article') || linkEl.parentElement;
+    var text = (container && container.textContent) || '';
+
+    var likeMatch = text.match(/([\d,]+)\s*likes?/i);
+    var commentMatch = text.match(/([\d,]+)\s*comments?/i);
+
+    var mediaType = 1; // default: photo
+    if (href.indexOf('/reel/') !== -1) mediaType = 2; // video/reel
+
+    return {
+      id: href.replace(/.*\/(p|reel)\/([^/]+).*/, '$2'),
+      taken_at: 0,
+      like_count: likeMatch ? parseInt(likeMatch[1].replace(/,/g, ''), 10) : 0,
+      comment_count: commentMatch ? parseInt(commentMatch[1].replace(/,/g, ''), 10) : 0,
+      media_type: mediaType,
+      caption_length: 0,
+      carousel_count: 0,
+      video_duration: 0,
+    };
+  }
+
+  async function scrapePostGrid(popup, maxPosts) {
+    var doc = popup.document;
+    var posts = [];
+    var seen = new Set();
+    var limit = maxPosts || 50;
+    var noNewCount = 0;
+
+    while (posts.length < limit) {
+      var postLinks = doc.querySelectorAll('a[href*="/p/"], a[href*="/reel/"]');
+
+      var prevSize = seen.size;
+      for (var i = 0; i < postLinks.length; i++) {
+        var href = postLinks[i].getAttribute('href') || '';
+        if (seen.has(href)) continue;
+        seen.add(href);
+
+        var post = readPostTile(postLinks[i], href);
+        if (post) posts.push(post);
+        if (posts.length >= limit) break;
+      }
+
+      if (seen.size === prevSize) {
+        noNewCount++;
+        if (noNewCount >= 3) break;
+      } else {
+        noNewCount = 0;
+      }
+
+      popup.scrollTo(0, popup.document.documentElement.scrollHeight);
+      await sleep(SCROLL_PAUSE_MS);
+    }
+
+    return posts;
+  }
+
   // ─── Fetch + classification ──────────────────────────────────────
 
   // doFetch is replaceable in tests via window.__followRadarTest.setFetch().
@@ -1065,6 +1124,8 @@
     window.__followRadarTest.readAccountSize = readAccountSize;
     window.__followRadarTest.openListModal = openListModal;
     window.__followRadarTest.scrapeModal = scrapeModal;
+    window.__followRadarTest.readPostTile = readPostTile;
+    window.__followRadarTest.scrapePostGrid = scrapePostGrid;
     window.__followRadarTest.findScrollableChild = findScrollableChild;
     window.__followRadarTest.readUserRow = readUserRow;
     window.__followRadarTest.constants.SCROLL_PAUSE_MS = SCROLL_PAUSE_MS;

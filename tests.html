@@ -547,5 +547,32 @@ test('shipResults via encode/decode round-trip', async () => {
     assert(result.full_name === '', 'should not use Following as full name');
   });
 </script>
+
+<script>
+  // ─── Post grid scraping tests ──────────────────────────────────
+
+  test('readPostTile extracts post info from mock DOM', function () {
+    var container = document.createElement('article');
+    var link = document.createElement('a');
+    link.setAttribute('href', '/p/ABC123/');
+    link.innerHTML = '<div><span>42 likes</span><span>5 comments</span></div>';
+    container.appendChild(link);
+    document.body.appendChild(container);
+
+    var result = window.__followRadarTest.readPostTile(link, '/p/ABC123/');
+    assert(result.id === 'ABC123', 'post id');
+    assert(result.like_count === 42, 'like count');
+    assert(result.comment_count === 5, 'comment count');
+    assert(result.media_type === 1, 'photo type');
+    container.remove();
+  });
+
+  test('readPostTile detects reels', function () {
+    var link = document.createElement('a');
+    link.setAttribute('href', '/reel/XYZ789/');
+    var result = window.__followRadarTest.readPostTile(link, '/reel/XYZ789/');
+    assert(result.media_type === 2, 'reel should be video type');
+  });
+</script>
 </body>
 </html>
