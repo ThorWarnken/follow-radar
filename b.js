@@ -22,7 +22,7 @@
   const RESUME_MAX_AGE_MS = 24 * 60 * 60 * 1000;
   const COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000; // 3 days between scans
   const COOLDOWN_KEY = 'flock:last-scan';
-  const FOLLOW_RADAR_URL = (typeof window !== 'undefined' && window.__flockBiz) ? 'https://flockscan.org/business.html' : 'https://flockscan.org';
+  const FOLLOW_RADAR_URL = 'https://flockscan.org';
   const RESUME_KEY = 'follow-radar:resume';
   const BIRD_LOGO_URI = 'data:image/svg+xml;base64,' + 'PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMTIgMjc2Ij48cGF0aCBmaWxsPSIjODU4MGQ0IiBkPSJtMjI3LjkgMTQ2LS4yLTQuOC0uOC0zLjJxMC0xLS4yLTIuOWwtLjctMi4xYTYzIDYzIDAgMCAwLTM1LjQtNDMuOGMtNy4yLTMuNS0xNS4yLTUuNC0yMy04bC00LjYtMS4zYzYuNi0yMi40IDM3LjMtNDIgNjIuNS00MC0xIDEtMi4xIDEuNC00LjYgMi40IDIuNyAxLjcgNC4yIDMgNiAzLjcgMi43IDEgNS44IDEuMyA4LjUgMi4yIDQgMS41IDYuNC42IDYuOS00IDMuNiAyLjYgNy45IDQuNyAxMC44IDggNCA0LjMgOCA4IDE0IDkuMiAyIC40IDMuOSAxLjcgNi4zIDNsMi42IDEuNSA0IDQuNy02IDEuMnEtNC42IDEuMi04IDIuM2wtNy4yIDMuNmMtNy4zIDYuOS05IDE0LTUuOCAyMi4zYTIzMSAyMzEgMCAwIDAgNiAxN2wyIDkgMS4yIDUgLjQgNC44LjUgMi4yLS4yIDE5LTEgNi44LS4yIDIuMy0xLjkgNi43LS4zIDIuMi0uOCAxLjgtLjQgMi4yLTEuNiAzLjktNCAxMGExMDQgMTA0IDAgMCAxLTQ0LjEgNDUuMyA4NyA4NyAwIDAgMS03MS4zIDUuOXEtLjQtMS0uMy0xLjEgMTAtMS42IDIwLjUtMi44YzMuNSA2LjUgNy40IDggMTUuMyA2bC0yLjgtMTEuNGguNXExLjEtLjYgMS41LTFoLjVxMS0uNSAxLjQtMSAwIC4xLjMuMSAxLjItLjUgMS43LTFoLjNxMS4yLS41IDEuNy0xYTExMyAxMTMgMCAwIDAgMjkuNy0yNC45IDkyIDkyIDAgMCAwIDE4LjQtMzYuOWwuMy0yLjIuOC0yLjhjLjItMS45LjItMyAuMi00LjJsLjgtNS44cTAtNC42LS4yLThtMi40LTc5LjhjMi45IDIgNiAyLjIgNy44LS44IDEtMS41LjgtNS4yLS4yLTZhOCA4IDAgMCAwLTctLjljLTMgMS40LTMgNC40LS42IDcuNyIvPjxwYXRoIGZpbGw9IiM4NTgwZDQiIGQ9Ik0yNDIgNDRjLS4yIDQuOC0yLjUgNS43LTYuNiA0LjItMi43LTEtNS44LTEuMi04LjUtMi4yLTEuOC0uNi0zLjMtMi02LTMuNyAyLjUtMSAzLjYtMS40IDUtMi4ycTggMS41IDE2LjEgNE0xNjkuNiAyMzQuOGExMjMgMTIzIDAgMCAxIDMuMiAxMS4zYy03LjkgMi4xLTExLjguNi0xNC45LTZxNS42LTIuOSAxMS43LTUuM204LTRxLS4yLjYtMS40IDEuMS4yLS42IDEuNC0xbS0yIDFxLS4yLjYtMS40IDEuMS4yLS41IDEuNC0xbS0yIDFxMCAuNS0xIDEgMC0uNCAxLTFtLTIgMXEwIC40LTEgMSAwLS42IDEtMU0xMzYuOCAyNDIuOXEuMy4zLjIgMS0uOC0uMS0xLjYtLjUuNS0uMyAxLjQtLjUiLz48cGF0aCBmaWxsPSIjYjhiNWYwIiBkPSJNMjA5IDEzNC42Yy02LjQgMC0xMi44LS41LTE5LjItLjYtMSAwLTEuOSAyLTIuOCAzLjVxLTcuNi0xLjYtMTUuNy00LjJjMS01LjggNS41LTQuMiA5LjEtNCAzIC4yIDUuOCAxLjMgOC42IDEgMi4xLS4yIDQtMiA2LTIuOGw4LjktMy42cTIuOSA1IDUuMSAxMC43TTE4OSAxNzRsLjUtMS4zYzMuNSAyLjcgNS45LTEgOS4yLTEuNyAzLjkgNy44IDIuNyAxNS0yIDIyLjVxLTQuNy02LjItOC42LTEyek0xMTAuNSAxOTIuMmMtMSA4LjQgMy4yIDEyLjkgMTEuNiAxMS42IDEtLjEgMS44LTEuOCAzLTIuMiAxLjMtLjUgMi44LS40IDQuMi0uNi0uNSAxLjItLjkgMy4yLTEuNyAzLjQtMy45IDEtNS4zIDMuMy02LjMgNy4yLS42IDIuNC0zLjggNC01LjUgNi4ycS0xLjYgMi41LTIuOCA2YTIzMyAyMzMgMCAwIDEtMjMtMTEuNXExLjUtOS43IDMtMTYuOWw2LTMuM3ptNy4zLjNxLTEuOC41LTQuNi4zIDEuOC0uNSA0LjYtLjMiLz48cGF0aCBmaWxsPSIjYjhiNWYwIiBkPSJNMTE4LjIgMTkyLjZxMTIuNy0yLjUgMjUuNC00LjdjMTEuNi0xLjkgMjMtMiAzMy44IDMuOXE2LjkgMy44IDguMiAxMS4xYy4zIDEuNC0uOCAzLjYtMiA0LjUtMjAuNSAxNy4zLTQzLjYgMjQuMS03MC4zIDE2LjZxLjgtMy44IDIuNS02LjJjMS43LTIuMiA1LTMuOCA1LjUtNi4yIDEtMy45IDIuNC02LjIgNi4zLTcuMi44LS4yIDEuMi0yLjIgMS43LTMuNC0xLjQuMi0zIDAtNC4yLjYtMS4yLjQtMiAyLTMgMi4yLTguNCAxLjMtMTIuNy0zLjItMTEuMS0xMS41cS42LS4xIDIgLjRjMiAuMyAzLjYgMCA1LjItLjFNOTQgMTM4YzEwLjcgMiAyMS40IDQuNiAzMi4yIDYgMTEuNiAxLjUgMjMuMyAxLjkgMzUgMi44cTYuMS42IDEyLjUgMmMtMS41IDMuNC0uMSA1LjMgMi4zIDYgMi42LjYgNS40LjQgNi4xLTMuMiAzLjcgMi44IDcuMyA1LjUgMTAuOSA5LTIuMSAzLjMtNC41IDYuMi0xLjMgOS4zIDMuMSAzIDMuOS0xLjUgNS44LTIuMnEuOCAxLjQgMS4xIDNjLTMuMiAxLTUuNiA0LjctOS4xIDJxLS4yLjYtLjggMS40bC01LjcgNGMtMTUtNy41LTMwLjQtNC42LTQ2LTIuNy0xNi43IDItMzMuMyAxLjItNDkuNy00LjVxLjctMy4zIDEuNi01LjYgMi4zLTcuMiA0LjEtMTQuNC44LTMuMy45LTYuN3pNMTE5IDg2LjhxMTkuMiA0LjggMzguMiA5LjljOS4yIDIuNSAxOC42IDQuOSAyNy41IDguNSA4LjUgMy40IDE0LjggMTAgMTkuMSAxOC40cS00LjcgMi4xLTguNyAzLjljLTIgLjktNCAyLjYtNiAyLjgtMi45LjMtNS44LS44LTguNy0xLTMuNi0uMi04LTEuOC05LjQgMy44cS0yLjYtLjItNS43LTEuMS0zLTQuMi00LjMgMC0xLjYgMC0zLjctLjljLS41LTQuMi0yLjgtNC44LTYuMy00LjdsMS4xIDVxLTEyLjctLjgtMjUuNi0yLjQgNi00LjQgMTEuNy03LjhjLTQuNi05LjEtMTUuMi02LjQtMjEuOC0xMi42IDUuNy0xLjIgOC00IDUtOC40LTIuOS00LjMtMi40LTguOC0yLjQtMTMuNG0zMy40IDE1LjQtMS42LTUtMS4zLS41Yy0uOCAyLjEtMi4zIDQuNC0yIDYuNC4yIDEuMiAzLjEgMiA1IDIuOC41LjIgMS41LS44IDIuMy0xLjJxLS43LTEtMi40LTIuNW03LjktLjEgMS41LS4yLS40LTEuM3EtLjYuMy0xLjEgMS41TTIwOSAxMzVhNDEgNDEgMCAwIDEgMSAyNyA1NiA1NiAwIDAgMC0yMi44LTI0LjJjLjctMS44IDEuNy0zLjggMi42LTMuOHE5LjYuMyAxOS4yIDEiLz48cGF0aCBmaWxsPSIjYjhiNWYwIiBkPSJNMTE4LjggODYuNmMuMiA0LjgtLjMgOS4zIDIuNiAxMy42IDMgNC4zLjcgNy4yLTUgOC40IDYuNiA2LjIgMTcuMiAzLjUgMjEuOCAxMi42bC0xMiA3LjVhNjY2IDY2NiAwIDAgMS00MC0xMC44cS0uMS0yLjIuNC0zLjQgMy01IDUuNy0xMGMyLjYtNS4xIDQuMy0xMC43IDcuNi0xNS4zIDEuOS0yLjYgNC45LTQuMyA0LjEtOC4yem0zMy43IDQ0LjlxLS45LTIuMy0xLjUtNWMzLjUtLjIgNS44LjQgNiA0LjVhMTQgMTQgMCAwIDEtNC41LjVtOC45LjdxLjgtNC40IDMuNi0uNGE5IDkgMCAwIDEtMy42LjRtLTguNy0yOS45cTEuNCAxLjQgMiAyLjRjLS43LjQtMS43IDEuNC0yLjIgMS4yLTEuOS0uNy00LjgtMS42LTUtMi44LS4zLTIgMS4yLTQuMyAyLTYuNGwxLjMuNXEuNyAyLjUgMiA1LjFtNy41LS41cS42LS44IDEuMi0xLjJsLjQgMS4zcS0uNy4xLTEuNi0uMU05My42IDEzOHEuNSAzIC4zIDYuMnQtLjkgNi43cS0xLjggNy4yLTQgMTQuNGwtMiA1LjRhNTMgNTMgMCAwIDEtMjUuOS0xMy42cS42LTMuOCAyLTYuNSA1LTkuNSAxMC0xOC45eiIvPjxwYXRoIGZpbGw9IiNiOGI1ZjAiIGQ9Ik0xMDMuNiA4MWMxLjIgNC0xLjggNS42LTMuNyA4LjItMy4zIDQuNi01IDEwLjItNy42IDE1LjJxLTIuNyA1LjEtNS43IDEwLS40IDEuNC0uNiAzLjMtMTIuMi02LTI0LjgtMTMuNiAxLjktNS42IDQuNC0xMC4zbDguNS0xNS41cTIuNy00LjggNS05LjZMOTguNyA3OXEyIC45IDUgMS44TTE5Ny40IDE2Ny40Yy0xLjggMS0yLjYgNS42LTUuNyAyLjUtMy4yLTMuMS0uOC02IDEuNC05cTIuMiAyLjcgNC4zIDYuNW0tOC43IDYuN3EwIDMuMy0uOCA3LTIuNi0xLjItNC43LTIuOCAyLjQtMi4yIDUuNS00LjJNMTgxLjkgMTUxLjNjLS41IDMuOS0zLjMgNC4xLTUuOSAzLjQtMi40LS42LTMuOC0yLjUtMi01LjZxMy45LjcgNy45IDIuMk05OC42IDE5MnEtMS44IDEuNC01LjcgMy40LTEuNCA3LjItMyAxNi43Yy0xMC02LjEtMTcuMS0xNS0yMy0yNS45eiIvPjxwYXRoIGZpbGw9IiNiOGI1ZjAiIGQ9Ik03OSA2OC40YTExMSAxMTEgMCAwIDEtNC45IDkuOWwtOC41IDE1LjVxLTIuNCA0LjgtNC42IDEwLTguNS03LjQtMTctMTYuNmMtMS42LTUgLjktOC4zIDMtMTEuNmwxMy4xLTE5Ljl6TTczIDEzMS40cS01IDkuOC0xMCAxOS4yYy0xIDEuOC0xLjQgMy45LTIgNi4ycS02LjUtNi0xMy0xMy43YzEtNi4yIDItMTEuNiAzLjQtMTcuMXEyLTEuNSAzLjYtMy4xIDkgNCAxOCA4LjVNNTMuNSA1MC41QzQ1IDUzLjUgNDEgNjAuNSAzOCA2OC4zcS0uNyAxLjgtMiAzLjdhMjcgMjcgMCAwIDEtMy03LjdjMS4xLTQuOCAzLjItOS4xIDIuNi0xMy4xLS44LTUuOCAxLjUtOS44IDQuMi0xNC4xcTYuNyA2LjQgMTMuNiAxMy40Ii8+PHBhdGggZmlsbD0iI2I4YjVmMCIgZD0ibTUxIDEyNi0zIDE2LjhhNjEgNjEgMCAwIDEtMTMtMzAuOWwxLS45cTUuOSAzLjYgMTEuOCA4ek02MCA1NS40cS02LjQgMTAuMy0xMyAyMC4yYy0yLjEgMy4zLTQuNiA2LjYtMyAxMS4zcS00LjItNi42LTgtMTQuNSAxLjQtMi40IDIuMS00LjFjMy03LjggNi45LTE0LjcgMTUuNS0xNy40ek0zOS44IDM2LjhjLTIuNiA0LjYtNSA4LjYtNC4xIDE0LjQuNiA0LTEuNSA4LjMtMi43IDEyLjdBNzEgNzEgMCAwIDEgMzEuNiAyOHoiLz48cGF0aCBmaWxsPSIjYjhiNWYwIiBkPSJNNTEuNCAxMjZxLTItMy0zLjQtNi43IDMuMyAxLjIgNi44IDMuMy0xLjMgMS44LTMuNCAzLjRNMjI3LjUgMTQ2cS43IDMuNi42IDcuNy0uNy0zLjYtLjYtNy42bS0uNSAxNHEuNCAxLjUgMCAzLjctLjMtMS42IDAtMy43bS0uMy0yMS44cS43IDEgLjkgMi42YTUgNSAwIDAgMS0xLTIuNk0yMjYgMTY3cS4yLjcgMCAxLjgtLjUtLjcgMC0xLjhtLS4zLTMzLjlxLjYuNi43IDEuNy0uNi0uNi0uNy0xLjdNMjMwIDY2Yy0yLTMtMi4xLTYgMS03LjQgMS45LS44IDUuMS0uMyA2LjkgMSAxIC43IDEuMSA0LjQuMiA2LTEuOSAzLTUgMi43LTggLjRNMjUzLjQgMTAwcS01LjQtMTIuMiA1LjMtMjJjLS4zIDItMS4xIDMuOS0xLjUgNS45LS43IDQtMSA4LTEuOCAxMmExMSAxMSAwIDAgMS0yIDRtNS45IDE2LjlhMTA2IDEwNiAwIDAgMS00LjQtMTEuNXEuNy0uNSAxLjUtLjNjLjUuMyAxLjMuNyAxLjMgMS4ycTEuMSA1LjIgMS42IDEwLjZtLTYuMiA3NnExLjMtNC42IDMuNi05LjcgMy42IDIuNS4yIDUuNGMtMS40IDEuMS0yLjMgMi45LTMuOCA0LjRtMTMuMi0xMTguNXEzLjEtMS41IDcuMy0yLjVjLS43IDQuOC00LjIgMi44LTcuMyAyLjVtLTMuOCA1Ni40cS0xLTEuOS0xLjMtNC41IDEuOC4xIDMuNi45em0tMy45IDQ4LjJxLS40LS43LjItMS44bDEuOC42cS0uOC42LTIgMS4ybTEuMS00cS0uMy0uNy4yLTEuOC4zLjctLjIgMS44bTIuMi05cS0uMy0uNyAwLTEuOC4zLjYgMCAxLjhtMS4yLTlxLS4zLS43LS4yLTEuOC40LjYuMiAxLjdtLjItMTkuMXEtLjYtLjYtLjUtMS43LjUuNi41IDEuN00yNzYgNjUuNnEtMS0uMS0yLjMtMS4xIDEgMCAyLjMgMSIvPjwvc3ZnPg==';
 
@@ -222,21 +222,20 @@
     scanPopup = null;
   }
 
-  async function waitForProfileRender(page, timeout) {
-    var deadline = Date.now() + (timeout || 15000);
+  async function waitForProfileRender(popup, timeout) {
+    var deadline = Date.now() + (timeout || 20000);
     while (Date.now() < deadline) {
+      if (popup.closed) throw new Error('Popup was closed before profile loaded.');
       try {
-        var doc = page.document;
+        var doc = popup.document;
         var links = doc.querySelectorAll('a[href*="/followers"]');
         if (links.length > 0) return;
-        var allLinks = doc.querySelectorAll('a');
-        for (var i = 0; i < allLinks.length; i++) {
-          if (/\d+\s*followers/i.test(allLinks[i].textContent)) return;
-        }
-      } catch (e) { /* keep polling */ }
+      } catch (e) {
+        // Cross-origin or not-ready — keep polling
+      }
       await sleep(500);
     }
-    throw new Error('Profile did not load in time.');
+    throw new Error('Profile did not load in time. Check your connection and try again.');
   }
 
   // Parse "1,234" or "12.5K" or "1.2M" to a number
@@ -267,60 +266,31 @@
     return { followers: followers, following: following };
   }
 
-  // ─── List navigation ─────────────────────────────────────────────
+  // ─── Modal scraping ─────────────────────────────────────────────
 
-  // Simulate a real mouse click that triggers React's event system
-  function simulateClick(el) {
-    var rect = el.getBoundingClientRect();
-    var x = rect.left + rect.width / 2;
-    var y = rect.top + rect.height / 2;
-    var opts = { bubbles: true, cancelable: true, view: window, clientX: x, clientY: y };
-    el.dispatchEvent(new MouseEvent('mousedown', opts));
-    el.dispatchEvent(new MouseEvent('mouseup', opts));
-    el.dispatchEvent(new MouseEvent('click', opts));
-  }
-
-  function findFollowLink(doc, type) {
-    // Strategy 1: <a> with href containing /followers or /following
+  async function openListModal(popup, type) {
+    // type is 'followers' or 'following'
+    var doc = popup.document;
     var links = doc.querySelectorAll('a[href]');
+    var target = null;
     for (var i = 0; i < links.length; i++) {
       var href = links[i].getAttribute('href') || '';
-      if (type === 'followers' && href.indexOf('/followers') !== -1 && href.indexOf('/following') === -1) return links[i];
-      if (type === 'following' && href.indexOf('/following') !== -1) return links[i];
+      if (type === 'followers' && href.indexOf('/followers') !== -1 && href.indexOf('/following') === -1) {
+        target = links[i];
+        break;
+      }
+      if (type === 'following' && href.indexOf('/following') !== -1) {
+        target = links[i];
+        break;
+      }
     }
-    // Strategy 2: text pattern match
-    var allEls = doc.querySelectorAll('a, span, div, button, li');
-    var pattern = type === 'followers'
-      ? /[\d,.]+[KkMm]?\s+followers/i
-      : /[\d,.]+[KkMm]?\s+following/i;
-    for (var j = 0; j < allEls.length; j++) {
-      var txt = allEls[j].textContent || '';
-      if (txt.length < 30 && pattern.test(txt)) return allEls[j];
-    }
-    return null;
-  }
+    if (!target) throw new Error('Could not find ' + type + ' link on profile page.');
+    target.click();
 
-  async function openList(username, type) {
-    var target = findFollowLink(document, type);
-    if (!target) throw new Error('Could not find ' + type + ' link on profile.');
-
-    var urlBefore = location.pathname;
-    simulateClick(target);
-
-    // Wait for something to happen: modal, URL change, or new content
-    var deadline = Date.now() + 10000;
-    while (Date.now() < deadline) {
-      // Check for modal
-      var modal = findModal(document);
-      if (modal) return { mode: 'modal' };
-      // Check for URL change (SPA navigation)
-      if (location.pathname !== urlBefore) return { mode: 'page' };
-      await sleep(300);
-    }
-
-    // If simulated click didn't work, try direct navigation as fallback
-    // This kills our script context, so save state first
-    throw new Error('Could not open ' + type + ' list. Click did not trigger navigation or modal.');
+    // Wait for modal (role="dialog") to appear
+    await waitForEl(doc, '[role="dialog"]', 8000);
+    // Small settle for content to render inside the modal
+    await sleep(1000);
   }
 
   // Find the scrollable container inside the modal
@@ -377,33 +347,9 @@
     };
   }
 
-  function findModal(doc) {
-    // Try multiple selectors for the modal container
-    var modal = doc.querySelector('[role="dialog"]');
-    if (modal) return modal;
-
-    // Fallback: look for presentation overlay
-    var pres = doc.querySelectorAll('div[role="presentation"], div[tabindex="-1"]');
-    for (var i = 0; i < pres.length; i++) {
-      var rect = pres[i].getBoundingClientRect();
-      if (rect.width > 200 && rect.height > 200) return pres[i];
-    }
-
-    // Fallback: find a fixed/absolute positioned overlay with scrollable content
-    var divs = doc.querySelectorAll('div[style*="position: fixed"], div[style*="position: absolute"]');
-    for (var j = 0; j < divs.length; j++) {
-      var r = divs[j].getBoundingClientRect();
-      if (r.width > 200 && r.height > 200 && divs[j].querySelectorAll('a[href]').length > 3) {
-        return divs[j];
-      }
-    }
-
-    return null;
-  }
-
   async function scrapeModal(popup, cap, onProgress) {
     var doc = popup.document;
-    var modal = findModal(doc);
+    var modal = doc.querySelector('[role="dialog"]');
     if (!modal) throw new Error('No modal found.');
 
     var users = [];
@@ -444,56 +390,6 @@
     // Close modal by pressing Escape
     doc.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     await sleep(500);
-
-    return users;
-  }
-
-  // Scrape from a full-page followers/following list (SPA navigation mode)
-  async function scrapePage(cap, onProgress) {
-    var users = [];
-    var seen = new Set();
-    var noNewContentCount = 0;
-
-    // Wait for initial user links to appear
-    var waitDeadline = Date.now() + 8000;
-    while (Date.now() < waitDeadline) {
-      var initialLinks = document.querySelectorAll('a[href]');
-      var userLinkCount = 0;
-      for (var k = 0; k < initialLinks.length; k++) {
-        if (extractUsernameFromHref(initialLinks[k].getAttribute('href') || '')) userLinkCount++;
-      }
-      if (userLinkCount >= 3) break;
-      await sleep(500);
-    }
-
-    while (users.length < cap) {
-      var links = document.querySelectorAll('a[href]');
-      var prevSize = seen.size;
-
-      for (var i = 0; i < links.length; i++) {
-        var username = extractUsernameFromHref(links[i].getAttribute('href') || '');
-        if (!username || seen.has(username)) continue;
-        seen.add(username);
-
-        var userInfo = readUserRow(links[i], username);
-        users.push(userInfo);
-
-        if (users.length >= cap) break;
-      }
-
-      if (onProgress) onProgress(users.length);
-
-      if (seen.size === prevSize) {
-        noNewContentCount++;
-        if (noNewContentCount >= 3) break;
-      } else {
-        noNewContentCount = 0;
-      }
-
-      // Scroll the page itself
-      window.scrollTo(0, document.documentElement.scrollHeight);
-      await sleep(SCROLL_PAUSE_MS);
-    }
 
     return users;
   }
@@ -714,7 +610,7 @@
 
     // Status text
     overlayTextEl = overlayDoc.createElement('div');
-    overlayTextEl.textContent = 'Starting...';
+    overlayTextEl.textContent = 'Starting\u2026';
     overlayTextEl.setAttribute('style', 'font-size:12px;color:rgba(255,255,255,0.65);font-variant-numeric:tabular-nums;margin-bottom:12px');
     content.appendChild(overlayTextEl);
 
@@ -768,20 +664,7 @@
 
   async function shipResults(payload) {
     const encoded = await encodePayload(payload);
-    var url = FOLLOW_RADAR_URL + '/#data=' + encoded;
-    // Try multiple redirect methods — Instagram may block some
-    try { window.location.href = url; } catch (e) {}
-    await sleep(1000);
-    // If still on Instagram, try replace
-    if (location.hostname.indexOf('instagram.com') !== -1) {
-      try { window.location.replace(url); } catch (e) {}
-      await sleep(1000);
-    }
-    // If still here, try window.open as last resort
-    if (location.hostname.indexOf('instagram.com') !== -1) {
-      var w = window.open(url, '_self');
-      if (!w) window.open(url, '_blank');
-    }
+    window.location = FOLLOW_RADAR_URL + '/#data=' + encoded;
   }
 
 
@@ -820,10 +703,13 @@
   }
 
   // ─── Main entry ──────────────────────────────────────────────────
-  // Runs directly on the current Instagram page -- no popup needed.
-  // The user must be on their own profile page or we navigate there.
 
   async function main() {
+    if (!/(^|\.)instagram\.com$/.test(location.hostname)) {
+      alert("Open instagram.com first, then click this bookmarklet.");
+      return;
+    }
+
     var user;
     try {
       user = getCurrentUserDOM();
@@ -862,28 +748,28 @@
       return;
     }
 
-    // Navigate to profile if not already there
-    var profilePath = '/' + user.username + '/';
-    if (location.pathname !== profilePath) {
-      location.href = 'https://www.instagram.com' + profilePath;
-      // After navigation, user clicks bookmarklet again
+    // Open popup to user's profile
+    var popup = openScanPopup(user.username);
+    if (!popup || popup.closed) {
+      alert(
+        "Flock needs to open a small window to scan your followers.\n\n" +
+        "Please allow popups for instagram.com and try again."
+      );
       return;
     }
 
-    // Use current page as the scan target (like a "popup" but it's this window)
-    var page = { document: document, scrollTo: window.scrollTo.bind(window) };
-
-    // Wait for profile to fully render
     try {
-      await waitForProfileRender(page, 10000);
+      await waitForProfileRender(popup, 20000);
     } catch (e) {
-      alert("Could not detect your profile. Make sure you're on your own profile page and try again.");
+      closeScanPopup();
+      alert(e.message);
       return;
     }
 
     // Read account size from profile DOM
-    var sizes = readAccountSize(page);
+    var sizes = readAccountSize(popup);
     if (sizes.followers > MAX_ACCOUNT_SIZE || sizes.following > MAX_ACCOUNT_SIZE) {
+      closeScanPopup();
       alert(
         "Flock is built for accounts under " + MAX_ACCOUNT_SIZE.toLocaleString() + " followers/following.\n\n" +
         "Yours has " + sizes.followers.toLocaleString() + " followers and " + sizes.following.toLocaleString() + " following."
@@ -899,15 +785,20 @@
     if (!resume) {
       var ok = confirm(
         'This scan takes about ' + estMinutes + ' minutes. ' +
-        'Flock will scroll through your follower list on this page -- nothing is shared with us or any server.\n\n' +
-        'Keep this tab open while it runs. You can use other tabs and apps.\n\n' +
+        'Flock opens a small window and scrolls through your follower list \u2014 nothing is shared with us or any server.\n\n' +
+        'Keep the scan window open while it runs. You can use other windows and apps in the meantime.\n\n' +
         'Ready to scan?'
       );
-      if (!ok) return;
+      if (!ok) {
+        closeScanPopup();
+        return;
+      }
     }
 
-    // Create overlay on current page
-    createOverlay();
+    // Create overlay in popup window
+    try {
+      createOverlay(popup.document);
+    } catch (e) { /* continue without overlay */ }
 
     var followers = (resume && resume.partialFollowers) || [];
     var following = (resume && resume.partialFollowing) || [];
@@ -915,59 +806,34 @@
     try {
       // Phase 1: Scrape followers
       if (phase === 'followers') {
-        updateOverlay('Scanning followers... (~' + estMinutes + ' min)', 0);
-        var fResult = await openList(user.username, 'followers');
-        await sleep(2000);
-        // Re-create overlay (may have been lost during navigation)
-        createOverlay();
-        updateOverlay('Scanning followers...', 0.05);
-        if (fResult.mode === 'modal') {
-          followers = await scrapeModal(page, SCAN_CAP, function (n) {
-            updateOverlay('Scanning followers... ' + n, 0.05 + Math.min(0.4, n / SCAN_CAP));
-          });
-        } else {
-          followers = await scrapePage(SCAN_CAP, function (n) {
-            updateOverlay('Scanning followers... ' + n, 0.05 + Math.min(0.4, n / SCAN_CAP));
-          });
-          // Go back to profile for next phase
-          history.back();
-          await sleep(2000);
-        }
+        updateOverlay('Scanning followers\u2026 (~' + estMinutes + ' min)', 0);
+        await openListModal(popup, 'followers');
+        followers = await scrapeModal(popup, SCAN_CAP, function (n) {
+          updateOverlay('Scanning followers\u2026 ' + n, 0.05 + Math.min(0.4, n / SCAN_CAP));
+        });
         phase = 'following';
       }
 
       // Phase 2: Scrape following
-      updateOverlay('Scanning following...', 0.5);
-      var gResult = await openList(user.username, 'following');
-      await sleep(2000);
-      createOverlay();
-      updateOverlay('Scanning following...', 0.5);
-      if (gResult.mode === 'modal') {
-        following = await scrapeModal(page, SCAN_CAP, function (n) {
-          updateOverlay('Scanning following... ' + n, 0.5 + Math.min(0.35, n / SCAN_CAP));
-        });
-      } else {
-        following = await scrapePage(SCAN_CAP, function (n) {
-          updateOverlay('Scanning following... ' + n, 0.5 + Math.min(0.35, n / SCAN_CAP));
-        });
-        // Go back to profile for post scraping
-        history.back();
-        await sleep(2000);
-      }
+      updateOverlay('Scanning following\u2026', 0.5);
+      await openListModal(popup, 'following');
+      following = await scrapeModal(popup, SCAN_CAP, function (n) {
+        updateOverlay('Scanning following\u2026 ' + n, 0.5 + Math.min(0.35, n / SCAN_CAP));
+      });
 
       // Phase 3: Scrape posts
-      updateOverlay('Analyzing your posts...', 0.9);
+      updateOverlay('Analyzing your posts\u2026', 0.9);
       var posts = [];
       try {
-        var page2 = { document: document, scrollTo: window.scrollTo.bind(window) };
-        posts = await scrapePostGrid(page2, 50);
-        updateOverlay('Analyzing your posts... ' + posts.length + ' found', 0.98);
+        posts = await scrapePostGrid(popup, 50);
+        updateOverlay('Analyzing your posts\u2026 ' + posts.length + ' found', 0.98);
       } catch (e) {
         console.warn('[flock] post scrape failed:', e);
       }
 
     } catch (e) {
       destroyOverlay();
+      closeScanPopup();
 
       if (followers.length > 0 || following.length > 0) {
         saveResumeState({
@@ -996,6 +862,7 @@
     }
 
     destroyOverlay();
+    closeScanPopup();
     clearResumeState();
     saveCooldown(user.userId);
 
@@ -1053,12 +920,8 @@
   }
 
   // Production entry point.
-  if (!/(^|\.)instagram\.com$/.test(location.hostname)) {
-    alert("Open instagram.com first, then click this bookmarklet.");
-  } else {
-    main().catch(function (e) {
-      console.error('[flock]', e);
-      alert("Unexpected error: " + (e.message || e));
-    });
-  }
+  main().catch(e => {
+    console.error('[follow radar]', e);
+    alert("Unexpected error: " + (e.message || e));
+  });
 })();
