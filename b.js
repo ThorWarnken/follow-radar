@@ -267,92 +267,53 @@
     return { followers: followers, following: following };
   }
 
-  // ─── Modal scraping ─────────────────────────────────────────────
+  // ─── List navigation ─────────────────────────────────────────────
 
-  async function openListModal(page, type) {
-    // type is 'followers' or 'following'
-    var doc = page.document;
-    var target = null;
+  async function openList(username, type) {
+    // Navigate directly to the followers/following page — no click needed
+    var targetUrl = 'https://www.instagram.com/' + encodeURIComponent(username) + '/' + type + '/';
 
-    // Strategy 1: find <a> with href containing /followers or /following
-    var links = doc.querySelectorAll('a[href]');
-    for (var i = 0; i < links.length; i++) {
-      var href = links[i].getAttribute('href') || '';
-      if (type === 'followers' && href.indexOf('/followers') !== -1 && href.indexOf('/following') === -1) {
-        target = links[i];
-        break;
+    // Use pushState + popstate to trigger Instagram's SPA router
+    // If that doesn't work, fall back to full navigation
+    var navigated = false;
+
+    // Try SPA-style navigation first (keeps our script alive)
+    try {
+      history.pushState(null, '', targetUrl);
+      window.dispatchEvent(new PopStateEvent('popstate', { state: null }));
+      await sleep(2000);
+
+      // Check if Instagram actually rendered the new page
+      if (location.pathname.indexOf('/' + type) !== -1) {
+        var userLinks = document.querySelectorAll('a[href]');
+        var userCount = 0;
+        for (var i = 0; i < userLinks.length; i++) {
+          if (extractUsernameFromHref(userLinks[i].getAttribute('href') || '')) userCount++;
+        }
+        if (userCount >= 2) navigated = true;
       }
-      if (type === 'following' && href.indexOf('/following') !== -1) {
-        target = links[i];
-        break;
-      }
+    } catch (e) { /* fall through */ }
+
+    // If SPA nav didn't render content, try direct location change
+    if (!navigated) {
+      location.href = targetUrl;
+      // Wait for page to load — our script context may survive if it's a SPA
+      await sleep(3000);
     }
 
-    // Strategy 2: find any clickable element with text like "1,186 followers"
-    if (!target) {
-      var allEls = doc.querySelectorAll('a, span, div, button, li');
-      var pattern = type === 'followers'
-        ? /^\s*[\d,.]+[KkMm]?\s+followers\s*$/i
-        : /^\s*[\d,.]+[KkMm]?\s+following\s*$/i;
-      for (var j = 0; j < allEls.length; j++) {
-        // Check direct text content (not children's text)
-        var directText = '';
-        for (var k = 0; k < allEls[j].childNodes.length; k++) {
-          if (allEls[j].childNodes[k].nodeType === 3) directText += allEls[j].childNodes[k].textContent;
-        }
-        // Also check full textContent for short elements
-        var fullText = allEls[j].textContent || '';
-        if (fullText.length < 30 && (pattern.test(fullText) || pattern.test(directText))) {
-          target = allEls[j];
-          break;
-        }
-      }
-    }
-
-    // Strategy 3: look for the profile stats section and find by position
-    if (!target) {
-      var sections = doc.querySelectorAll('ul li, header section');
-      for (var m = 0; m < sections.length; m++) {
-        var txt = sections[m].textContent || '';
-        if (type === 'followers' && /followers/i.test(txt) && !/following/i.test(txt)) {
-          target = sections[m];
-          break;
-        }
-        if (type === 'following' && /following/i.test(txt)) {
-          target = sections[m];
-          break;
-        }
-      }
-    }
-
-    if (!target) throw new Error('Could not find ' + type + ' link on profile page.');
-
-    var urlBefore = location.pathname;
-    target.click();
-
-    // Wait for either a modal OR a SPA navigation to /followers/ or /following/
-    var result = { mode: null }; // 'modal' or 'page'
-    var deadline = Date.now() + 12000;
+    // Wait for user list to populate
+    var deadline = Date.now() + 15000;
     while (Date.now() < deadline) {
-      // Check for modal
-      var modal = findModal(doc);
-      if (modal) {
-        result.mode = 'modal';
-        break;
+      var links = document.querySelectorAll('a[href]');
+      var count = 0;
+      for (var j = 0; j < links.length; j++) {
+        if (extractUsernameFromHref(links[j].getAttribute('href') || '')) count++;
       }
-      // Check for SPA navigation (URL changed to /followers or /following)
-      if (location.pathname !== urlBefore &&
-          (location.pathname.indexOf('/followers') !== -1 || location.pathname.indexOf('/following') !== -1)) {
-        result.mode = 'page';
-        break;
-      }
-      await sleep(300);
+      if (count >= 3) return;
+      await sleep(500);
     }
 
-    if (!result.mode) throw new Error('Could not detect ' + type + ' list after clicking. Instagram may have changed their UI.');
-    // Settle for content to render
-    await sleep(2000);
-    return result;
+    throw new Error('Could not load ' + type + ' list. Try navigating to ' + targetUrl + ' manually.');
   }
 
   // Find the scrollable container inside the modal
@@ -935,44 +896,35 @@
       // Phase 1: Scrape followers
       if (phase === 'followers') {
         updateOverlay('Scanning followers... (~' + estMinutes + ' min)', 0);
-        var followersResult = await openListModal(page, 'followers');
-        if (followersResult.mode === 'page') {
-          followers = await scrapePage(SCAN_CAP, function (n) {
-            updateOverlay('Scanning followers... ' + n, 0.05 + Math.min(0.4, n / SCAN_CAP));
-          });
-          // Navigate back to profile for next phase
-          history.back();
-          await sleep(2000);
-          await waitForProfileRender(page, 10000);
-        } else {
-          followers = await scrapeModal(page, SCAN_CAP, function (n) {
-            updateOverlay('Scanning followers... ' + n, 0.05 + Math.min(0.4, n / SCAN_CAP));
-          });
-        }
+        await openList(user.username, 'followers');
+        // Re-create overlay on new page (old one lost during navigation)
+        createOverlay();
+        updateOverlay('Scanning followers...', 0.05);
+        followers = await scrapePage(SCAN_CAP, function (n) {
+          updateOverlay('Scanning followers... ' + n, 0.05 + Math.min(0.4, n / SCAN_CAP));
+        });
         phase = 'following';
       }
 
-      // Phase 2: Scrape following
+      // Navigate to following
       updateOverlay('Scanning following...', 0.5);
-      var followingResult = await openListModal(page, 'following');
-      if (followingResult.mode === 'page') {
-        following = await scrapePage(SCAN_CAP, function (n) {
-          updateOverlay('Scanning following... ' + n, 0.5 + Math.min(0.35, n / SCAN_CAP));
-        });
-        // Navigate back to profile for post scraping
-        history.back();
-        await sleep(2000);
-      } else {
-        following = await scrapeModal(page, SCAN_CAP, function (n) {
-          updateOverlay('Scanning following... ' + n, 0.5 + Math.min(0.35, n / SCAN_CAP));
-        });
-      }
+      await openList(user.username, 'following');
+      createOverlay();
+      updateOverlay('Scanning following...', 0.5);
+      following = await scrapePage(SCAN_CAP, function (n) {
+        updateOverlay('Scanning following... ' + n, 0.5 + Math.min(0.35, n / SCAN_CAP));
+      });
 
-      // Phase 3: Scrape posts (scroll the profile grid)
+      // Navigate back to profile for post scraping
+      updateOverlay('Analyzing your posts...', 0.9);
+      location.href = 'https://www.instagram.com/' + user.username + '/';
+      await sleep(3000);
+      createOverlay();
       updateOverlay('Analyzing your posts...', 0.9);
       var posts = [];
       try {
-        posts = await scrapePostGrid(page, 50);
+        var page2 = { document: document, scrollTo: window.scrollTo.bind(window) };
+        posts = await scrapePostGrid(page2, 50);
         updateOverlay('Analyzing your posts... ' + posts.length + ' found', 0.98);
       } catch (e) {
         console.warn('[flock] post scrape failed:', e);
