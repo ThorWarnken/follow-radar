@@ -326,40 +326,33 @@
     }
 
     if (!target) throw new Error('Could not find ' + type + ' link on profile page.');
+
+    var urlBefore = location.pathname;
     target.click();
 
-    // Wait for modal — Instagram may use different selectors across versions
-    var modalSelectors = [
-      '[role="dialog"]',
-      'div[style*="position: fixed"] div[style*="overflow"]',
-      'div[aria-label="Followers"], div[aria-label="Following"]',
-    ];
-    var modalFound = false;
+    // Wait for either a modal OR a SPA navigation to /followers/ or /following/
+    var result = { mode: null }; // 'modal' or 'page'
     var deadline = Date.now() + 12000;
     while (Date.now() < deadline) {
-      for (var s = 0; s < modalSelectors.length; s++) {
-        if (doc.querySelector(modalSelectors[s])) {
-          modalFound = true;
-          break;
-        }
+      // Check for modal
+      var modal = findModal(doc);
+      if (modal) {
+        result.mode = 'modal';
+        break;
       }
-      if (modalFound) break;
-      // Also check if a new scrollable overlay appeared (generic fallback)
-      var overlays = doc.querySelectorAll('div[role="presentation"], div[role="dialog"], div[tabindex="-1"]');
-      for (var ov = 0; ov < overlays.length; ov++) {
-        var ovRect = overlays[ov].getBoundingClientRect();
-        if (ovRect.width > 200 && ovRect.height > 200) {
-          modalFound = true;
-          break;
-        }
+      // Check for SPA navigation (URL changed to /followers or /following)
+      if (location.pathname !== urlBefore &&
+          (location.pathname.indexOf('/followers') !== -1 || location.pathname.indexOf('/following') !== -1)) {
+        result.mode = 'page';
+        break;
       }
-      if (modalFound) break;
       await sleep(300);
     }
 
-    if (!modalFound) throw new Error('Could not detect ' + type + ' modal after clicking. Instagram may have changed their UI.');
-    // Settle for content to render inside the modal
-    await sleep(1500);
+    if (!result.mode) throw new Error('Could not detect ' + type + ' list after clicking. Instagram may have changed their UI.');
+    // Settle for content to render
+    await sleep(2000);
+    return result;
   }
 
   // Find the scrollable container inside the modal
@@ -483,6 +476,56 @@
     // Close modal by pressing Escape
     doc.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     await sleep(500);
+
+    return users;
+  }
+
+  // Scrape from a full-page followers/following list (SPA navigation mode)
+  async function scrapePage(cap, onProgress) {
+    var users = [];
+    var seen = new Set();
+    var noNewContentCount = 0;
+
+    // Wait for initial user links to appear
+    var waitDeadline = Date.now() + 8000;
+    while (Date.now() < waitDeadline) {
+      var initialLinks = document.querySelectorAll('a[href]');
+      var userLinkCount = 0;
+      for (var k = 0; k < initialLinks.length; k++) {
+        if (extractUsernameFromHref(initialLinks[k].getAttribute('href') || '')) userLinkCount++;
+      }
+      if (userLinkCount >= 3) break;
+      await sleep(500);
+    }
+
+    while (users.length < cap) {
+      var links = document.querySelectorAll('a[href]');
+      var prevSize = seen.size;
+
+      for (var i = 0; i < links.length; i++) {
+        var username = extractUsernameFromHref(links[i].getAttribute('href') || '');
+        if (!username || seen.has(username)) continue;
+        seen.add(username);
+
+        var userInfo = readUserRow(links[i], username);
+        users.push(userInfo);
+
+        if (users.length >= cap) break;
+      }
+
+      if (onProgress) onProgress(users.length);
+
+      if (seen.size === prevSize) {
+        noNewContentCount++;
+        if (noNewContentCount >= 3) break;
+      } else {
+        noNewContentCount = 0;
+      }
+
+      // Scroll the page itself
+      window.scrollTo(0, document.documentElement.scrollHeight);
+      await sleep(SCROLL_PAUSE_MS);
+    }
 
     return users;
   }
@@ -892,19 +935,38 @@
       // Phase 1: Scrape followers
       if (phase === 'followers') {
         updateOverlay('Scanning followers... (~' + estMinutes + ' min)', 0);
-        await openListModal(page, 'followers');
-        followers = await scrapeModal(page, SCAN_CAP, function (n) {
-          updateOverlay('Scanning followers... ' + n, 0.05 + Math.min(0.4, n / SCAN_CAP));
-        });
+        var followersResult = await openListModal(page, 'followers');
+        if (followersResult.mode === 'page') {
+          followers = await scrapePage(SCAN_CAP, function (n) {
+            updateOverlay('Scanning followers... ' + n, 0.05 + Math.min(0.4, n / SCAN_CAP));
+          });
+          // Navigate back to profile for next phase
+          history.back();
+          await sleep(2000);
+          await waitForProfileRender(page, 10000);
+        } else {
+          followers = await scrapeModal(page, SCAN_CAP, function (n) {
+            updateOverlay('Scanning followers... ' + n, 0.05 + Math.min(0.4, n / SCAN_CAP));
+          });
+        }
         phase = 'following';
       }
 
       // Phase 2: Scrape following
       updateOverlay('Scanning following...', 0.5);
-      await openListModal(page, 'following');
-      following = await scrapeModal(page, SCAN_CAP, function (n) {
-        updateOverlay('Scanning following... ' + n, 0.5 + Math.min(0.35, n / SCAN_CAP));
-      });
+      var followingResult = await openListModal(page, 'following');
+      if (followingResult.mode === 'page') {
+        following = await scrapePage(SCAN_CAP, function (n) {
+          updateOverlay('Scanning following... ' + n, 0.5 + Math.min(0.35, n / SCAN_CAP));
+        });
+        // Navigate back to profile for post scraping
+        history.back();
+        await sleep(2000);
+      } else {
+        following = await scrapeModal(page, SCAN_CAP, function (n) {
+          updateOverlay('Scanning following... ' + n, 0.5 + Math.min(0.35, n / SCAN_CAP));
+        });
+      }
 
       // Phase 3: Scrape posts (scroll the profile grid)
       updateOverlay('Analyzing your posts...', 0.9);
