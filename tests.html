@@ -74,9 +74,11 @@ test('RateLimitError is an Error subclass', () => {
 test('constants are exposed', () => {
   const c = window.__followRadarTest.constants;
   assertEq(c.MAX_ACCOUNT_SIZE, 10000);
-  assertEq(c.THROTTLE_MS, 1500);
-  assertEq(c.PAGE_SIZE, 200);
-  assertEq(c.FOLLOW_RADAR_URL, 'https://follow-radar.app');
+  assert(typeof c.SCAN_CAP === 'number', 'SCAN_CAP should be a number');
+  assert(typeof c.SCROLL_PAUSE_MS === 'number', 'SCROLL_PAUSE_MS should be a number');
+  assert(typeof c.SCROLL_SETTLE_MS === 'number', 'SCROLL_SETTLE_MS should be a number');
+  assert(typeof c.COOLDOWN_MS === 'number', 'COOLDOWN_MS should be a number');
+  assert(typeof c.COOLDOWN_KEY === 'string', 'COOLDOWN_KEY should be a string');
   assertEq(c.RESUME_KEY, 'follow-radar:resume');
 });
 </script>
@@ -113,6 +115,18 @@ test('decodePayload throws on garbage', async () => {
   let threw = false;
   try { await dec('x:notreal'); } catch (e) { threw = true; }
   assert(threw, 'should throw on unknown tag');
+});
+
+test('encodePayload + decodePayload round-trips with mutual_count', async function () {
+  var users = [];
+  for (var i = 0; i < 100; i++) {
+    users.push({ username: 'user' + i, full_name: 'User ' + i, is_private: false, mutual_count: i % 5 });
+  }
+  var obj = { username: 'me', followers: users, following: users, scrapedAt: new Date().toISOString() };
+  var encoded = await window.__followRadarTest.encodePayload(obj);
+  var decoded = await window.__followRadarTest.decodePayload(encoded);
+  assert(decoded.followers.length === 100, 'should round-trip 100 followers');
+  assert(decoded.followers[3].mutual_count === 3, 'mutual_count should survive round-trip');
 });
 </script>
 
@@ -193,196 +207,6 @@ test('loadResumeState returns null on garbage JSON', () => {
 </script>
 
 <script>
-test('classifyResponse: 200 with users array returns users + cursor', () => {
-  const c = window.__followRadarTest.classifyResponse;
-  const r = c(200, {users: [{username:'a'}, {username:'b'}], next_max_id: 'cur1'});
-  assertEq(r.users.length, 2);
-  assertEq(r.nextCursor, 'cur1');
-});
-
-test('classifyResponse: 200 with users but no next_max_id returns null cursor', () => {
-  const c = window.__followRadarTest.classifyResponse;
-  const r = c(200, {users: [{username:'a'}]});
-  assertEq(r.nextCursor, null);
-});
-
-test('classifyResponse: 429 throws RateLimitError', () => {
-  const c = window.__followRadarTest.classifyResponse;
-  const E = window.__followRadarTest.RateLimitError;
-  let threw = null;
-  try { c(429, {}); } catch (e) { threw = e; }
-  assert(threw instanceof E, 'should throw RateLimitError');
-  assertEq(threw.reason, 'http 429');
-});
-
-test('classifyResponse: 401 throws RateLimitError', () => {
-  const c = window.__followRadarTest.classifyResponse;
-  const E = window.__followRadarTest.RateLimitError;
-  let threw = null;
-  try { c(401, {}); } catch (e) { threw = e; }
-  assert(threw instanceof E);
-  assertEq(threw.reason, 'http 401');
-});
-
-test('classifyResponse: feedback_required body throws RateLimitError', () => {
-  const c = window.__followRadarTest.classifyResponse;
-  const E = window.__followRadarTest.RateLimitError;
-  let threw = null;
-  try { c(200, {message: 'feedback_required'}); } catch (e) { threw = e; }
-  assert(threw instanceof E);
-  assertEq(threw.reason, 'feedback_required');
-});
-
-test('classifyResponse: login_required throws RateLimitError', () => {
-  const c = window.__followRadarTest.classifyResponse;
-  const E = window.__followRadarTest.RateLimitError;
-  let threw = null;
-  try { c(200, {message: 'login_required'}); } catch (e) { threw = e; }
-  assert(threw instanceof E);
-});
-
-test('classifyResponse: 500 throws generic Error (not RateLimitError)', () => {
-  const c = window.__followRadarTest.classifyResponse;
-  const E = window.__followRadarTest.RateLimitError;
-  let threw = null;
-  try { c(500, {}); } catch (e) { threw = e; }
-  assert(threw && !(threw instanceof E), 'should be generic Error');
-});
-
-test('classifyResponse: 200 with no users field throws generic Error', () => {
-  const c = window.__followRadarTest.classifyResponse;
-  let threw = null;
-  try { c(200, {something: 'else'}); } catch (e) { threw = e; }
-  assert(threw && threw.message.indexOf('users') >= 0);
-});
-
-test('fetchPage uses injected fetch and skipThrottle', async () => {
-  const set = window.__followRadarTest.setFetch;
-  const fp = window.__followRadarTest.fetchPage;
-  let calledWith = null;
-  set(async (url, opts) => {
-    calledWith = {url, opts};
-    return {
-      status: 200,
-      json: async () => ({users: [{username:'x'}], next_max_id: 'n'}),
-    };
-  });
-  const r = await fp('https://i.instagram.com/api/v1/friendships/123/followers/?count=200', {skipThrottle: true});
-  assertEq(r.users.length, 1);
-  assertEq(r.nextCursor, 'n');
-  assert(calledWith.url.indexOf('/followers/') >= 0);
-  assertEq(calledWith.opts.headers['X-IG-App-ID'], '936619743392459');
-  assertEq(calledWith.opts.credentials, 'include');
-});
-</script>
-
-<script>
-test('buildFollowersUrl with no cursor', () => {
-  const b = window.__followRadarTest.buildFollowersUrl;
-  const u = b('123', null);
-  assert(u.indexOf('/123/followers/') >= 0);
-  assert(u.indexOf('count=200') >= 0);
-  assert(u.indexOf('max_id=') === -1);
-});
-
-test('buildFollowersUrl with cursor', () => {
-  const b = window.__followRadarTest.buildFollowersUrl;
-  const u = b('123', 'abc def');
-  assert(u.indexOf('max_id=abc%20def') >= 0);
-});
-
-test('buildFollowingUrl shape', () => {
-  const b = window.__followRadarTest.buildFollowingUrl;
-  assert(b('99', null).indexOf('/99/following/') >= 0);
-});
-
-test('trimUser drops extra fields', () => {
-  const t = window.__followRadarTest.trimUser;
-  const out = t({pk: 1, username: 'thor', full_name: 'Thor W', is_private: true, profile_pic_url: 'https://x', is_verified: true});
-  assertEq(out, {username: 'thor', full_name: 'Thor W', is_private: true});
-});
-
-test('trimUser handles missing full_name', () => {
-  const t = window.__followRadarTest.trimUser;
-  assertEq(t({username: 'a'}), {username: 'a', full_name: '', is_private: false});
-});
-
-test('scrapeFollowers: paginates through 3 pages and stops on null cursor', async () => {
-  const setImpl = window.__followRadarTest.setFetchPageImpl;
-  const scrape = window.__followRadarTest.scrapeFollowers;
-  const pages = [
-    {users: [{username: 'a'}, {username: 'b'}], nextCursor: 'c1'},
-    {users: [{username: 'c'}], nextCursor: 'c2'},
-    {users: [{username: 'd'}, {username: 'e'}], nextCursor: null},
-  ];
-  let calls = 0;
-  setImpl(async (url) => pages[calls++]);
-  const all = await scrape('123');
-  assertEq(all.length, 5);
-  assertEq(all.map(u => u.username), ['a','b','c','d','e']);
-  assertEq(calls, 3);
-});
-
-test('scrapeFollowers: resumes from initial + cursor', async () => {
-  const setImpl = window.__followRadarTest.setFetchPageImpl;
-  const scrape = window.__followRadarTest.scrapeFollowers;
-  setImpl(async (url) => {
-    assert(url.indexOf('max_id=resume-cursor') >= 0, 'should pass cursor');
-    return {users: [{username: 'new1'}], nextCursor: null};
-  });
-  const initial = [{username: 'old1', full_name: '', is_private: false}];
-  const all = await scrape('123', initial, 'resume-cursor');
-  assertEq(all.length, 2);
-  assertEq(all[0].username, 'old1');
-  assertEq(all[1].username, 'new1');
-});
-
-test('scrapeFollowers: propagates RateLimitError with cursor and partial attached', async () => {
-  const setImpl = window.__followRadarTest.setFetchPageImpl;
-  const scrape = window.__followRadarTest.scrapeFollowers;
-  const E = window.__followRadarTest.RateLimitError;
-  let call = 0;
-  setImpl(async (url) => {
-    call++;
-    if (call === 1) return {users: [{username:'a'}, {username:'b'}], nextCursor: 'c-abc'};
-    if (call === 2) return {users: [{username:'c'}], nextCursor: 'c-def'};
-    throw new E('http 429');
-  });
-  let threw = null;
-  try { await scrape('123'); } catch (e) { threw = e; }
-  assert(threw instanceof E, 'should be RateLimitError');
-  assertEq(threw.cursor, 'c-def');
-  assert(Array.isArray(threw.partial), 'partial should be array');
-  assertEq(threw.partial.length, 3);
-  assertEq(threw.partial.map(u => u.username), ['a','b','c']);
-});
-
-test('scrapeFollowers: first-request rate limit has null cursor and empty partial', async () => {
-  const setImpl = window.__followRadarTest.setFetchPageImpl;
-  const scrape = window.__followRadarTest.scrapeFollowers;
-  const E = window.__followRadarTest.RateLimitError;
-  setImpl(async () => { throw new E('http 429'); });
-  let threw = null;
-  try { await scrape('123'); } catch (e) { threw = e; }
-  assert(threw instanceof E);
-  assertEq(threw.cursor, null);
-  assertEq(threw.partial, []);
-});
-
-test('scrapeFollowers: onProgress called per page', async () => {
-  const setImpl = window.__followRadarTest.setFetchPageImpl;
-  const scrape = window.__followRadarTest.scrapeFollowers;
-  setImpl(async (url) => {
-    if (url.indexOf('max_id=') === -1) return {users: [{username: 'a'}], nextCursor: 'c1'};
-    return {users: [{username: 'b'}], nextCursor: null};
-  });
-  const progress = [];
-  await scrape('123', null, null, (n) => progress.push(n));
-  assertEq(progress, [1, 2]);
-});
-</script>
-
-<script>
 test('main is exposed in test mode', () => {
   assert(typeof window.__followRadarTest.main === 'function');
 });
@@ -395,6 +219,230 @@ test('shipResults via encode/decode round-trip', async () => {
   const back = await dec(encoded);
   assertEq(back, obj);
 });
+</script>
+
+<script>
+  // ─── DOM utility tests ─────────────────────────────────────────
+
+  test('sleep delays for at least the specified time', async function () {
+    var start = Date.now();
+    await window.__followRadarTest.sleep(50);
+    var elapsed = Date.now() - start;
+    assert(elapsed >= 45, 'sleep should delay at least ~50ms, got ' + elapsed);
+  });
+
+  test('waitForEl resolves when element appears', async function () {
+    var container = document.createElement('div');
+    document.body.appendChild(container);
+    setTimeout(function () {
+      var el = document.createElement('span');
+      el.setAttribute('data-test', 'wfe');
+      container.appendChild(el);
+    }, 50);
+    var found = await window.__followRadarTest.waitForEl(container, '[data-test="wfe"]', 2000);
+    assert(found !== null, 'should find the element');
+    assert(found.getAttribute('data-test') === 'wfe', 'should be the right element');
+    container.remove();
+  });
+
+  test('waitForEl rejects on timeout', async function () {
+    var container = document.createElement('div');
+    try {
+      await window.__followRadarTest.waitForEl(container, '[data-test="nope"]', 100);
+      assert(false, 'should have thrown');
+    } catch (e) {
+      assert(e.message.indexOf('timed out') !== -1, 'should mention timeout');
+    }
+  });
+
+  test('findByText finds element by case-insensitive text', function () {
+    var container = document.createElement('div');
+    var a = document.createElement('a');
+    a.textContent = '1,234 followers';
+    var b = document.createElement('a');
+    b.textContent = '567 following';
+    container.appendChild(a);
+    container.appendChild(b);
+    var found = window.__followRadarTest.findByText(container, 'followers');
+    assert(found === a, 'should find the followers link');
+    var found2 = window.__followRadarTest.findByText(container, 'Followers');
+    assert(found2 === a, 'should be case-insensitive');
+  });
+
+  test('extractUsernameFromHref parses username from profile links', function () {
+    var ex = window.__followRadarTest.extractUsernameFromHref;
+    assert(ex('/johndoe/') === 'johndoe', 'simple username');
+    assert(ex('https://www.instagram.com/johndoe/') === 'johndoe', 'full URL');
+    assert(ex('/explore/') === null, 'reserved path');
+    assert(ex('/reels/') === null, 'reserved path reels');
+    assert(ex('/p/ABC123/') === null, 'post link');
+    assert(ex('/stories/johndoe/') === null, 'stories link');
+  });
+
+  test('parseMutualText extracts mutual count from IG text', function () {
+    var p = window.__followRadarTest.parseMutualText;
+    assert(p('Followed by sarah_j and 3 others') === 4, '1 named + 3 others = 4');
+    assert(p('Followed by sarah_j, mike and 5 others') === 7, '2 named + 5 others = 7');
+    assert(p('Followed by sarah_j and mike') === 2, '2 named no others');
+    assert(p('Followed by sarah_j') === 1, '1 named');
+    assert(p('') === 0, 'empty string');
+    assert(p('Some random text') === 0, 'no match');
+  });
+</script>
+
+<script>
+  // ─── Popup management tests ────────────────────────────────────
+
+  test('parseCountText parses various count formats', function () {
+    var p = window.__followRadarTest.parseCountText;
+    assert(p('1,234') === 1234, 'comma-separated');
+    assert(p('567') === 567, 'plain number');
+    assert(p('12.5K') === 12500, 'K suffix');
+    assert(p('1.2M') === 1200000, 'M suffix');
+    assert(p('0') === 0, 'zero');
+  });
+
+  test('openScanPopup is a callable function', function () {
+    var fn = window.__followRadarTest.openScanPopup;
+    assert(typeof fn === 'function', 'should be exported');
+  });
+
+  test('readAccountSize reads from mock DOM', function () {
+    // Create a mock popup-like object with a mock document
+    var container = document.createElement('div');
+    var followersLink = document.createElement('a');
+    followersLink.setAttribute('href', '/testuser/followers/');
+    followersLink.textContent = '1,234 followers';
+    var followingLink = document.createElement('a');
+    followingLink.setAttribute('href', '/testuser/following/');
+    followingLink.textContent = '567 following';
+    container.appendChild(followersLink);
+    container.appendChild(followingLink);
+
+    // Mock popup with querySelectorAll
+    var mockDoc = {
+      querySelectorAll: function(sel) { return container.querySelectorAll(sel); }
+    };
+    var mockPopup = { document: mockDoc };
+    var result = window.__followRadarTest.readAccountSize(mockPopup);
+    assert(result.followers === 1234, 'followers count, got ' + result.followers);
+    assert(result.following === 567, 'following count, got ' + result.following);
+  });
+</script>
+
+<script>
+  // ─── Modal scraping tests ──────────────────────────────────────
+
+  test('readUserRow extracts user info from mock DOM row', function () {
+    var container = document.createElement('div');
+    container.setAttribute('role', 'button');
+    container.innerHTML =
+      '<div><a href="/janedoe/">janedoe</a></div>' +
+      '<span>Jane Doe</span>' +
+      '<span>Followed by mike and 3 others</span>' +
+      '<span>Follow</span>';
+    var link = container.querySelector('a');
+    var result = window.__followRadarTest.readUserRow(link, 'janedoe');
+    assert(result.username === 'janedoe', 'username');
+    assert(result.full_name === 'Jane Doe', 'full name');
+    assert(result.mutual_count === 4, 'mutual count: 1 named + 3 others');
+  });
+
+  test('readUserRow handles verified badge', function () {
+    var container = document.createElement('div');
+    container.setAttribute('role', 'button');
+    container.innerHTML =
+      '<div><a href="/celeb/">celeb</a></div>' +
+      '<span>Celebrity Name</span>' +
+      '<svg aria-label="Verified"></svg>';
+    var link = container.querySelector('a');
+    var result = window.__followRadarTest.readUserRow(link, 'celeb');
+    assert(result.is_verified === true, 'should detect verified');
+  });
+
+  test('readUserRow skips button text for full name', function () {
+    var container = document.createElement('div');
+    container.setAttribute('role', 'button');
+    container.innerHTML =
+      '<div><a href="/someone/">someone</a></div>' +
+      '<span>Following</span>';
+    var link = container.querySelector('a');
+    var result = window.__followRadarTest.readUserRow(link, 'someone');
+    assert(result.full_name === '', 'should not use Following as full name');
+  });
+</script>
+
+<script>
+  // ─── Post grid scraping tests ──────────────────────────────────
+
+  test('readPostTile extracts post info from mock DOM', function () {
+    var container = document.createElement('article');
+    var link = document.createElement('a');
+    link.setAttribute('href', '/p/ABC123/');
+    link.innerHTML = '<div><span>42 likes</span><span>5 comments</span></div>';
+    container.appendChild(link);
+    document.body.appendChild(container);
+
+    var result = window.__followRadarTest.readPostTile(link, '/p/ABC123/');
+    assert(result.id === 'ABC123', 'post id');
+    assert(result.like_count === 42, 'like count');
+    assert(result.comment_count === 5, 'comment count');
+    assert(result.media_type === 1, 'photo type');
+    container.remove();
+  });
+
+  test('readPostTile detects reels', function () {
+    var link = document.createElement('a');
+    link.setAttribute('href', '/reel/XYZ789/');
+    var result = window.__followRadarTest.readPostTile(link, '/reel/XYZ789/');
+    assert(result.media_type === 2, 'reel should be video type');
+  });
+</script>
+
+<script>
+  // ─── React fiber fallback tests ────────────────────────────────
+
+  test('getFiberKey finds React fiber property', function () {
+    var el = document.createElement('div');
+    el['__reactFiber$abc123'] = { memoizedProps: {} };
+    var key = window.__followRadarTest.getFiberKey(el);
+    assert(key === '__reactFiber$abc123', 'should find fiber key');
+  });
+
+  test('getFiberKey returns null for non-React elements', function () {
+    var el = document.createElement('div');
+    var key = window.__followRadarTest.getFiberKey(el);
+    assert(key === null, 'should return null');
+  });
+
+  test('getReactFiberData finds data walking up fiber tree', function () {
+    var el = document.createElement('div');
+    var mockUsers = [{ username: 'test1' }, { username: 'test2' }];
+    el['__reactFiber$xyz'] = {
+      memoizedProps: {},
+      return: {
+        memoizedProps: { users: mockUsers },
+        return: null
+      },
+      child: null,
+      sibling: null
+    };
+    var result = window.__followRadarTest.getReactFiberData(el, 'users');
+    assert(result === mockUsers, 'should find users array walking up');
+    assert(result.length === 2, 'should have 2 users');
+  });
+
+  test('getReactFiberData returns null when key not found', function () {
+    var el = document.createElement('div');
+    el['__reactFiber$xyz'] = {
+      memoizedProps: { other: 'data' },
+      return: null,
+      child: null,
+      sibling: null
+    };
+    var result = window.__followRadarTest.getReactFiberData(el, 'users');
+    assert(result === null, 'should return null when key not found');
+  });
 </script>
 </body>
 </html>

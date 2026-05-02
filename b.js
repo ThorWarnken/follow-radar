@@ -19,10 +19,6 @@
 
   const MAX_ACCOUNT_SIZE = 10000;
   const SCAN_CAP = 5000;
-  const THROTTLE_MS = 3000;
-  const THROTTLE_JITTER_MS = 2000;
-  const PAGE_SIZE = 20;
-  const IG_APP_ID = '936619743392459';
   const RESUME_MAX_AGE_MS = 24 * 60 * 60 * 1000;
   const COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000; // 3 days between scans
   const COOLDOWN_KEY = 'flock:last-scan';
@@ -154,249 +150,359 @@
     s.setItem(COOLDOWN_KEY, JSON.stringify({ userId: userId, timestamp: Date.now() }));
   }
 
-  // ─── Warm-up requests ────────────────────────────────────────────
-  // Make a few normal-looking requests before scanning to give the session
-  // realistic browsing activity (profile load + feed fetch).
+  // ─── DOM utilities ───────────────────────────────────────────────
 
-  async function warmUp(userId) {
-    try {
-      await doFetch('https://i.instagram.com/api/v1/users/' + userId + '/info/', {
-        credentials: 'include',
-        headers: igHeaders,
-      });
-    } catch (e) { /* non-critical */ }
-    await throttle();
-    try {
-      await doFetch('https://i.instagram.com/api/v1/feed/timeline/?count=12', {
-        credentials: 'include',
-        headers: igHeaders,
-      });
-    } catch (e) { /* non-critical */ }
-    await throttle();
+  const SCROLL_PAUSE_MS = 2000;
+  const SCROLL_SETTLE_MS = 500;
+
+  function sleep(ms) {
+    return new Promise(function (r) { setTimeout(r, ms); });
   }
 
-  // ─── Fetch + classification ──────────────────────────────────────
-
-  // doFetch is replaceable in tests via window.__followRadarTest.setFetch().
-  let doFetch = (typeof fetch !== 'undefined') ? fetch.bind(typeof window !== 'undefined' ? window : undefined) : null;
-
-  async function throttle() {
-    const ms = THROTTLE_MS + Math.random() * THROTTLE_JITTER_MS;
-    await new Promise(r => setTimeout(r, ms));
-  }
-
-  // Classify a parsed JSON response into either {users, nextCursor} or
-  // a thrown RateLimitError. Pure function — easy to unit-test.
-  function classifyResponse(status, body) {
-    if (status === 429) throw new RateLimitError('http 429');
-    if (status === 401) throw new RateLimitError('http 401');
-    if (status >= 500) throw new Error('instagram server error: http ' + status);
-    if (status !== 200) throw new Error('unexpected http status: ' + status);
-    if (!body || typeof body !== 'object') throw new Error('non-object response body');
-    // IG sometimes 200s with a "feedback_required" body when throttled.
-    if (body.message === 'feedback_required' || body.spam === true) {
-      throw new RateLimitError('feedback_required');
-    }
-    if (body.require_login || body.message === 'login_required') {
-      throw new RateLimitError('login_required');
-    }
-    if (!Array.isArray(body.users)) throw new Error('response missing users array');
-    return { users: body.users, nextCursor: body.next_max_id || null };
-  }
-
-  // Standard headers that match Instagram's own web client requests
-  var igHeaders = {
-    'X-IG-App-ID': IG_APP_ID,
-    'X-IG-WWW-Claim': '0',
-    'X-Requested-With': 'XMLHttpRequest',
-    'Accept': '*/*',
-  };
-
-  // fetchPage does the actual HTTP call, with throttling and retry.
-  // Returns {users, nextCursor} or throws.
-  async function fetchPage(url, opts) {
-    opts = opts || {};
-    var maxRetries = 2;
-    for (var attempt = 0; attempt <= maxRetries; attempt++) {
-      if (!opts.skipThrottle || attempt > 0) await throttle();
-      // Increasing backoff on retries: 3s, 6s
-      if (attempt > 0) await new Promise(function(r) { setTimeout(r, 3000 * attempt); });
-      var resp;
-      try {
-        resp = await doFetch(url, {
-          credentials: 'include',
-          headers: igHeaders,
-        });
-      } catch (e) {
-        if (attempt < maxRetries) continue;
-        throw new Error('network error: ' + e.message);
-      }
-      // Rate limit responses — no point retrying these
-      if (resp.status === 429 || resp.status === 401) {
-        throw new RateLimitError('http ' + resp.status);
-      }
-      var body;
-      try {
-        body = await resp.json();
-      } catch (e) {
-        if (attempt < maxRetries) {
-          console.warn('[flock] non-json response (attempt ' + (attempt + 1) + '), retrying...');
-          continue;
-        }
-        // After retries exhausted, treat as rate limit so progress is saved
-        throw new RateLimitError('non-json response after ' + (maxRetries + 1) + ' attempts');
-      }
-      return classifyResponse(resp.status, body);
-    }
-  }
-
-  // ─── Pagination ──────────────────────────────────────────────────
-
-  // fetchPageImpl is replaceable in tests so we don't need real fetch.
-  let fetchPageImpl = fetchPage;
-
-  function buildFollowersUrl(userId, cursor) {
-    let u = 'https://i.instagram.com/api/v1/friendships/' + userId + '/followers/?count=' + PAGE_SIZE;
-    if (cursor) u += '&max_id=' + encodeURIComponent(cursor);
-    return u;
-  }
-
-  function buildFollowingUrl(userId, cursor) {
-    let u = 'https://i.instagram.com/api/v1/friendships/' + userId + '/following/?count=' + PAGE_SIZE;
-    if (cursor) u += '&max_id=' + encodeURIComponent(cursor);
-    return u;
-  }
-
-  // Reduce IG's account shape to ours.
-  function trimUser(u) {
-    const obj = {
-      username: u.username,
-      full_name: u.full_name || '',
-      is_private: !!u.is_private,
-    };
-    if (u.is_verified) obj.is_verified = true;
-    if (typeof u.follower_count === 'number') obj.follower_count = u.follower_count;
-    return obj;
-  }
-
-  // Generic paginator. urlBuilder(cursor) -> url.
-  // initial: array of already-collected users (for resume).
-  // initialCursor: cursor to start from (for resume).
-  // onProgress(count): called after each page.
-  // If fetchPageImpl throws RateLimitError, we re-throw after attaching
-  // {cursor, partial} so main() can save resume state with exact progress.
-  async function paginate(urlBuilder, initial, initialCursor, onProgress) {
-    const all = (initial && initial.length) ? initial.slice() : [];
-    let cursor = initialCursor || null;
-    while (true) {
-      const url = urlBuilder(cursor);
-      let page;
-      try {
-        page = await fetchPageImpl(url);
-      } catch (e) {
-        if (e instanceof RateLimitError) {
-          e.cursor = cursor;    // cursor that was used for the failed request — resume uses this
-          e.partial = all;      // everything accumulated before the failure
-        }
-        throw e;
-      }
-      for (const u of page.users) all.push(trimUser(u));
-      if (onProgress) onProgress(all.length, cursor);
-      if (all.length >= SCAN_CAP) break;
-      if (!page.nextCursor) break;
-      cursor = page.nextCursor;
-    }
-    return all;
-  }
-
-  async function scrapeFollowers(userId, initial, initialCursor, onProgress) {
-    return paginate(c => buildFollowersUrl(userId, c), initial, initialCursor, onProgress);
-  }
-
-  async function scrapeFollowing(userId, initial, initialCursor, onProgress) {
-    return paginate(c => buildFollowingUrl(userId, c), initial, initialCursor, onProgress);
-  }
-
-  // ─── Current user resolution + size check ────────────────────────
-
-  async function getCurrentUser() {
-    // Try _sharedData (works on legacy IG web pages).
-    try {
-      const sd = window._sharedData && window._sharedData.config && window._sharedData.config.viewer;
-      if (sd && sd.id && sd.username) {
-        return { userId: String(sd.id), username: sd.username };
-      }
-    } catch (e) { /* fall through */ }
-
-    // Try ds_user_id cookie (set by Instagram on login, most reliable).
-    let cookieUserId = null;
-    try {
-      const m = document.cookie.match(/(?:^|;\s*)ds_user_id=(\d+)/);
-      if (m) cookieUserId = m[1];
-    } catch (e) { /* fall through */ }
-
-    // Try /api/v1/accounts/current_user/ endpoint.
-    if (cookieUserId) {
-      try {
-        const r = await doFetch('https://i.instagram.com/api/v1/accounts/current_user/?edit=true', {
-          credentials: 'include',
-          headers: igHeaders,
-        });
-        if (r.ok) {
-          const j = await r.json();
-          if (j && j.user && j.user.pk && j.user.username) {
-            return { userId: String(j.user.pk), username: j.user.username };
-          }
-        }
-      } catch (e) { /* fall through */ }
-    }
-
-    // Try the web accounts info endpoint.
-    try {
-      const r = await doFetch('https://www.instagram.com/api/v1/web/accounts/login/ajax/info/', {
-        credentials: 'include',
-        headers: igHeaders,
-      });
-      if (r.ok) {
-        const j = await r.json();
-        if (j && j.user_id && j.username) return { userId: String(j.user_id), username: j.username };
-      }
-    } catch (e) { /* fall through */ }
-
-    // Last resort: use cookie userId + fetch username from web_profile_info by
-    // reading the current page's profile if we're on one.
-    if (cookieUserId) {
-      try {
-        const r = await doFetch('https://i.instagram.com/api/v1/users/' + cookieUserId + '/info/', {
-          credentials: 'include',
-          headers: igHeaders,
-        });
-        if (r.ok) {
-          const j = await r.json();
-          if (j && j.user && j.user.username) {
-            return { userId: cookieUserId, username: j.user.username };
-          }
-        }
-      } catch (e) { /* fall through */ }
-    }
-
-    throw new Error("Could not determine logged-in user. Make sure you're logged into instagram.com.");
-  }
-
-  async function checkAccountSize(username) {
-    // /api/v1/users/web_profile_info/?username=...
-    const url = 'https://i.instagram.com/api/v1/users/web_profile_info/?username=' + encodeURIComponent(username);
-    const r = await doFetch(url, {
-      credentials: 'include',
-      headers: igHeaders,
+  function waitForEl(root, selector, timeout) {
+    return new Promise(function (resolve, reject) {
+      var deadline = Date.now() + (timeout || 10000);
+      (function poll() {
+        var el = root.querySelector(selector);
+        if (el) return resolve(el);
+        if (Date.now() > deadline) return reject(new Error('waitForEl timed out: ' + selector));
+        setTimeout(poll, 200);
+      })();
     });
-    if (!r.ok) throw new Error('Could not fetch profile info: http ' + r.status);
-    const j = await r.json();
-    const u = j && j.data && j.data.user;
-    if (!u) throw new Error('Unexpected profile info shape');
-    const followers = (u.edge_followed_by && u.edge_followed_by.count) || 0;
-    const following = (u.edge_follow && u.edge_follow.count) || 0;
-    return { followers, following };
+  }
+
+  function findByText(parent, text) {
+    var lower = text.toLowerCase();
+    var all = parent.querySelectorAll('a, span, div, button, h1, h2');
+    for (var i = 0; i < all.length; i++) {
+      if (all[i].textContent.toLowerCase().indexOf(lower) !== -1) return all[i];
+    }
+    return null;
+  }
+
+  var RESERVED_PATHS = /^\/(explore|reels|stories|p|direct|accounts|about|legal|developer|static|press|api|tags|locations|challenge)\b/;
+
+  function extractUsernameFromHref(href) {
+    var path = href.replace(/^https?:\/\/[^/]+/, '');
+    if (RESERVED_PATHS.test(path)) return null;
+    var m = path.match(/^\/([a-zA-Z0-9._]{1,30})\/?$/);
+    return m ? m[1] : null;
+  }
+
+  function parseMutualText(text) {
+    if (!text || text.indexOf('Followed by') === -1) return 0;
+    var othersMatch = text.match(/(\d+)\s*others?\s*$/i);
+    var othersCount = othersMatch ? parseInt(othersMatch[1], 10) : 0;
+    var afterFollowedBy = text.replace(/^.*?Followed by\s*/i, '');
+    var withoutOthers = afterFollowedBy.replace(/\s*and\s*\d+\s*others?\s*$/i, '').replace(/\s*,?\s*\d+\s*others?\s*$/i, '');
+    var names = withoutOthers.split(/\s*,\s*|\s+and\s+/).filter(function (s) { return s.trim().length > 0; });
+    return names.length + othersCount;
+  }
+
+  // ─── Popup management ───────────────────────────────────────────
+
+  var scanPopup = null;
+
+  function openScanPopup(username) {
+    var w = 420, h = 720;
+    var left = window.screen.availWidth - w - 40;
+    var top = 60;
+    var features = 'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top +
+                   ',resizable=yes,scrollbars=yes';
+    scanPopup = window.open(
+      'https://www.instagram.com/' + encodeURIComponent(username) + '/',
+      'flock-scan',
+      features
+    );
+    return scanPopup;
+  }
+
+  function closeScanPopup() {
+    if (scanPopup && !scanPopup.closed) scanPopup.close();
+    scanPopup = null;
+  }
+
+  async function waitForProfileRender(popup, timeout) {
+    var deadline = Date.now() + (timeout || 20000);
+    while (Date.now() < deadline) {
+      if (popup.closed) throw new Error('Popup was closed before profile loaded.');
+      try {
+        var doc = popup.document;
+        var links = doc.querySelectorAll('a[href*="/followers"]');
+        if (links.length > 0) return;
+      } catch (e) {
+        // Cross-origin or not-ready — keep polling
+      }
+      await sleep(500);
+    }
+    throw new Error('Profile did not load in time. Check your connection and try again.');
+  }
+
+  // Parse "1,234" or "12.5K" or "1.2M" to a number
+  function parseCountText(s) {
+    s = s.replace(/,/g, '').trim();
+    if (/[Kk]$/.test(s)) return Math.round(parseFloat(s) * 1000);
+    if (/[Mm]$/.test(s)) return Math.round(parseFloat(s) * 1000000);
+    return parseInt(s, 10) || 0;
+  }
+
+  function readAccountSize(popup) {
+    var doc = popup.document;
+    var followers = 0, following = 0;
+
+    var allLinks = doc.querySelectorAll('a[href]');
+    for (var i = 0; i < allLinks.length; i++) {
+      var href = allLinks[i].getAttribute('href') || '';
+      var text = allLinks[i].textContent.replace(/,/g, '').trim();
+      var numMatch = text.match(/([\d.]+[KkMm]?)/);
+      if (!numMatch) continue;
+      var num = parseCountText(numMatch[1]);
+      if (href.indexOf('/followers') !== -1 && href.indexOf('/following') === -1) {
+        followers = num;
+      } else if (href.indexOf('/following') !== -1) {
+        following = num;
+      }
+    }
+    return { followers: followers, following: following };
+  }
+
+  // ─── Modal scraping ─────────────────────────────────────────────
+
+  async function openListModal(popup, type) {
+    // type is 'followers' or 'following'
+    var doc = popup.document;
+    var links = doc.querySelectorAll('a[href]');
+    var target = null;
+    for (var i = 0; i < links.length; i++) {
+      var href = links[i].getAttribute('href') || '';
+      if (type === 'followers' && href.indexOf('/followers') !== -1 && href.indexOf('/following') === -1) {
+        target = links[i];
+        break;
+      }
+      if (type === 'following' && href.indexOf('/following') !== -1) {
+        target = links[i];
+        break;
+      }
+    }
+    if (!target) throw new Error('Could not find ' + type + ' link on profile page.');
+    target.click();
+
+    // Wait for modal (role="dialog") to appear
+    await waitForEl(doc, '[role="dialog"]', 8000);
+    // Small settle for content to render inside the modal
+    await sleep(1000);
+  }
+
+  // Find the scrollable container inside the modal
+  function findScrollableChild(modal) {
+    var candidates = modal.querySelectorAll('div');
+    for (var i = 0; i < candidates.length; i++) {
+      var style = window.getComputedStyle(candidates[i]);
+      if ((style.overflowY === 'auto' || style.overflowY === 'scroll') &&
+          candidates[i].scrollHeight > candidates[i].clientHeight) {
+        return candidates[i];
+      }
+    }
+    return modal;
+  }
+
+  function readUserRow(linkEl, username) {
+    var row = linkEl.closest('div[role="button"]') ||
+              linkEl.parentElement?.parentElement?.parentElement ||
+              linkEl.parentElement;
+
+    var fullName = '';
+    var isPrivate = false;
+    var isVerified = false;
+    var mutualCount = 0;
+
+    if (row) {
+      var textContent = row.textContent || '';
+
+      var spans = row.querySelectorAll('span');
+      for (var i = 0; i < spans.length; i++) {
+        var spanText = spans[i].textContent.trim();
+        if (spanText === username) continue;
+        if (spanText.indexOf('Followed by') !== -1) continue;
+        if (spanText === 'Follow' || spanText === 'Following' || spanText === 'Remove') continue;
+        if (spanText === 'Requested') continue;
+        if (spanText.length > 0 && spanText.length < 60 && !fullName) {
+          fullName = spanText;
+        }
+      }
+
+      mutualCount = parseMutualText(textContent);
+
+      var svg = row.querySelector('svg[aria-label="Verified"]') ||
+                row.querySelector('[title="Verified"]');
+      if (svg) isVerified = true;
+    }
+
+    return {
+      username: username,
+      full_name: fullName,
+      is_private: isPrivate,
+      is_verified: isVerified,
+      mutual_count: mutualCount,
+    };
+  }
+
+  async function scrapeModal(popup, cap, onProgress) {
+    var doc = popup.document;
+    var modal = doc.querySelector('[role="dialog"]');
+    if (!modal) throw new Error('No modal found.');
+
+    var users = [];
+    var seen = new Set();
+    var scrollable = findScrollableChild(modal);
+    var noNewContentCount = 0;
+
+    while (users.length < cap) {
+      var links = modal.querySelectorAll('a[href]');
+      var prevSize = seen.size;
+
+      for (var i = 0; i < links.length; i++) {
+        var username = extractUsernameFromHref(links[i].getAttribute('href') || '');
+        if (!username || seen.has(username)) continue;
+        seen.add(username);
+
+        var userInfo = readUserRow(links[i], username);
+        users.push(userInfo);
+
+        if (users.length >= cap) break;
+      }
+
+      if (onProgress) onProgress(users.length);
+
+      if (seen.size === prevSize) {
+        noNewContentCount++;
+        if (noNewContentCount >= 3) break;
+      } else {
+        noNewContentCount = 0;
+      }
+
+      if (scrollable) {
+        scrollable.scrollTop = scrollable.scrollHeight;
+      }
+      await sleep(SCROLL_PAUSE_MS);
+    }
+
+    // Close modal by pressing Escape
+    doc.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await sleep(500);
+
+    return users;
+  }
+
+  // ─── Post grid scraping ─────────────────────────────────────────
+
+  function readPostTile(linkEl, href) {
+    var container = linkEl.closest('article') || linkEl.parentElement;
+    var text = (container && container.textContent) || '';
+
+    var likeMatch = text.match(/([\d,]+)\s*likes?/i);
+    var commentMatch = text.match(/([\d,]+)\s*comments?/i);
+
+    var mediaType = 1; // default: photo
+    if (href.indexOf('/reel/') !== -1) mediaType = 2; // video/reel
+
+    return {
+      id: href.replace(/.*\/(p|reel)\/([^/]+).*/, '$2'),
+      taken_at: 0,
+      like_count: likeMatch ? parseInt(likeMatch[1].replace(/,/g, ''), 10) : 0,
+      comment_count: commentMatch ? parseInt(commentMatch[1].replace(/,/g, ''), 10) : 0,
+      media_type: mediaType,
+      caption_length: 0,
+      carousel_count: 0,
+      video_duration: 0,
+    };
+  }
+
+  async function scrapePostGrid(popup, maxPosts) {
+    var doc = popup.document;
+    var posts = [];
+    var seen = new Set();
+    var limit = maxPosts || 50;
+    var noNewCount = 0;
+
+    while (posts.length < limit) {
+      var postLinks = doc.querySelectorAll('a[href*="/p/"], a[href*="/reel/"]');
+
+      var prevSize = seen.size;
+      for (var i = 0; i < postLinks.length; i++) {
+        var href = postLinks[i].getAttribute('href') || '';
+        if (seen.has(href)) continue;
+        seen.add(href);
+
+        var post = readPostTile(postLinks[i], href);
+        if (post) posts.push(post);
+        if (posts.length >= limit) break;
+      }
+
+      if (seen.size === prevSize) {
+        noNewCount++;
+        if (noNewCount >= 3) break;
+      } else {
+        noNewCount = 0;
+      }
+
+      popup.scrollTo(0, popup.document.documentElement.scrollHeight);
+      await sleep(SCROLL_PAUSE_MS);
+    }
+
+    return posts;
+  }
+
+  // ─── React fiber fallback ───────────────────────────────────────
+
+  function getFiberKey(element) {
+    var keys = Object.keys(element);
+    for (var i = 0; i < keys.length; i++) {
+      if (keys[i].indexOf('__reactFiber$') === 0 || keys[i].indexOf('__reactInternalInstance$') === 0) {
+        return keys[i];
+      }
+    }
+    return null;
+  }
+
+  function walkFiber(fiber, predicate, maxDepth) {
+    if (!fiber || maxDepth <= 0) return null;
+    if (predicate(fiber)) return fiber;
+    var result = walkFiber(fiber.child, predicate, maxDepth - 1);
+    if (result) return result;
+    return walkFiber(fiber.sibling, predicate, maxDepth - 1);
+  }
+
+  function getReactFiberData(element, dataKey) {
+    var fiberKey = getFiberKey(element);
+    if (!fiberKey) return null;
+    var fiber = element[fiberKey];
+
+    // Walk up to find a fiber with memoizedProps containing user data
+    var node = fiber;
+    for (var i = 0; i < 20 && node; i++) {
+      var props = node.memoizedProps || {};
+      if (props[dataKey] && Array.isArray(props[dataKey])) {
+        return props[dataKey];
+      }
+      props = node.pendingProps || {};
+      if (props[dataKey] && Array.isArray(props[dataKey])) {
+        return props[dataKey];
+      }
+      node = node.return;
+    }
+
+    // Walk down as well
+    var found = walkFiber(fiber, function (f) {
+      var p = f.memoizedProps || f.pendingProps || {};
+      return p[dataKey] && Array.isArray(p[dataKey]);
+    }, 15);
+
+    if (found) {
+      var p = found.memoizedProps || found.pendingProps || {};
+      return p[dataKey];
+    }
+    return null;
   }
 
   // ─── Progress overlay ────────────────────────────────────────────
@@ -404,8 +510,10 @@
   let overlayEl = null;
   let overlayBarEl = null;
   let overlayTextEl = null;
+  var overlayDoc = null;
 
-  function createOverlay() {
+  function createOverlay(targetDoc) {
+    overlayDoc = targetDoc || document;
     if (overlayEl) return;
 
     // Detect business mode from redirect URL
@@ -418,17 +526,17 @@
     const bgTint = isBiz ? 'rgba(20,16,8,0.92)' : 'rgba(12,14,36,0.92)';
 
     // Inject animations
-    const style = document.createElement('style');
+    const style = overlayDoc.createElement('style');
     style.textContent = [
       '@keyframes fr-in{from{opacity:0;transform:translateY(12px) scale(0.95)}to{opacity:1;transform:translateY(0) scale(1)}}',
       '@keyframes fr-spin{to{transform:rotate(360deg)}}',
       '@keyframes fr-dots{0%,80%,100%{opacity:.25}40%{opacity:1}}',
       '@keyframes fr-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}',
     ].join('');
-    document.head.appendChild(style);
+    overlayDoc.head.appendChild(style);
 
     // Outer container
-    overlayEl = document.createElement('div');
+    overlayEl = overlayDoc.createElement('div');
     overlayEl.setAttribute('style', [
       'position:fixed','bottom:20px','right:20px','z-index:2147483647',
       'width:260px','border-radius:14px',
@@ -442,21 +550,21 @@
     ].join(';'));
 
     // Content area
-    const content = document.createElement('div');
+    const content = overlayDoc.createElement('div');
     content.setAttribute('style', 'padding:14px 16px 12px');
 
     // Top row: spinner + title + live badge
-    const topRow = document.createElement('div');
+    const topRow = overlayDoc.createElement('div');
     topRow.setAttribute('style', 'display:flex;align-items:center;gap:10px;margin-bottom:10px');
 
     // Logo (business) or spinning ring (personal)
     var spinner;
     if (isBiz) {
-      spinner = document.createElement('img');
+      spinner = overlayDoc.createElement('img');
       spinner.src = GOLD_LOGO_URI;
       spinner.setAttribute('style', 'width:28px;height:28px;border-radius:6px;flex-shrink:0');
     } else {
-      spinner = document.createElement('div');
+      spinner = overlayDoc.createElement('div');
       spinner.setAttribute('style', [
         'width:28px','height:28px','border-radius:50%','flex-shrink:0',
         'border:2.5px solid rgba(255,255,255,0.08)',
@@ -466,19 +574,19 @@
     }
 
     // Title column
-    const titleCol = document.createElement('div');
+    const titleCol = overlayDoc.createElement('div');
     titleCol.setAttribute('style', 'flex:1;min-width:0');
-    const title = document.createElement('div');
+    const title = overlayDoc.createElement('div');
     title.setAttribute('style', 'font-weight:700;font-size:13px;letter-spacing:0.02em;color:#fff');
     title.textContent = brandName;
-    const subtitle = document.createElement('div');
+    const subtitle = overlayDoc.createElement('div');
     subtitle.setAttribute('style', 'font-size:10px;color:rgba(255,255,255,0.4);margin-top:1px;text-transform:uppercase;letter-spacing:0.06em');
     subtitle.textContent = 'Scanning';
     titleCol.appendChild(title);
     titleCol.appendChild(subtitle);
 
     // Live badge with animated dots
-    const badge = document.createElement('div');
+    const badge = overlayDoc.createElement('div');
     badge.setAttribute('style', [
       'display:flex','align-items:center','gap:3px',
       'padding:3px 8px','border-radius:20px',
@@ -486,7 +594,7 @@
       'flex-shrink:0',
     ].join(';'));
     for (let i = 0; i < 3; i++) {
-      const d = document.createElement('div');
+      const d = overlayDoc.createElement('div');
       d.setAttribute('style', [
         'width:4px','height:4px','border-radius:50%',
         'background:' + accentColor,
@@ -501,15 +609,15 @@
     content.appendChild(topRow);
 
     // Status text
-    overlayTextEl = document.createElement('div');
+    overlayTextEl = overlayDoc.createElement('div');
     overlayTextEl.textContent = 'Starting\u2026';
     overlayTextEl.setAttribute('style', 'font-size:12px;color:rgba(255,255,255,0.65);font-variant-numeric:tabular-nums;margin-bottom:12px');
     content.appendChild(overlayTextEl);
 
     // Progress bar track
-    const track = document.createElement('div');
+    const track = overlayDoc.createElement('div');
     track.setAttribute('style', 'height:3px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden');
-    overlayBarEl = document.createElement('div');
+    overlayBarEl = overlayDoc.createElement('div');
     overlayBarEl.setAttribute('style', [
       'height:100%','width:0%','border-radius:2px',
       'background:linear-gradient(90deg,' + accentColor + ',' + accentColor2 + ',' + accentColor3 + ')',
@@ -523,7 +631,7 @@
     overlayEl.appendChild(content);
 
     // Bottom accent line
-    const accent = document.createElement('div');
+    const accent = overlayDoc.createElement('div');
     accent.setAttribute('style', [
       'height:2px',
       'background:linear-gradient(90deg,' + accentColor + ',' + accentColor2 + ',' + accentColor3 + ',' + accentColor + ')',
@@ -532,7 +640,7 @@
     ].join(';'));
     overlayEl.appendChild(accent);
 
-    document.body.appendChild(overlayEl);
+    overlayDoc.body.appendChild(overlayEl);
   }
 
   function updateOverlay(text, fraction) {
@@ -549,67 +657,7 @@
     overlayEl = null;
     overlayBarEl = null;
     overlayTextEl = null;
-  }
-
-  // ─── Post scraping (for growth analytics) ────────────────────────
-
-  function trimPost(item) {
-    return {
-      id: item.id || item.pk || '',
-      taken_at: item.taken_at || 0,
-      like_count: item.like_count || 0,
-      comment_count: item.comment_count || 0,
-      media_type: item.media_type || 1, // 1=photo, 2=video, 8=carousel
-      caption_length: (item.caption && item.caption.text) ? item.caption.text.length : 0,
-      carousel_count: (item.carousel_media_count) || (item.carousel_media ? item.carousel_media.length : 0) || 0,
-      video_duration: item.video_duration || 0,
-    };
-  }
-
-  async function scrapePosts(userId, maxPosts) {
-    const posts = [];
-    let maxId = null;
-    const limit = maxPosts || 50;
-
-    for (let page = 0; page < 5; page++) { // max 5 pages to be safe
-      await throttle();
-      let url = 'https://i.instagram.com/api/v1/feed/user/' + userId + '/?count=33';
-      if (maxId) url += '&max_id=' + encodeURIComponent(maxId);
-
-      let r, body;
-      try {
-        r = await doFetch(url, {
-          credentials: 'include',
-          headers: igHeaders,
-        });
-      } catch (e) {
-        console.warn('[flock] post fetch network error:', e);
-        break;
-      }
-
-      if (!r.ok) {
-        console.warn('[flock] post fetch http ' + r.status);
-        break;
-      }
-
-      try {
-        body = await r.json();
-      } catch (e) {
-        break;
-      }
-
-      if (!body || !Array.isArray(body.items)) break;
-
-      for (const item of body.items) {
-        posts.push(trimPost(item));
-        if (posts.length >= limit) break;
-      }
-
-      if (posts.length >= limit || !body.more_available || !body.next_max_id) break;
-      maxId = body.next_max_id;
-    }
-
-    return posts;
+    overlayDoc = null;
   }
 
   // ─── Ship results ────────────────────────────────────────────────
@@ -617,6 +665,41 @@
   async function shipResults(payload) {
     const encoded = await encodePayload(payload);
     window.location = FOLLOW_RADAR_URL + '/#data=' + encoded;
+  }
+
+
+  // ─── Current user detection ─────────────────────────────────────
+
+  function getCurrentUserDOM() {
+    try {
+      var sd = window._sharedData && window._sharedData.config && window._sharedData.config.viewer;
+      if (sd && sd.id && sd.username) {
+        return { userId: String(sd.id), username: sd.username };
+      }
+    } catch (e) { /* fall through */ }
+
+    var cookieUserId = null;
+    try {
+      var m = document.cookie.match(/(?:^|;\s*)ds_user_id=(\d+)/);
+      if (m) cookieUserId = m[1];
+    } catch (e) { /* fall through */ }
+
+    if (cookieUserId) {
+      var navLinks = document.querySelectorAll('a[href]');
+      for (var i = 0; i < navLinks.length; i++) {
+        var href = navLinks[i].getAttribute('href') || '';
+        var username = extractUsernameFromHref(href);
+        if (username && navLinks[i].querySelector('img[alt]')) {
+          return { userId: cookieUserId, username: username };
+        }
+      }
+    }
+
+    if (cookieUserId) {
+      return { userId: cookieUserId, username: null };
+    }
+
+    throw new Error("Could not determine logged-in user. Make sure you're logged into instagram.com.");
   }
 
   // ─── Main entry ──────────────────────────────────────────────────
@@ -627,29 +710,36 @@
       return;
     }
 
-    let user;
+    var user;
     try {
-      user = await getCurrentUser();
+      user = getCurrentUserDOM();
     } catch (e) {
       alert(e.message);
       return;
     }
 
-    // Check resume state.
-    const existing = loadResumeState(user.userId);
+    if (!user.username) {
+      var pathMatch = location.pathname.match(/^\/([a-zA-Z0-9._]{1,30})\/?$/);
+      if (pathMatch) {
+        user.username = pathMatch[1];
+      } else {
+        alert("Could not determine your username. Navigate to your profile and try again.");
+        return;
+      }
+    }
+
+    // Check resume state
+    var existing = loadResumeState(user.userId);
     if (existing && existing.mismatch) {
       alert("You have a scan in progress on a different account. Switch back to that account, or clear it from DevTools (localStorage key '" + RESUME_KEY + "').");
       return;
     }
 
-    const resume = existing;
-    const initialFollowers = (resume && resume.partialFollowers) || null;
-    const initialFollowing = (resume && resume.partialFollowing) || null;
-    let initialCursor = (resume && resume.cursor) || null;
-    let phase = (resume && resume.phase) || 'followers';
+    var resume = existing;
+    var phase = (resume && resume.phase) || 'followers';
 
-    // Cooldown check — applies to fresh scans AND resumes.
-    const cooldownLeft = checkCooldown(user.userId);
+    // Cooldown check
+    var cooldownLeft = checkCooldown(user.userId);
     if (cooldownLeft) {
       alert(
         "You scanned recently. To keep your account safe, Flock limits scans to once every 3 days.\n\n" +
@@ -658,116 +748,125 @@
       return;
     }
 
-    // Size check (only on fresh runs, not on resume).
+    // Open popup to user's profile
+    var popup = openScanPopup(user.username);
+    if (!popup || popup.closed) {
+      alert(
+        "Flock needs to open a small window to scan your followers.\n\n" +
+        "Please allow popups for instagram.com and try again."
+      );
+      return;
+    }
+
+    try {
+      await waitForProfileRender(popup, 20000);
+    } catch (e) {
+      closeScanPopup();
+      alert(e.message);
+      return;
+    }
+
+    // Read account size from profile DOM
+    var sizes = readAccountSize(popup);
+    if (sizes.followers > MAX_ACCOUNT_SIZE || sizes.following > MAX_ACCOUNT_SIZE) {
+      closeScanPopup();
+      alert(
+        "Flock is built for accounts under " + MAX_ACCOUNT_SIZE.toLocaleString() + " followers/following.\n\n" +
+        "Yours has " + sizes.followers.toLocaleString() + " followers and " + sizes.following.toLocaleString() + " following."
+      );
+      return;
+    }
+
+    // Estimate time
+    var totalUsers = Math.min(sizes.followers, SCAN_CAP) + Math.min(sizes.following, SCAN_CAP);
+    var estMinutes = Math.ceil(totalUsers / 20 * SCROLL_PAUSE_MS / 60000) + 1;
+
+    // Confirmation dialog
     if (!resume) {
-      try {
-        const sizes = await checkAccountSize(user.username);
-        if (sizes.followers > MAX_ACCOUNT_SIZE || sizes.following > MAX_ACCOUNT_SIZE) {
-          alert(
-            "Flock is built for accounts under " + MAX_ACCOUNT_SIZE.toLocaleString() + " followers/following.\n\n" +
-            "Yours has " + sizes.followers.toLocaleString() + " followers and " + sizes.following.toLocaleString() + " following.\n\n" +
-            "If you really need this for a bigger account, the code is open source — fork it and remove the cap."
-          );
-          return;
-        }
-        // Estimate scan time for the overlay
-        var totalPages = Math.ceil(Math.min(sizes.followers, SCAN_CAP) / PAGE_SIZE) +
-                         Math.ceil(Math.min(sizes.following, SCAN_CAP) / PAGE_SIZE);
-        var estMinutes = Math.ceil(totalPages * (THROTTLE_MS + THROTTLE_JITTER_MS / 2) / 60000);
-      } catch (e) {
-        alert("Could not check account size: " + e.message);
+      var ok = confirm(
+        'This scan takes about ' + estMinutes + ' minutes. ' +
+        'Flock opens a small window and scrolls through your follower list \u2014 nothing is shared with us or any server.\n\n' +
+        'Keep the scan window open while it runs. You can use other windows and apps in the meantime.\n\n' +
+        'Ready to scan?'
+      );
+      if (!ok) {
+        closeScanPopup();
         return;
       }
     }
 
-    // Confirmation dialog on fresh scans.
-    if (!resume) {
-      var timeMsg = estMinutes ? 'This scan takes about ' + estMinutes + ' minutes. ' : '';
-      var ok = confirm(
-        timeMsg + 'Flock scans your follower list directly in your browser — nothing is shared with us or any server.\n\n' +
-        'We use careful pacing to keep everything smooth, but like any third-party tool, there\'s a small chance Instagram may temporarily limit some activity on your account.\n\n' +
-        'Ready to scan?'
-      );
-      if (!ok) return;
-    }
+    // Create overlay in popup window
+    try {
+      createOverlay(popup.document);
+    } catch (e) { /* continue without overlay */ }
 
-    createOverlay();
-
-    // Warm up the session with normal-looking requests before scanning.
-    if (!resume) {
-      updateOverlay('Loading your profile\u2026', 0);
-      await warmUp(user.userId);
-    }
-
-    let followers = initialFollowers || [];
-    let following = initialFollowing || [];
+    var followers = (resume && resume.partialFollowers) || [];
+    var following = (resume && resume.partialFollowing) || [];
 
     try {
+      // Phase 1: Scrape followers
       if (phase === 'followers') {
-        var timeNote = estMinutes ? ' (~' + estMinutes + ' min total)' : '';
-        updateOverlay('Scanning followers\u2026 ' + followers.length + timeNote, 0);
-        followers = await scrapeFollowers(user.userId, followers, initialCursor, (n) => {
-          updateOverlay('Scanning followers\u2026 ' + n + timeNote, 0.1 + Math.min(0.4, n / SCAN_CAP));
+        updateOverlay('Scanning followers\u2026 (~' + estMinutes + ' min)', 0);
+        await openListModal(popup, 'followers');
+        followers = await scrapeModal(popup, SCAN_CAP, function (n) {
+          updateOverlay('Scanning followers\u2026 ' + n, 0.05 + Math.min(0.4, n / SCAN_CAP));
         });
         phase = 'following';
-        initialCursor = null;
       }
-      updateOverlay('Scanning following\u2026 ' + following.length, 0.5);
-      following = await scrapeFollowing(user.userId, following, phase === 'following' ? initialCursor : null, (n) => {
-        updateOverlay('Scanning following\u2026 ' + n, 0.5 + Math.min(0.5, n / SCAN_CAP));
+
+      // Phase 2: Scrape following
+      updateOverlay('Scanning following\u2026', 0.5);
+      await openListModal(popup, 'following');
+      following = await scrapeModal(popup, SCAN_CAP, function (n) {
+        updateOverlay('Scanning following\u2026 ' + n, 0.5 + Math.min(0.35, n / SCAN_CAP));
       });
+
+      // Phase 3: Scrape posts
+      updateOverlay('Analyzing your posts\u2026', 0.9);
+      var posts = [];
+      try {
+        posts = await scrapePostGrid(popup, 50);
+        updateOverlay('Analyzing your posts\u2026 ' + posts.length + ' found', 0.98);
+      } catch (e) {
+        console.warn('[flock] post scrape failed:', e);
+      }
+
     } catch (e) {
       destroyOverlay();
-      if (e instanceof RateLimitError) {
-        // paginate() attached .cursor and .partial to the error at the point of failure.
-        // The in-flight phase's partial list lives on the error; the completed-so-far list
-        // (for the OTHER phase) is whatever `followers` or `following` holds locally.
-        let partialFollowers = followers;
-        let partialFollowing = following;
-        if (phase === 'followers') {
-          partialFollowers = Array.isArray(e.partial) ? e.partial : followers;
-        } else {
-          partialFollowing = Array.isArray(e.partial) ? e.partial : following;
-        }
+      closeScanPopup();
+
+      if (followers.length > 0 || following.length > 0) {
         saveResumeState({
           userId: user.userId,
           username: user.username,
           phase: phase,
-          cursor: (typeof e.cursor !== 'undefined') ? e.cursor : null,
-          partialFollowers: partialFollowers,
-          partialFollowing: partialFollowing,
+          cursor: null,
+          partialFollowers: followers,
+          partialFollowing: following,
         });
-        const payload = {
+        var payload = {
           username: user.username,
           userId: user.userId,
           scrapedAt: new Date().toISOString(),
-          followers: partialFollowers,
-          following: partialFollowing,
+          followers: followers,
+          following: following,
           partial: true,
           phase: phase,
         };
         try { await shipResults(payload); } catch (err) { alert("Could not redirect: " + err.message); }
         return;
       }
+
       alert("Something went wrong: " + (e.message || e) + ". Try again in a few minutes.");
       return;
     }
 
-    // Phase 3: scrape recent posts for growth analytics
-    let posts = [];
-    try {
-      updateOverlay('Analyzing your posts\u2026', 0.92);
-      posts = await scrapePosts(user.userId, 50);
-      updateOverlay('Analyzing your posts\u2026 ' + posts.length + ' found', 0.98);
-    } catch (e) {
-      console.warn('[flock] post scrape failed:', e);
-    }
-
     destroyOverlay();
+    closeScanPopup();
     clearResumeState();
     saveCooldown(user.userId);
 
-    const payload = {
+    var payload = {
       username: user.username,
       userId: user.userId,
       scrapedAt: new Date().toISOString(),
@@ -786,9 +885,8 @@
   if (typeof window !== 'undefined' && window.__followRadarTest) {
     window.__followRadarTest.RateLimitError = RateLimitError;
     window.__followRadarTest.constants = {
-      MAX_ACCOUNT_SIZE, SCAN_CAP, THROTTLE_MS, THROTTLE_JITTER_MS, PAGE_SIZE,
-      IG_APP_ID, RESUME_MAX_AGE_MS, COOLDOWN_MS, COOLDOWN_KEY,
-      FOLLOW_RADAR_URL, RESUME_KEY
+      MAX_ACCOUNT_SIZE, SCAN_CAP, SCROLL_PAUSE_MS, SCROLL_SETTLE_MS,
+      COOLDOWN_MS, COOLDOWN_KEY, FOLLOW_RADAR_URL, RESUME_KEY
     };
     window.__followRadarTest.encodePayload = encodePayload;
     window.__followRadarTest.decodePayload = decodePayload;
@@ -797,19 +895,28 @@
     window.__followRadarTest.clearResumeState = clearResumeState;
     window.__followRadarTest.checkCooldown = checkCooldown;
     window.__followRadarTest.saveCooldown = saveCooldown;
-    window.__followRadarTest.warmUp = warmUp;
-    window.__followRadarTest.classifyResponse = classifyResponse;
-    window.__followRadarTest.fetchPage = fetchPage;
-    window.__followRadarTest.setFetch = function (fn) { doFetch = fn; };
-    window.__followRadarTest.buildFollowersUrl = buildFollowersUrl;
-    window.__followRadarTest.buildFollowingUrl = buildFollowingUrl;
-    window.__followRadarTest.trimUser = trimUser;
-    window.__followRadarTest.scrapeFollowers = scrapeFollowers;
-    window.__followRadarTest.scrapeFollowing = scrapeFollowing;
-    window.__followRadarTest.setFetchPageImpl = function (fn) { fetchPageImpl = fn; };
+    window.__followRadarTest.sleep = sleep;
+    window.__followRadarTest.waitForEl = waitForEl;
+    window.__followRadarTest.findByText = findByText;
+    window.__followRadarTest.extractUsernameFromHref = extractUsernameFromHref;
+    window.__followRadarTest.parseMutualText = parseMutualText;
+    window.__followRadarTest.parseCountText = parseCountText;
+    window.__followRadarTest.openScanPopup = openScanPopup;
+    window.__followRadarTest.closeScanPopup = closeScanPopup;
+    window.__followRadarTest.readAccountSize = readAccountSize;
+    window.__followRadarTest.openListModal = openListModal;
+    window.__followRadarTest.scrapeModal = scrapeModal;
+    window.__followRadarTest.findScrollableChild = findScrollableChild;
+    window.__followRadarTest.readUserRow = readUserRow;
+    window.__followRadarTest.readPostTile = readPostTile;
+    window.__followRadarTest.scrapePostGrid = scrapePostGrid;
+    window.__followRadarTest.getFiberKey = getFiberKey;
+    window.__followRadarTest.walkFiber = walkFiber;
+    window.__followRadarTest.getReactFiberData = getReactFiberData;
+    window.__followRadarTest.getCurrentUserDOM = getCurrentUserDOM;
     window.__followRadarTest.shipResults = shipResults;
     window.__followRadarTest.main = main;
-    return; // skip main() in test mode
+    return;
   }
 
   // Production entry point.
