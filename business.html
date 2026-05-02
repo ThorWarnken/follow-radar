@@ -2163,6 +2163,84 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
     document.querySelector('.pricing').style.display = 'none';
   }
 
+  function aggregateScanData(scan) {
+    var followers = scan.followers || [];
+    var following = scan.following || [];
+    var posts = scan.posts || [];
+
+    var followerSet = new Set(followers.map(function(u) { return u.username.toLowerCase(); }));
+    var notFollowingBack = following.filter(function(u) { return !followerSet.has(u.username.toLowerCase()); });
+    var mutualCount = following.filter(function(u) { return followerSet.has(u.username.toLowerCase()); }).length;
+
+    var totalLikes = 0, totalComments = 0;
+    var typeBreakdown = { photo: 0, video: 0, carousel: 0 };
+    var typeNames = { 1: 'photo', 2: 'video', 8: 'carousel' };
+    var dayEngagement = {};
+    var hourEngagement = {};
+    var dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    for (var i = 0; i < posts.length; i++) {
+      var p = posts[i];
+      var likes = p.like_count || 0;
+      var comments = p.comment_count || 0;
+      totalLikes += likes;
+      totalComments += comments;
+
+      var typeName = typeNames[p.media_type] || 'photo';
+      typeBreakdown[typeName] = (typeBreakdown[typeName] || 0) + 1;
+
+      if (p.taken_at) {
+        var date = new Date(p.taken_at * 1000);
+        var eng = likes + comments;
+        var day = dayNames[date.getUTCDay()];
+        if (!dayEngagement[day]) dayEngagement[day] = { total: 0, count: 0 };
+        dayEngagement[day].total += eng;
+        dayEngagement[day].count++;
+
+        var hour = String(date.getUTCHours());
+        if (!hourEngagement[hour]) hourEngagement[hour] = { total: 0, count: 0 };
+        hourEngagement[hour].total += eng;
+        hourEngagement[hour].count++;
+      }
+    }
+
+    var avgLikes = posts.length > 0 ? Math.round(totalLikes / posts.length) : 0;
+    var avgComments = posts.length > 0 ? Math.round((totalComments / posts.length) * 10) / 10 : 0;
+    var engagementRate = followers.length > 0 && posts.length > 0
+      ? Math.round(((totalLikes + totalComments) / posts.length / followers.length) * 10000) / 100
+      : 0;
+
+    var bestDays = {};
+    for (var d in dayEngagement) {
+      bestDays[d] = dayEngagement[d].count > 0
+        ? Math.round(dayEngagement[d].total / dayEngagement[d].count)
+        : 0;
+    }
+    var bestHours = {};
+    for (var h in hourEngagement) {
+      bestHours[h] = hourEngagement[h].count > 0
+        ? Math.round(hourEngagement[h].total / hourEngagement[h].count)
+        : 0;
+    }
+
+    return {
+      username: scan.username,
+      userId: scan.userId,
+      scrapedAt: scan.scrapedAt,
+      follower_count: followers.length,
+      following_count: following.length,
+      not_following_back_count: notFollowingBack.length,
+      mutual_count: mutualCount,
+      total_posts_scanned: posts.length,
+      avg_likes_per_post: avgLikes,
+      avg_comments_per_post: avgComments,
+      engagement_rate: engagementRate,
+      post_type_breakdown: typeBreakdown,
+      best_posting_days: bestDays,
+      best_posting_hours: bestHours
+    };
+  }
+
   (async function checkScanData() {
     var hash = location.hash;
     if (hash.indexOf('#data=') !== 0) return;
@@ -2179,11 +2257,14 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
       var profile = profileRaw ? JSON.parse(profileRaw) : {};
       var email = localStorage.getItem('flock-business:email') || '';
 
+      /* Aggregate scan data — no raw usernames or post records leave the browser */
+      var aggregated = aggregateScanData(scanData);
+
       /* Call report endpoint */
       var res = await fetch('https://flock-payments.warnkenc.workers.dev/report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, profile: profile, scan: scanData })
+        body: JSON.stringify({ email: email, profile: profile, scan: aggregated })
       });
 
       if (!res.ok) {
