@@ -269,11 +269,13 @@
 
   // ─── Modal scraping ─────────────────────────────────────────────
 
-  async function openListModal(popup, type) {
+  async function openListModal(page, type) {
     // type is 'followers' or 'following'
-    var doc = popup.document;
-    var links = doc.querySelectorAll('a[href]');
+    var doc = page.document;
     var target = null;
+
+    // Strategy 1: find <a> with href containing /followers or /following
+    var links = doc.querySelectorAll('a[href]');
     for (var i = 0; i < links.length; i++) {
       var href = links[i].getAttribute('href') || '';
       if (type === 'followers' && href.indexOf('/followers') !== -1 && href.indexOf('/following') === -1) {
@@ -285,13 +287,51 @@
         break;
       }
     }
+
+    // Strategy 2: find any clickable element with text like "1,186 followers"
+    if (!target) {
+      var allEls = doc.querySelectorAll('a, span, div, button, li');
+      var pattern = type === 'followers'
+        ? /^\s*[\d,.]+[KkMm]?\s+followers\s*$/i
+        : /^\s*[\d,.]+[KkMm]?\s+following\s*$/i;
+      for (var j = 0; j < allEls.length; j++) {
+        // Check direct text content (not children's text)
+        var directText = '';
+        for (var k = 0; k < allEls[j].childNodes.length; k++) {
+          if (allEls[j].childNodes[k].nodeType === 3) directText += allEls[j].childNodes[k].textContent;
+        }
+        // Also check full textContent for short elements
+        var fullText = allEls[j].textContent || '';
+        if (fullText.length < 30 && (pattern.test(fullText) || pattern.test(directText))) {
+          target = allEls[j];
+          break;
+        }
+      }
+    }
+
+    // Strategy 3: look for the profile stats section and find by position
+    if (!target) {
+      var sections = doc.querySelectorAll('ul li, header section');
+      for (var m = 0; m < sections.length; m++) {
+        var txt = sections[m].textContent || '';
+        if (type === 'followers' && /followers/i.test(txt) && !/following/i.test(txt)) {
+          target = sections[m];
+          break;
+        }
+        if (type === 'following' && /following/i.test(txt)) {
+          target = sections[m];
+          break;
+        }
+      }
+    }
+
     if (!target) throw new Error('Could not find ' + type + ' link on profile page.');
     target.click();
 
     // Wait for modal (role="dialog") to appear
-    await waitForEl(doc, '[role="dialog"]', 8000);
-    // Small settle for content to render inside the modal
-    await sleep(1000);
+    await waitForEl(doc, '[role="dialog"]', 10000);
+    // Settle for content to render inside the modal
+    await sleep(1500);
   }
 
   // Find the scrollable container inside the modal
