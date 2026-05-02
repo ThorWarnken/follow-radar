@@ -222,26 +222,21 @@
     scanPopup = null;
   }
 
-  async function waitForProfileRender(popup, timeout) {
-    var deadline = Date.now() + (timeout || 30000);
+  async function waitForProfileRender(page, timeout) {
+    var deadline = Date.now() + (timeout || 15000);
     while (Date.now() < deadline) {
-      if (popup.closed) throw new Error('Popup was closed before profile loaded.');
       try {
-        var doc = popup.document;
-        // Try multiple selectors -- Instagram's DOM varies
+        var doc = page.document;
         var links = doc.querySelectorAll('a[href*="/followers"]');
         if (links.length > 0) return;
-        // Also check for the text "followers" in any link
         var allLinks = doc.querySelectorAll('a');
         for (var i = 0; i < allLinks.length; i++) {
           if (/\d+\s*followers/i.test(allLinks[i].textContent)) return;
         }
-      } catch (e) {
-        // Cross-origin or not-ready -- keep polling
-      }
-      await sleep(1000);
+      } catch (e) { /* keep polling */ }
+      await sleep(500);
     }
-    throw new Error('Profile did not load in time. Check your connection and try again.');
+    throw new Error('Profile did not load in time.');
   }
 
   // Parse "1,234" or "12.5K" or "1.2M" to a number
@@ -709,6 +704,8 @@
   }
 
   // ─── Main entry ──────────────────────────────────────────────────
+  // Runs directly on the current Instagram page -- no popup needed.
+  // The user must be on their own profile page or we navigate there.
 
   async function main() {
     var user;
@@ -749,29 +746,28 @@
       return;
     }
 
-    // Popup is opened synchronously before main() to preserve user gesture.
-    // It's passed in via the popup parameter.
-    var popup = scanPopup;
-    if (!popup || popup.closed) {
-      alert(
-        "Flock needs to open a small window to scan your followers.\n\n" +
-        "Please allow popups for instagram.com and try again."
-      );
+    // Navigate to profile if not already there
+    var profilePath = '/' + user.username + '/';
+    if (location.pathname !== profilePath) {
+      location.href = 'https://www.instagram.com' + profilePath;
+      // After navigation, user clicks bookmarklet again
       return;
     }
 
+    // Use current page as the scan target (like a "popup" but it's this window)
+    var page = { document: document, scrollTo: window.scrollTo.bind(window) };
+
+    // Wait for profile to fully render
     try {
-      await waitForProfileRender(popup, 30000);
+      await waitForProfileRender(page, 10000);
     } catch (e) {
-      closeScanPopup();
-      alert(e.message);
+      alert("Could not detect your profile. Make sure you're on your own profile page and try again.");
       return;
     }
 
     // Read account size from profile DOM
-    var sizes = readAccountSize(popup);
+    var sizes = readAccountSize(page);
     if (sizes.followers > MAX_ACCOUNT_SIZE || sizes.following > MAX_ACCOUNT_SIZE) {
-      closeScanPopup();
       alert(
         "Flock is built for accounts under " + MAX_ACCOUNT_SIZE.toLocaleString() + " followers/following.\n\n" +
         "Yours has " + sizes.followers.toLocaleString() + " followers and " + sizes.following.toLocaleString() + " following."
@@ -787,20 +783,15 @@
     if (!resume) {
       var ok = confirm(
         'This scan takes about ' + estMinutes + ' minutes. ' +
-        'Flock opens a small window and scrolls through your follower list -- nothing is shared with us or any server.\n\n' +
-        'Keep the scan window open while it runs. You can use other windows and apps in the meantime.\n\n' +
+        'Flock will scroll through your follower list on this page -- nothing is shared with us or any server.\n\n' +
+        'Keep this tab open while it runs. You can use other tabs and apps.\n\n' +
         'Ready to scan?'
       );
-      if (!ok) {
-        closeScanPopup();
-        return;
-      }
+      if (!ok) return;
     }
 
-    // Create overlay in popup window
-    try {
-      createOverlay(popup.document);
-    } catch (e) { /* continue without overlay */ }
+    // Create overlay on current page
+    createOverlay();
 
     var followers = (resume && resume.partialFollowers) || [];
     var following = (resume && resume.partialFollowing) || [];
@@ -809,8 +800,8 @@
       // Phase 1: Scrape followers
       if (phase === 'followers') {
         updateOverlay('Scanning followers... (~' + estMinutes + ' min)', 0);
-        await openListModal(popup, 'followers');
-        followers = await scrapeModal(popup, SCAN_CAP, function (n) {
+        await openListModal(page, 'followers');
+        followers = await scrapeModal(page, SCAN_CAP, function (n) {
           updateOverlay('Scanning followers... ' + n, 0.05 + Math.min(0.4, n / SCAN_CAP));
         });
         phase = 'following';
@@ -818,16 +809,16 @@
 
       // Phase 2: Scrape following
       updateOverlay('Scanning following...', 0.5);
-      await openListModal(popup, 'following');
-      following = await scrapeModal(popup, SCAN_CAP, function (n) {
+      await openListModal(page, 'following');
+      following = await scrapeModal(page, SCAN_CAP, function (n) {
         updateOverlay('Scanning following... ' + n, 0.5 + Math.min(0.35, n / SCAN_CAP));
       });
 
-      // Phase 3: Scrape posts
+      // Phase 3: Scrape posts (scroll the profile grid)
       updateOverlay('Analyzing your posts...', 0.9);
       var posts = [];
       try {
-        posts = await scrapePostGrid(popup, 50);
+        posts = await scrapePostGrid(page, 50);
         updateOverlay('Analyzing your posts... ' + posts.length + ' found', 0.98);
       } catch (e) {
         console.warn('[flock] post scrape failed:', e);
@@ -835,7 +826,6 @@
 
     } catch (e) {
       destroyOverlay();
-      closeScanPopup();
 
       if (followers.length > 0 || following.length > 0) {
         saveResumeState({
@@ -864,7 +854,6 @@
     }
 
     destroyOverlay();
-    closeScanPopup();
     clearResumeState();
     saveCooldown(user.userId);
 
@@ -922,38 +911,11 @@
   }
 
   // Production entry point.
-  // Open popup SYNCHRONOUSLY here (in the user gesture call stack) before
-  // entering async main(). Browsers block window.open() inside async functions.
   if (!/(^|\.)instagram\.com$/.test(location.hostname)) {
     alert("Open instagram.com first, then click this bookmarklet.");
   } else {
-    // Detect username synchronously for the popup URL
-    var _username = null;
-    try {
-      var _sd = window._sharedData && window._sharedData.config && window._sharedData.config.viewer;
-      if (_sd && _sd.username) _username = _sd.username;
-    } catch (e) {}
-    if (!_username) {
-      try {
-        var _links = document.querySelectorAll('a[href]');
-        for (var _i = 0; _i < _links.length; _i++) {
-          var _u = extractUsernameFromHref(_links[_i].getAttribute('href') || '');
-          if (_u && _links[_i].querySelector('img[alt]')) { _username = _u; break; }
-        }
-      } catch (e) {}
-    }
-    if (!_username) {
-      var _pm = location.pathname.match(/^\/([a-zA-Z0-9._]{1,30})\/?$/);
-      if (_pm) _username = _pm[1];
-    }
-
-    if (_username) {
-      openScanPopup(_username); // synchronous -- preserves user gesture for popup
-    }
-
-    main().catch(e => {
-      closeScanPopup();
-      console.error('[follow radar]', e);
+    main().catch(function (e) {
+      console.error('[flock]', e);
       alert("Unexpected error: " + (e.message || e));
     });
   }
