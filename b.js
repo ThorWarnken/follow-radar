@@ -291,6 +291,134 @@
     return { followers: followers, following: following };
   }
 
+  // ─── Modal scraping ─────────────────────────────────────────────
+
+  async function openListModal(popup, type) {
+    // type is 'followers' or 'following'
+    var doc = popup.document;
+    var links = doc.querySelectorAll('a[href]');
+    var target = null;
+    for (var i = 0; i < links.length; i++) {
+      var href = links[i].getAttribute('href') || '';
+      if (type === 'followers' && href.indexOf('/followers') !== -1 && href.indexOf('/following') === -1) {
+        target = links[i];
+        break;
+      }
+      if (type === 'following' && href.indexOf('/following') !== -1) {
+        target = links[i];
+        break;
+      }
+    }
+    if (!target) throw new Error('Could not find ' + type + ' link on profile page.');
+    target.click();
+
+    // Wait for modal (role="dialog") to appear
+    await waitForEl(doc, '[role="dialog"]', 8000);
+    // Small settle for content to render inside the modal
+    await sleep(1000);
+  }
+
+  // Find the scrollable container inside the modal
+  function findScrollableChild(modal) {
+    var candidates = modal.querySelectorAll('div');
+    for (var i = 0; i < candidates.length; i++) {
+      var style = window.getComputedStyle(candidates[i]);
+      if ((style.overflowY === 'auto' || style.overflowY === 'scroll') &&
+          candidates[i].scrollHeight > candidates[i].clientHeight) {
+        return candidates[i];
+      }
+    }
+    return modal;
+  }
+
+  function readUserRow(linkEl, username) {
+    var row = linkEl.closest('div[role="button"]') ||
+              linkEl.parentElement?.parentElement?.parentElement ||
+              linkEl.parentElement;
+
+    var fullName = '';
+    var isPrivate = false;
+    var isVerified = false;
+    var mutualCount = 0;
+
+    if (row) {
+      var textContent = row.textContent || '';
+
+      var spans = row.querySelectorAll('span');
+      for (var i = 0; i < spans.length; i++) {
+        var spanText = spans[i].textContent.trim();
+        if (spanText === username) continue;
+        if (spanText.indexOf('Followed by') !== -1) continue;
+        if (spanText === 'Follow' || spanText === 'Following' || spanText === 'Remove') continue;
+        if (spanText === 'Requested') continue;
+        if (spanText.length > 0 && spanText.length < 60 && !fullName) {
+          fullName = spanText;
+        }
+      }
+
+      mutualCount = parseMutualText(textContent);
+
+      var svg = row.querySelector('svg[aria-label="Verified"]') ||
+                row.querySelector('[title="Verified"]');
+      if (svg) isVerified = true;
+    }
+
+    return {
+      username: username,
+      full_name: fullName,
+      is_private: isPrivate,
+      is_verified: isVerified,
+      mutual_count: mutualCount,
+    };
+  }
+
+  async function scrapeModal(popup, cap, onProgress) {
+    var doc = popup.document;
+    var modal = doc.querySelector('[role="dialog"]');
+    if (!modal) throw new Error('No modal found.');
+
+    var users = [];
+    var seen = new Set();
+    var scrollable = findScrollableChild(modal);
+    var noNewContentCount = 0;
+
+    while (users.length < cap) {
+      var links = modal.querySelectorAll('a[href]');
+      var prevSize = seen.size;
+
+      for (var i = 0; i < links.length; i++) {
+        var username = extractUsernameFromHref(links[i].getAttribute('href') || '');
+        if (!username || seen.has(username)) continue;
+        seen.add(username);
+
+        var userInfo = readUserRow(links[i], username);
+        users.push(userInfo);
+
+        if (users.length >= cap) break;
+      }
+
+      if (onProgress) onProgress(users.length);
+
+      if (seen.size === prevSize) {
+        noNewContentCount++;
+        if (noNewContentCount >= 3) break;
+      } else {
+        noNewContentCount = 0;
+      }
+
+      if (scrollable) {
+        scrollable.scrollTop = scrollable.scrollHeight;
+      }
+      await sleep(SCROLL_PAUSE_MS);
+    }
+
+    // Close modal by pressing Escape
+    doc.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await sleep(500);
+
+    return users;
+  }
+
   // ─── Fetch + classification ──────────────────────────────────────
 
   // doFetch is replaceable in tests via window.__followRadarTest.setFetch().
@@ -935,6 +1063,10 @@
     window.__followRadarTest.waitForProfileRender = waitForProfileRender;
     window.__followRadarTest.parseCountText = parseCountText;
     window.__followRadarTest.readAccountSize = readAccountSize;
+    window.__followRadarTest.openListModal = openListModal;
+    window.__followRadarTest.scrapeModal = scrapeModal;
+    window.__followRadarTest.findScrollableChild = findScrollableChild;
+    window.__followRadarTest.readUserRow = readUserRow;
     window.__followRadarTest.constants.SCROLL_PAUSE_MS = SCROLL_PAUSE_MS;
     window.__followRadarTest.constants.SCROLL_SETTLE_MS = SCROLL_SETTLE_MS;
     return; // skip main() in test mode

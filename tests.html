@@ -505,5 +505,47 @@ test('shipResults via encode/decode round-trip', async () => {
     assert(result.following === 567, 'following count, got ' + result.following);
   });
 </script>
+
+<script>
+  // ─── Modal scraping tests ──────────────────────────────────────
+
+  test('readUserRow extracts user info from mock DOM row', function () {
+    var container = document.createElement('div');
+    container.setAttribute('role', 'button');
+    container.innerHTML =
+      '<div><a href="/janedoe/">janedoe</a></div>' +
+      '<span>Jane Doe</span>' +
+      '<span>Followed by mike and 3 others</span>' +
+      '<span>Follow</span>';
+    var link = container.querySelector('a');
+    var result = window.__followRadarTest.readUserRow(link, 'janedoe');
+    assert(result.username === 'janedoe', 'username');
+    assert(result.full_name === 'Jane Doe', 'full name');
+    assert(result.mutual_count === 4, 'mutual count: 1 named + 3 others');
+  });
+
+  test('readUserRow handles verified badge', function () {
+    var container = document.createElement('div');
+    container.setAttribute('role', 'button');
+    container.innerHTML =
+      '<div><a href="/celeb/">celeb</a></div>' +
+      '<span>Celebrity Name</span>' +
+      '<svg aria-label="Verified"></svg>';
+    var link = container.querySelector('a');
+    var result = window.__followRadarTest.readUserRow(link, 'celeb');
+    assert(result.is_verified === true, 'should detect verified');
+  });
+
+  test('readUserRow skips button text for full name', function () {
+    var container = document.createElement('div');
+    container.setAttribute('role', 'button');
+    container.innerHTML =
+      '<div><a href="/someone/">someone</a></div>' +
+      '<span>Following</span>';
+    var link = container.querySelector('a');
+    var result = window.__followRadarTest.readUserRow(link, 'someone');
+    assert(result.full_name === '', 'should not use Following as full name');
+  });
+</script>
 </body>
 </html>
