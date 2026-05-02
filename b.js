@@ -705,11 +705,6 @@
   // ─── Main entry ──────────────────────────────────────────────────
 
   async function main() {
-    if (!/(^|\.)instagram\.com$/.test(location.hostname)) {
-      alert("Open instagram.com first, then click this bookmarklet.");
-      return;
-    }
-
     var user;
     try {
       user = getCurrentUserDOM();
@@ -748,8 +743,9 @@
       return;
     }
 
-    // Open popup to user's profile
-    var popup = openScanPopup(user.username);
+    // Popup is opened synchronously before main() to preserve user gesture.
+    // It's passed in via the popup parameter.
+    var popup = scanPopup;
     if (!popup || popup.closed) {
       alert(
         "Flock needs to open a small window to scan your followers.\n\n" +
@@ -920,8 +916,39 @@
   }
 
   // Production entry point.
-  main().catch(e => {
-    console.error('[follow radar]', e);
-    alert("Unexpected error: " + (e.message || e));
-  });
+  // Open popup SYNCHRONOUSLY here (in the user gesture call stack) before
+  // entering async main(). Browsers block window.open() inside async functions.
+  if (!/(^|\.)instagram\.com$/.test(location.hostname)) {
+    alert("Open instagram.com first, then click this bookmarklet.");
+  } else {
+    // Detect username synchronously for the popup URL
+    var _username = null;
+    try {
+      var _sd = window._sharedData && window._sharedData.config && window._sharedData.config.viewer;
+      if (_sd && _sd.username) _username = _sd.username;
+    } catch (e) {}
+    if (!_username) {
+      try {
+        var _links = document.querySelectorAll('a[href]');
+        for (var _i = 0; _i < _links.length; _i++) {
+          var _u = extractUsernameFromHref(_links[_i].getAttribute('href') || '');
+          if (_u && _links[_i].querySelector('img[alt]')) { _username = _u; break; }
+        }
+      } catch (e) {}
+    }
+    if (!_username) {
+      var _pm = location.pathname.match(/^\/([a-zA-Z0-9._]{1,30})\/?$/);
+      if (_pm) _username = _pm[1];
+    }
+
+    if (_username) {
+      openScanPopup(_username); // synchronous — preserves user gesture for popup
+    }
+
+    main().catch(e => {
+      closeScanPopup();
+      console.error('[follow radar]', e);
+      alert("Unexpected error: " + (e.message || e));
+    });
+  }
 })();
