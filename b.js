@@ -269,51 +269,58 @@
 
   // ─── List navigation ─────────────────────────────────────────────
 
+  // Simulate a real mouse click that triggers React's event system
+  function simulateClick(el) {
+    var rect = el.getBoundingClientRect();
+    var x = rect.left + rect.width / 2;
+    var y = rect.top + rect.height / 2;
+    var opts = { bubbles: true, cancelable: true, view: window, clientX: x, clientY: y };
+    el.dispatchEvent(new MouseEvent('mousedown', opts));
+    el.dispatchEvent(new MouseEvent('mouseup', opts));
+    el.dispatchEvent(new MouseEvent('click', opts));
+  }
+
+  function findFollowLink(doc, type) {
+    // Strategy 1: <a> with href containing /followers or /following
+    var links = doc.querySelectorAll('a[href]');
+    for (var i = 0; i < links.length; i++) {
+      var href = links[i].getAttribute('href') || '';
+      if (type === 'followers' && href.indexOf('/followers') !== -1 && href.indexOf('/following') === -1) return links[i];
+      if (type === 'following' && href.indexOf('/following') !== -1) return links[i];
+    }
+    // Strategy 2: text pattern match
+    var allEls = doc.querySelectorAll('a, span, div, button, li');
+    var pattern = type === 'followers'
+      ? /[\d,.]+[KkMm]?\s+followers/i
+      : /[\d,.]+[KkMm]?\s+following/i;
+    for (var j = 0; j < allEls.length; j++) {
+      var txt = allEls[j].textContent || '';
+      if (txt.length < 30 && pattern.test(txt)) return allEls[j];
+    }
+    return null;
+  }
+
   async function openList(username, type) {
-    // Navigate directly to the followers/following page — no click needed
-    var targetUrl = 'https://www.instagram.com/' + encodeURIComponent(username) + '/' + type + '/';
+    var target = findFollowLink(document, type);
+    if (!target) throw new Error('Could not find ' + type + ' link on profile.');
 
-    // Use pushState + popstate to trigger Instagram's SPA router
-    // If that doesn't work, fall back to full navigation
-    var navigated = false;
+    var urlBefore = location.pathname;
+    simulateClick(target);
 
-    // Try SPA-style navigation first (keeps our script alive)
-    try {
-      history.pushState(null, '', targetUrl);
-      window.dispatchEvent(new PopStateEvent('popstate', { state: null }));
-      await sleep(2000);
-
-      // Check if Instagram actually rendered the new page
-      if (location.pathname.indexOf('/' + type) !== -1) {
-        var userLinks = document.querySelectorAll('a[href]');
-        var userCount = 0;
-        for (var i = 0; i < userLinks.length; i++) {
-          if (extractUsernameFromHref(userLinks[i].getAttribute('href') || '')) userCount++;
-        }
-        if (userCount >= 2) navigated = true;
-      }
-    } catch (e) { /* fall through */ }
-
-    // If SPA nav didn't render content, try direct location change
-    if (!navigated) {
-      location.href = targetUrl;
-      // Wait for page to load — our script context may survive if it's a SPA
-      await sleep(3000);
-    }
-
-    // Wait for user list to populate
-    var deadline = Date.now() + 15000;
+    // Wait for something to happen: modal, URL change, or new content
+    var deadline = Date.now() + 10000;
     while (Date.now() < deadline) {
-      var links = document.querySelectorAll('a[href]');
-      var count = 0;
-      for (var j = 0; j < links.length; j++) {
-        if (extractUsernameFromHref(links[j].getAttribute('href') || '')) count++;
-      }
-      if (count >= 3) return;
-      await sleep(500);
+      // Check for modal
+      var modal = findModal(document);
+      if (modal) return { mode: 'modal' };
+      // Check for URL change (SPA navigation)
+      if (location.pathname !== urlBefore) return { mode: 'page' };
+      await sleep(300);
     }
 
-    throw new Error('Could not load ' + type + ' list. Try navigating to ' + targetUrl + ' manually.');
+    // If simulated click didn't work, try direct navigation as fallback
+    // This kills our script context, so save state first
+    throw new Error('Could not open ' + type + ' list. Click did not trigger navigation or modal.');
   }
 
   // Find the scrollable container inside the modal
@@ -761,7 +768,20 @@
 
   async function shipResults(payload) {
     const encoded = await encodePayload(payload);
-    window.location = FOLLOW_RADAR_URL + '/#data=' + encoded;
+    var url = FOLLOW_RADAR_URL + '/#data=' + encoded;
+    // Try multiple redirect methods — Instagram may block some
+    try { window.location.href = url; } catch (e) {}
+    await sleep(1000);
+    // If still on Instagram, try replace
+    if (location.hostname.indexOf('instagram.com') !== -1) {
+      try { window.location.replace(url); } catch (e) {}
+      await sleep(1000);
+    }
+    // If still here, try window.open as last resort
+    if (location.hostname.indexOf('instagram.com') !== -1) {
+      var w = window.open(url, '_self');
+      if (!w) window.open(url, '_blank');
+    }
   }
 
 
@@ -896,30 +916,46 @@
       // Phase 1: Scrape followers
       if (phase === 'followers') {
         updateOverlay('Scanning followers... (~' + estMinutes + ' min)', 0);
-        await openList(user.username, 'followers');
-        // Re-create overlay on new page (old one lost during navigation)
+        var fResult = await openList(user.username, 'followers');
+        await sleep(2000);
+        // Re-create overlay (may have been lost during navigation)
         createOverlay();
         updateOverlay('Scanning followers...', 0.05);
-        followers = await scrapePage(SCAN_CAP, function (n) {
-          updateOverlay('Scanning followers... ' + n, 0.05 + Math.min(0.4, n / SCAN_CAP));
-        });
+        if (fResult.mode === 'modal') {
+          followers = await scrapeModal(page, SCAN_CAP, function (n) {
+            updateOverlay('Scanning followers... ' + n, 0.05 + Math.min(0.4, n / SCAN_CAP));
+          });
+        } else {
+          followers = await scrapePage(SCAN_CAP, function (n) {
+            updateOverlay('Scanning followers... ' + n, 0.05 + Math.min(0.4, n / SCAN_CAP));
+          });
+          // Go back to profile for next phase
+          history.back();
+          await sleep(2000);
+        }
         phase = 'following';
       }
 
-      // Navigate to following
+      // Phase 2: Scrape following
       updateOverlay('Scanning following...', 0.5);
-      await openList(user.username, 'following');
+      var gResult = await openList(user.username, 'following');
+      await sleep(2000);
       createOverlay();
       updateOverlay('Scanning following...', 0.5);
-      following = await scrapePage(SCAN_CAP, function (n) {
-        updateOverlay('Scanning following... ' + n, 0.5 + Math.min(0.35, n / SCAN_CAP));
-      });
+      if (gResult.mode === 'modal') {
+        following = await scrapeModal(page, SCAN_CAP, function (n) {
+          updateOverlay('Scanning following... ' + n, 0.5 + Math.min(0.35, n / SCAN_CAP));
+        });
+      } else {
+        following = await scrapePage(SCAN_CAP, function (n) {
+          updateOverlay('Scanning following... ' + n, 0.5 + Math.min(0.35, n / SCAN_CAP));
+        });
+        // Go back to profile for post scraping
+        history.back();
+        await sleep(2000);
+      }
 
-      // Navigate back to profile for post scraping
-      updateOverlay('Analyzing your posts...', 0.9);
-      location.href = 'https://www.instagram.com/' + user.username + '/';
-      await sleep(3000);
-      createOverlay();
+      // Phase 3: Scrape posts
       updateOverlay('Analyzing your posts...', 0.9);
       var posts = [];
       try {
