@@ -759,8 +759,10 @@
   let overlayEl = null;
   let overlayBarEl = null;
   let overlayTextEl = null;
+  var overlayDoc = null;
 
-  function createOverlay() {
+  function createOverlay(targetDoc) {
+    overlayDoc = targetDoc || document;
     if (overlayEl) return;
 
     // Detect business mode from redirect URL
@@ -773,17 +775,17 @@
     const bgTint = isBiz ? 'rgba(20,16,8,0.92)' : 'rgba(12,14,36,0.92)';
 
     // Inject animations
-    const style = document.createElement('style');
+    const style = overlayDoc.createElement('style');
     style.textContent = [
       '@keyframes fr-in{from{opacity:0;transform:translateY(12px) scale(0.95)}to{opacity:1;transform:translateY(0) scale(1)}}',
       '@keyframes fr-spin{to{transform:rotate(360deg)}}',
       '@keyframes fr-dots{0%,80%,100%{opacity:.25}40%{opacity:1}}',
       '@keyframes fr-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}',
     ].join('');
-    document.head.appendChild(style);
+    overlayDoc.head.appendChild(style);
 
     // Outer container
-    overlayEl = document.createElement('div');
+    overlayEl = overlayDoc.createElement('div');
     overlayEl.setAttribute('style', [
       'position:fixed','bottom:20px','right:20px','z-index:2147483647',
       'width:260px','border-radius:14px',
@@ -797,21 +799,21 @@
     ].join(';'));
 
     // Content area
-    const content = document.createElement('div');
+    const content = overlayDoc.createElement('div');
     content.setAttribute('style', 'padding:14px 16px 12px');
 
     // Top row: spinner + title + live badge
-    const topRow = document.createElement('div');
+    const topRow = overlayDoc.createElement('div');
     topRow.setAttribute('style', 'display:flex;align-items:center;gap:10px;margin-bottom:10px');
 
     // Logo (business) or spinning ring (personal)
     var spinner;
     if (isBiz) {
-      spinner = document.createElement('img');
+      spinner = overlayDoc.createElement('img');
       spinner.src = GOLD_LOGO_URI;
       spinner.setAttribute('style', 'width:28px;height:28px;border-radius:6px;flex-shrink:0');
     } else {
-      spinner = document.createElement('div');
+      spinner = overlayDoc.createElement('div');
       spinner.setAttribute('style', [
         'width:28px','height:28px','border-radius:50%','flex-shrink:0',
         'border:2.5px solid rgba(255,255,255,0.08)',
@@ -821,19 +823,19 @@
     }
 
     // Title column
-    const titleCol = document.createElement('div');
+    const titleCol = overlayDoc.createElement('div');
     titleCol.setAttribute('style', 'flex:1;min-width:0');
-    const title = document.createElement('div');
+    const title = overlayDoc.createElement('div');
     title.setAttribute('style', 'font-weight:700;font-size:13px;letter-spacing:0.02em;color:#fff');
     title.textContent = brandName;
-    const subtitle = document.createElement('div');
+    const subtitle = overlayDoc.createElement('div');
     subtitle.setAttribute('style', 'font-size:10px;color:rgba(255,255,255,0.4);margin-top:1px;text-transform:uppercase;letter-spacing:0.06em');
     subtitle.textContent = 'Scanning';
     titleCol.appendChild(title);
     titleCol.appendChild(subtitle);
 
     // Live badge with animated dots
-    const badge = document.createElement('div');
+    const badge = overlayDoc.createElement('div');
     badge.setAttribute('style', [
       'display:flex','align-items:center','gap:3px',
       'padding:3px 8px','border-radius:20px',
@@ -841,7 +843,7 @@
       'flex-shrink:0',
     ].join(';'));
     for (let i = 0; i < 3; i++) {
-      const d = document.createElement('div');
+      const d = overlayDoc.createElement('div');
       d.setAttribute('style', [
         'width:4px','height:4px','border-radius:50%',
         'background:' + accentColor,
@@ -856,15 +858,15 @@
     content.appendChild(topRow);
 
     // Status text
-    overlayTextEl = document.createElement('div');
+    overlayTextEl = overlayDoc.createElement('div');
     overlayTextEl.textContent = 'Starting\u2026';
     overlayTextEl.setAttribute('style', 'font-size:12px;color:rgba(255,255,255,0.65);font-variant-numeric:tabular-nums;margin-bottom:12px');
     content.appendChild(overlayTextEl);
 
     // Progress bar track
-    const track = document.createElement('div');
+    const track = overlayDoc.createElement('div');
     track.setAttribute('style', 'height:3px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden');
-    overlayBarEl = document.createElement('div');
+    overlayBarEl = overlayDoc.createElement('div');
     overlayBarEl.setAttribute('style', [
       'height:100%','width:0%','border-radius:2px',
       'background:linear-gradient(90deg,' + accentColor + ',' + accentColor2 + ',' + accentColor3 + ')',
@@ -878,7 +880,7 @@
     overlayEl.appendChild(content);
 
     // Bottom accent line
-    const accent = document.createElement('div');
+    const accent = overlayDoc.createElement('div');
     accent.setAttribute('style', [
       'height:2px',
       'background:linear-gradient(90deg,' + accentColor + ',' + accentColor2 + ',' + accentColor3 + ',' + accentColor + ')',
@@ -887,7 +889,7 @@
     ].join(';'));
     overlayEl.appendChild(accent);
 
-    document.body.appendChild(overlayEl);
+    overlayDoc.body.appendChild(overlayEl);
   }
 
   function updateOverlay(text, fraction) {
@@ -904,6 +906,7 @@
     overlayEl = null;
     overlayBarEl = null;
     overlayTextEl = null;
+    overlayDoc = null;
   }
 
   // ─── Post scraping (for growth analytics) ────────────────────────
