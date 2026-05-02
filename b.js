@@ -19,10 +19,6 @@
 
   const MAX_ACCOUNT_SIZE = 10000;
   const SCAN_CAP = 5000;
-  const THROTTLE_MS = 3000;
-  const THROTTLE_JITTER_MS = 2000;
-  const PAGE_SIZE = 20;
-  const IG_APP_ID = '936619743392459';
   const RESUME_MAX_AGE_MS = 24 * 60 * 60 * 1000;
   const COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000; // 3 days between scans
   const COOLDOWN_KEY = 'flock:last-scan';
@@ -152,27 +148,6 @@
   function saveCooldown(userId, storage) {
     const s = storage || localStorage;
     s.setItem(COOLDOWN_KEY, JSON.stringify({ userId: userId, timestamp: Date.now() }));
-  }
-
-  // ─── Warm-up requests ────────────────────────────────────────────
-  // Make a few normal-looking requests before scanning to give the session
-  // realistic browsing activity (profile load + feed fetch).
-
-  async function warmUp(userId) {
-    try {
-      await doFetch('https://i.instagram.com/api/v1/users/' + userId + '/info/', {
-        credentials: 'include',
-        headers: igHeaders,
-      });
-    } catch (e) { /* non-critical */ }
-    await throttle();
-    try {
-      await doFetch('https://i.instagram.com/api/v1/feed/timeline/?count=12', {
-        credentials: 'include',
-        headers: igHeaders,
-      });
-    } catch (e) { /* non-critical */ }
-    await throttle();
   }
 
   // ─── DOM utilities ───────────────────────────────────────────────
@@ -530,230 +505,6 @@
     return null;
   }
 
-  // ─── Fetch + classification ──────────────────────────────────────
-
-  // doFetch is replaceable in tests via window.__followRadarTest.setFetch().
-  let doFetch = (typeof fetch !== 'undefined') ? fetch.bind(typeof window !== 'undefined' ? window : undefined) : null;
-
-  async function throttle() {
-    const ms = THROTTLE_MS + Math.random() * THROTTLE_JITTER_MS;
-    await new Promise(r => setTimeout(r, ms));
-  }
-
-  // Classify a parsed JSON response into either {users, nextCursor} or
-  // a thrown RateLimitError. Pure function — easy to unit-test.
-  function classifyResponse(status, body) {
-    if (status === 429) throw new RateLimitError('http 429');
-    if (status === 401) throw new RateLimitError('http 401');
-    if (status >= 500) throw new Error('instagram server error: http ' + status);
-    if (status !== 200) throw new Error('unexpected http status: ' + status);
-    if (!body || typeof body !== 'object') throw new Error('non-object response body');
-    // IG sometimes 200s with a "feedback_required" body when throttled.
-    if (body.message === 'feedback_required' || body.spam === true) {
-      throw new RateLimitError('feedback_required');
-    }
-    if (body.require_login || body.message === 'login_required') {
-      throw new RateLimitError('login_required');
-    }
-    if (!Array.isArray(body.users)) throw new Error('response missing users array');
-    return { users: body.users, nextCursor: body.next_max_id || null };
-  }
-
-  // Standard headers that match Instagram's own web client requests
-  var igHeaders = {
-    'X-IG-App-ID': IG_APP_ID,
-    'X-IG-WWW-Claim': '0',
-    'X-Requested-With': 'XMLHttpRequest',
-    'Accept': '*/*',
-  };
-
-  // fetchPage does the actual HTTP call, with throttling and retry.
-  // Returns {users, nextCursor} or throws.
-  async function fetchPage(url, opts) {
-    opts = opts || {};
-    var maxRetries = 2;
-    for (var attempt = 0; attempt <= maxRetries; attempt++) {
-      if (!opts.skipThrottle || attempt > 0) await throttle();
-      // Increasing backoff on retries: 3s, 6s
-      if (attempt > 0) await new Promise(function(r) { setTimeout(r, 3000 * attempt); });
-      var resp;
-      try {
-        resp = await doFetch(url, {
-          credentials: 'include',
-          headers: igHeaders,
-        });
-      } catch (e) {
-        if (attempt < maxRetries) continue;
-        throw new Error('network error: ' + e.message);
-      }
-      // Rate limit responses — no point retrying these
-      if (resp.status === 429 || resp.status === 401) {
-        throw new RateLimitError('http ' + resp.status);
-      }
-      var body;
-      try {
-        body = await resp.json();
-      } catch (e) {
-        if (attempt < maxRetries) {
-          console.warn('[flock] non-json response (attempt ' + (attempt + 1) + '), retrying...');
-          continue;
-        }
-        // After retries exhausted, treat as rate limit so progress is saved
-        throw new RateLimitError('non-json response after ' + (maxRetries + 1) + ' attempts');
-      }
-      return classifyResponse(resp.status, body);
-    }
-  }
-
-  // ─── Pagination ──────────────────────────────────────────────────
-
-  // fetchPageImpl is replaceable in tests so we don't need real fetch.
-  let fetchPageImpl = fetchPage;
-
-  function buildFollowersUrl(userId, cursor) {
-    let u = 'https://i.instagram.com/api/v1/friendships/' + userId + '/followers/?count=' + PAGE_SIZE;
-    if (cursor) u += '&max_id=' + encodeURIComponent(cursor);
-    return u;
-  }
-
-  function buildFollowingUrl(userId, cursor) {
-    let u = 'https://i.instagram.com/api/v1/friendships/' + userId + '/following/?count=' + PAGE_SIZE;
-    if (cursor) u += '&max_id=' + encodeURIComponent(cursor);
-    return u;
-  }
-
-  // Reduce IG's account shape to ours.
-  function trimUser(u) {
-    const obj = {
-      username: u.username,
-      full_name: u.full_name || '',
-      is_private: !!u.is_private,
-    };
-    if (u.is_verified) obj.is_verified = true;
-    if (typeof u.follower_count === 'number') obj.follower_count = u.follower_count;
-    return obj;
-  }
-
-  // Generic paginator. urlBuilder(cursor) -> url.
-  // initial: array of already-collected users (for resume).
-  // initialCursor: cursor to start from (for resume).
-  // onProgress(count): called after each page.
-  // If fetchPageImpl throws RateLimitError, we re-throw after attaching
-  // {cursor, partial} so main() can save resume state with exact progress.
-  async function paginate(urlBuilder, initial, initialCursor, onProgress) {
-    const all = (initial && initial.length) ? initial.slice() : [];
-    let cursor = initialCursor || null;
-    while (true) {
-      const url = urlBuilder(cursor);
-      let page;
-      try {
-        page = await fetchPageImpl(url);
-      } catch (e) {
-        if (e instanceof RateLimitError) {
-          e.cursor = cursor;    // cursor that was used for the failed request — resume uses this
-          e.partial = all;      // everything accumulated before the failure
-        }
-        throw e;
-      }
-      for (const u of page.users) all.push(trimUser(u));
-      if (onProgress) onProgress(all.length, cursor);
-      if (all.length >= SCAN_CAP) break;
-      if (!page.nextCursor) break;
-      cursor = page.nextCursor;
-    }
-    return all;
-  }
-
-  async function scrapeFollowers(userId, initial, initialCursor, onProgress) {
-    return paginate(c => buildFollowersUrl(userId, c), initial, initialCursor, onProgress);
-  }
-
-  async function scrapeFollowing(userId, initial, initialCursor, onProgress) {
-    return paginate(c => buildFollowingUrl(userId, c), initial, initialCursor, onProgress);
-  }
-
-  // ─── Current user resolution + size check ────────────────────────
-
-  async function getCurrentUser() {
-    // Try _sharedData (works on legacy IG web pages).
-    try {
-      const sd = window._sharedData && window._sharedData.config && window._sharedData.config.viewer;
-      if (sd && sd.id && sd.username) {
-        return { userId: String(sd.id), username: sd.username };
-      }
-    } catch (e) { /* fall through */ }
-
-    // Try ds_user_id cookie (set by Instagram on login, most reliable).
-    let cookieUserId = null;
-    try {
-      const m = document.cookie.match(/(?:^|;\s*)ds_user_id=(\d+)/);
-      if (m) cookieUserId = m[1];
-    } catch (e) { /* fall through */ }
-
-    // Try /api/v1/accounts/current_user/ endpoint.
-    if (cookieUserId) {
-      try {
-        const r = await doFetch('https://i.instagram.com/api/v1/accounts/current_user/?edit=true', {
-          credentials: 'include',
-          headers: igHeaders,
-        });
-        if (r.ok) {
-          const j = await r.json();
-          if (j && j.user && j.user.pk && j.user.username) {
-            return { userId: String(j.user.pk), username: j.user.username };
-          }
-        }
-      } catch (e) { /* fall through */ }
-    }
-
-    // Try the web accounts info endpoint.
-    try {
-      const r = await doFetch('https://www.instagram.com/api/v1/web/accounts/login/ajax/info/', {
-        credentials: 'include',
-        headers: igHeaders,
-      });
-      if (r.ok) {
-        const j = await r.json();
-        if (j && j.user_id && j.username) return { userId: String(j.user_id), username: j.username };
-      }
-    } catch (e) { /* fall through */ }
-
-    // Last resort: use cookie userId + fetch username from web_profile_info by
-    // reading the current page's profile if we're on one.
-    if (cookieUserId) {
-      try {
-        const r = await doFetch('https://i.instagram.com/api/v1/users/' + cookieUserId + '/info/', {
-          credentials: 'include',
-          headers: igHeaders,
-        });
-        if (r.ok) {
-          const j = await r.json();
-          if (j && j.user && j.user.username) {
-            return { userId: cookieUserId, username: j.user.username };
-          }
-        }
-      } catch (e) { /* fall through */ }
-    }
-
-    throw new Error("Could not determine logged-in user. Make sure you're logged into instagram.com.");
-  }
-
-  async function checkAccountSize(username) {
-    // /api/v1/users/web_profile_info/?username=...
-    const url = 'https://i.instagram.com/api/v1/users/web_profile_info/?username=' + encodeURIComponent(username);
-    const r = await doFetch(url, {
-      credentials: 'include',
-      headers: igHeaders,
-    });
-    if (!r.ok) throw new Error('Could not fetch profile info: http ' + r.status);
-    const j = await r.json();
-    const u = j && j.data && j.data.user;
-    if (!u) throw new Error('Unexpected profile info shape');
-    const followers = (u.edge_followed_by && u.edge_followed_by.count) || 0;
-    const following = (u.edge_follow && u.edge_follow.count) || 0;
-    return { followers, following };
-  }
-
   // ─── Progress overlay ────────────────────────────────────────────
 
   let overlayEl = null;
@@ -909,72 +660,46 @@
     overlayDoc = null;
   }
 
-  // ─── Post scraping (for growth analytics) ────────────────────────
-
-  function trimPost(item) {
-    return {
-      id: item.id || item.pk || '',
-      taken_at: item.taken_at || 0,
-      like_count: item.like_count || 0,
-      comment_count: item.comment_count || 0,
-      media_type: item.media_type || 1, // 1=photo, 2=video, 8=carousel
-      caption_length: (item.caption && item.caption.text) ? item.caption.text.length : 0,
-      carousel_count: (item.carousel_media_count) || (item.carousel_media ? item.carousel_media.length : 0) || 0,
-      video_duration: item.video_duration || 0,
-    };
-  }
-
-  async function scrapePosts(userId, maxPosts) {
-    const posts = [];
-    let maxId = null;
-    const limit = maxPosts || 50;
-
-    for (let page = 0; page < 5; page++) { // max 5 pages to be safe
-      await throttle();
-      let url = 'https://i.instagram.com/api/v1/feed/user/' + userId + '/?count=33';
-      if (maxId) url += '&max_id=' + encodeURIComponent(maxId);
-
-      let r, body;
-      try {
-        r = await doFetch(url, {
-          credentials: 'include',
-          headers: igHeaders,
-        });
-      } catch (e) {
-        console.warn('[flock] post fetch network error:', e);
-        break;
-      }
-
-      if (!r.ok) {
-        console.warn('[flock] post fetch http ' + r.status);
-        break;
-      }
-
-      try {
-        body = await r.json();
-      } catch (e) {
-        break;
-      }
-
-      if (!body || !Array.isArray(body.items)) break;
-
-      for (const item of body.items) {
-        posts.push(trimPost(item));
-        if (posts.length >= limit) break;
-      }
-
-      if (posts.length >= limit || !body.more_available || !body.next_max_id) break;
-      maxId = body.next_max_id;
-    }
-
-    return posts;
-  }
-
   // ─── Ship results ────────────────────────────────────────────────
 
   async function shipResults(payload) {
     const encoded = await encodePayload(payload);
     window.location = FOLLOW_RADAR_URL + '/#data=' + encoded;
+  }
+
+
+  // ─── Current user detection ─────────────────────────────────────
+
+  function getCurrentUserDOM() {
+    try {
+      var sd = window._sharedData && window._sharedData.config && window._sharedData.config.viewer;
+      if (sd && sd.id && sd.username) {
+        return { userId: String(sd.id), username: sd.username };
+      }
+    } catch (e) { /* fall through */ }
+
+    var cookieUserId = null;
+    try {
+      var m = document.cookie.match(/(?:^|;\s*)ds_user_id=(\d+)/);
+      if (m) cookieUserId = m[1];
+    } catch (e) { /* fall through */ }
+
+    if (cookieUserId) {
+      var navLinks = document.querySelectorAll('a[href]');
+      for (var i = 0; i < navLinks.length; i++) {
+        var href = navLinks[i].getAttribute('href') || '';
+        var username = extractUsernameFromHref(href);
+        if (username && navLinks[i].querySelector('img[alt]')) {
+          return { userId: cookieUserId, username: username };
+        }
+      }
+    }
+
+    if (cookieUserId) {
+      return { userId: cookieUserId, username: null };
+    }
+
+    throw new Error("Could not determine logged-in user. Make sure you're logged into instagram.com.");
   }
 
   // ─── Main entry ──────────────────────────────────────────────────
@@ -985,29 +710,36 @@
       return;
     }
 
-    let user;
+    var user;
     try {
-      user = await getCurrentUser();
+      user = getCurrentUserDOM();
     } catch (e) {
       alert(e.message);
       return;
     }
 
-    // Check resume state.
-    const existing = loadResumeState(user.userId);
+    if (!user.username) {
+      var pathMatch = location.pathname.match(/^\/([a-zA-Z0-9._]{1,30})\/?$/);
+      if (pathMatch) {
+        user.username = pathMatch[1];
+      } else {
+        alert("Could not determine your username. Navigate to your profile and try again.");
+        return;
+      }
+    }
+
+    // Check resume state
+    var existing = loadResumeState(user.userId);
     if (existing && existing.mismatch) {
       alert("You have a scan in progress on a different account. Switch back to that account, or clear it from DevTools (localStorage key '" + RESUME_KEY + "').");
       return;
     }
 
-    const resume = existing;
-    const initialFollowers = (resume && resume.partialFollowers) || null;
-    const initialFollowing = (resume && resume.partialFollowing) || null;
-    let initialCursor = (resume && resume.cursor) || null;
-    let phase = (resume && resume.phase) || 'followers';
+    var resume = existing;
+    var phase = (resume && resume.phase) || 'followers';
 
-    // Cooldown check — applies to fresh scans AND resumes.
-    const cooldownLeft = checkCooldown(user.userId);
+    // Cooldown check
+    var cooldownLeft = checkCooldown(user.userId);
     if (cooldownLeft) {
       alert(
         "You scanned recently. To keep your account safe, Flock limits scans to once every 3 days.\n\n" +
@@ -1016,116 +748,125 @@
       return;
     }
 
-    // Size check (only on fresh runs, not on resume).
+    // Open popup to user's profile
+    var popup = openScanPopup(user.username);
+    if (!popup || popup.closed) {
+      alert(
+        "Flock needs to open a small window to scan your followers.\n\n" +
+        "Please allow popups for instagram.com and try again."
+      );
+      return;
+    }
+
+    try {
+      await waitForProfileRender(popup, 20000);
+    } catch (e) {
+      closeScanPopup();
+      alert(e.message);
+      return;
+    }
+
+    // Read account size from profile DOM
+    var sizes = readAccountSize(popup);
+    if (sizes.followers > MAX_ACCOUNT_SIZE || sizes.following > MAX_ACCOUNT_SIZE) {
+      closeScanPopup();
+      alert(
+        "Flock is built for accounts under " + MAX_ACCOUNT_SIZE.toLocaleString() + " followers/following.\n\n" +
+        "Yours has " + sizes.followers.toLocaleString() + " followers and " + sizes.following.toLocaleString() + " following."
+      );
+      return;
+    }
+
+    // Estimate time
+    var totalUsers = Math.min(sizes.followers, SCAN_CAP) + Math.min(sizes.following, SCAN_CAP);
+    var estMinutes = Math.ceil(totalUsers / 20 * SCROLL_PAUSE_MS / 60000) + 1;
+
+    // Confirmation dialog
     if (!resume) {
-      try {
-        const sizes = await checkAccountSize(user.username);
-        if (sizes.followers > MAX_ACCOUNT_SIZE || sizes.following > MAX_ACCOUNT_SIZE) {
-          alert(
-            "Flock is built for accounts under " + MAX_ACCOUNT_SIZE.toLocaleString() + " followers/following.\n\n" +
-            "Yours has " + sizes.followers.toLocaleString() + " followers and " + sizes.following.toLocaleString() + " following.\n\n" +
-            "If you really need this for a bigger account, the code is open source — fork it and remove the cap."
-          );
-          return;
-        }
-        // Estimate scan time for the overlay
-        var totalPages = Math.ceil(Math.min(sizes.followers, SCAN_CAP) / PAGE_SIZE) +
-                         Math.ceil(Math.min(sizes.following, SCAN_CAP) / PAGE_SIZE);
-        var estMinutes = Math.ceil(totalPages * (THROTTLE_MS + THROTTLE_JITTER_MS / 2) / 60000);
-      } catch (e) {
-        alert("Could not check account size: " + e.message);
+      var ok = confirm(
+        'This scan takes about ' + estMinutes + ' minutes. ' +
+        'Flock opens a small window and scrolls through your follower list \u2014 nothing is shared with us or any server.\n\n' +
+        'Keep the scan window open while it runs. You can use other windows and apps in the meantime.\n\n' +
+        'Ready to scan?'
+      );
+      if (!ok) {
+        closeScanPopup();
         return;
       }
     }
 
-    // Confirmation dialog on fresh scans.
-    if (!resume) {
-      var timeMsg = estMinutes ? 'This scan takes about ' + estMinutes + ' minutes. ' : '';
-      var ok = confirm(
-        timeMsg + 'Flock scans your follower list directly in your browser — nothing is shared with us or any server.\n\n' +
-        'We use careful pacing to keep everything smooth, but like any third-party tool, there\'s a small chance Instagram may temporarily limit some activity on your account.\n\n' +
-        'Ready to scan?'
-      );
-      if (!ok) return;
-    }
+    // Create overlay in popup window
+    try {
+      createOverlay(popup.document);
+    } catch (e) { /* continue without overlay */ }
 
-    createOverlay();
-
-    // Warm up the session with normal-looking requests before scanning.
-    if (!resume) {
-      updateOverlay('Loading your profile\u2026', 0);
-      await warmUp(user.userId);
-    }
-
-    let followers = initialFollowers || [];
-    let following = initialFollowing || [];
+    var followers = (resume && resume.partialFollowers) || [];
+    var following = (resume && resume.partialFollowing) || [];
 
     try {
+      // Phase 1: Scrape followers
       if (phase === 'followers') {
-        var timeNote = estMinutes ? ' (~' + estMinutes + ' min total)' : '';
-        updateOverlay('Scanning followers\u2026 ' + followers.length + timeNote, 0);
-        followers = await scrapeFollowers(user.userId, followers, initialCursor, (n) => {
-          updateOverlay('Scanning followers\u2026 ' + n + timeNote, 0.1 + Math.min(0.4, n / SCAN_CAP));
+        updateOverlay('Scanning followers\u2026 (~' + estMinutes + ' min)', 0);
+        await openListModal(popup, 'followers');
+        followers = await scrapeModal(popup, SCAN_CAP, function (n) {
+          updateOverlay('Scanning followers\u2026 ' + n, 0.05 + Math.min(0.4, n / SCAN_CAP));
         });
         phase = 'following';
-        initialCursor = null;
       }
-      updateOverlay('Scanning following\u2026 ' + following.length, 0.5);
-      following = await scrapeFollowing(user.userId, following, phase === 'following' ? initialCursor : null, (n) => {
-        updateOverlay('Scanning following\u2026 ' + n, 0.5 + Math.min(0.5, n / SCAN_CAP));
+
+      // Phase 2: Scrape following
+      updateOverlay('Scanning following\u2026', 0.5);
+      await openListModal(popup, 'following');
+      following = await scrapeModal(popup, SCAN_CAP, function (n) {
+        updateOverlay('Scanning following\u2026 ' + n, 0.5 + Math.min(0.35, n / SCAN_CAP));
       });
+
+      // Phase 3: Scrape posts
+      updateOverlay('Analyzing your posts\u2026', 0.9);
+      var posts = [];
+      try {
+        posts = await scrapePostGrid(popup, 50);
+        updateOverlay('Analyzing your posts\u2026 ' + posts.length + ' found', 0.98);
+      } catch (e) {
+        console.warn('[flock] post scrape failed:', e);
+      }
+
     } catch (e) {
       destroyOverlay();
-      if (e instanceof RateLimitError) {
-        // paginate() attached .cursor and .partial to the error at the point of failure.
-        // The in-flight phase's partial list lives on the error; the completed-so-far list
-        // (for the OTHER phase) is whatever `followers` or `following` holds locally.
-        let partialFollowers = followers;
-        let partialFollowing = following;
-        if (phase === 'followers') {
-          partialFollowers = Array.isArray(e.partial) ? e.partial : followers;
-        } else {
-          partialFollowing = Array.isArray(e.partial) ? e.partial : following;
-        }
+      closeScanPopup();
+
+      if (followers.length > 0 || following.length > 0) {
         saveResumeState({
           userId: user.userId,
           username: user.username,
           phase: phase,
-          cursor: (typeof e.cursor !== 'undefined') ? e.cursor : null,
-          partialFollowers: partialFollowers,
-          partialFollowing: partialFollowing,
+          cursor: null,
+          partialFollowers: followers,
+          partialFollowing: following,
         });
-        const payload = {
+        var payload = {
           username: user.username,
           userId: user.userId,
           scrapedAt: new Date().toISOString(),
-          followers: partialFollowers,
-          following: partialFollowing,
+          followers: followers,
+          following: following,
           partial: true,
           phase: phase,
         };
         try { await shipResults(payload); } catch (err) { alert("Could not redirect: " + err.message); }
         return;
       }
+
       alert("Something went wrong: " + (e.message || e) + ". Try again in a few minutes.");
       return;
     }
 
-    // Phase 3: scrape recent posts for growth analytics
-    let posts = [];
-    try {
-      updateOverlay('Analyzing your posts\u2026', 0.92);
-      posts = await scrapePosts(user.userId, 50);
-      updateOverlay('Analyzing your posts\u2026 ' + posts.length + ' found', 0.98);
-    } catch (e) {
-      console.warn('[flock] post scrape failed:', e);
-    }
-
     destroyOverlay();
+    closeScanPopup();
     clearResumeState();
     saveCooldown(user.userId);
 
-    const payload = {
+    var payload = {
       username: user.username,
       userId: user.userId,
       scrapedAt: new Date().toISOString(),
@@ -1144,9 +885,8 @@
   if (typeof window !== 'undefined' && window.__followRadarTest) {
     window.__followRadarTest.RateLimitError = RateLimitError;
     window.__followRadarTest.constants = {
-      MAX_ACCOUNT_SIZE, SCAN_CAP, THROTTLE_MS, THROTTLE_JITTER_MS, PAGE_SIZE,
-      IG_APP_ID, RESUME_MAX_AGE_MS, COOLDOWN_MS, COOLDOWN_KEY,
-      FOLLOW_RADAR_URL, RESUME_KEY
+      MAX_ACCOUNT_SIZE, SCAN_CAP, SCROLL_PAUSE_MS, SCROLL_SETTLE_MS,
+      COOLDOWN_MS, COOLDOWN_KEY, FOLLOW_RADAR_URL, RESUME_KEY
     };
     window.__followRadarTest.encodePayload = encodePayload;
     window.__followRadarTest.decodePayload = decodePayload;
@@ -1155,40 +895,28 @@
     window.__followRadarTest.clearResumeState = clearResumeState;
     window.__followRadarTest.checkCooldown = checkCooldown;
     window.__followRadarTest.saveCooldown = saveCooldown;
-    window.__followRadarTest.warmUp = warmUp;
-    window.__followRadarTest.classifyResponse = classifyResponse;
-    window.__followRadarTest.fetchPage = fetchPage;
-    window.__followRadarTest.setFetch = function (fn) { doFetch = fn; };
-    window.__followRadarTest.buildFollowersUrl = buildFollowersUrl;
-    window.__followRadarTest.buildFollowingUrl = buildFollowingUrl;
-    window.__followRadarTest.trimUser = trimUser;
-    window.__followRadarTest.scrapeFollowers = scrapeFollowers;
-    window.__followRadarTest.scrapeFollowing = scrapeFollowing;
-    window.__followRadarTest.setFetchPageImpl = function (fn) { fetchPageImpl = fn; };
-    window.__followRadarTest.shipResults = shipResults;
-    window.__followRadarTest.main = main;
     window.__followRadarTest.sleep = sleep;
     window.__followRadarTest.waitForEl = waitForEl;
     window.__followRadarTest.findByText = findByText;
     window.__followRadarTest.extractUsernameFromHref = extractUsernameFromHref;
     window.__followRadarTest.parseMutualText = parseMutualText;
+    window.__followRadarTest.parseCountText = parseCountText;
     window.__followRadarTest.openScanPopup = openScanPopup;
     window.__followRadarTest.closeScanPopup = closeScanPopup;
-    window.__followRadarTest.waitForProfileRender = waitForProfileRender;
-    window.__followRadarTest.parseCountText = parseCountText;
     window.__followRadarTest.readAccountSize = readAccountSize;
     window.__followRadarTest.openListModal = openListModal;
     window.__followRadarTest.scrapeModal = scrapeModal;
+    window.__followRadarTest.findScrollableChild = findScrollableChild;
+    window.__followRadarTest.readUserRow = readUserRow;
     window.__followRadarTest.readPostTile = readPostTile;
     window.__followRadarTest.scrapePostGrid = scrapePostGrid;
     window.__followRadarTest.getFiberKey = getFiberKey;
     window.__followRadarTest.walkFiber = walkFiber;
     window.__followRadarTest.getReactFiberData = getReactFiberData;
-    window.__followRadarTest.findScrollableChild = findScrollableChild;
-    window.__followRadarTest.readUserRow = readUserRow;
-    window.__followRadarTest.constants.SCROLL_PAUSE_MS = SCROLL_PAUSE_MS;
-    window.__followRadarTest.constants.SCROLL_SETTLE_MS = SCROLL_SETTLE_MS;
-    return; // skip main() in test mode
+    window.__followRadarTest.getCurrentUserDOM = getCurrentUserDOM;
+    window.__followRadarTest.shipResults = shipResults;
+    window.__followRadarTest.main = main;
+    return;
   }
 
   // Production entry point.
