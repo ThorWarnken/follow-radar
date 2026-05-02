@@ -299,159 +299,53 @@ Return your response as valid JSON matching the exact schema provided. Do not in
 }
 
 function computeMetrics(scan) {
-  const posts = scan.posts || [];
-  const followers = scan.followers || [];
-  const following = scan.following || [];
-  const followerCount = followers.length;
-  const followingCount = following.length;
-  const postsAnalyzed = posts.length;
-
-  // Basic engagement averages
-  const totalLikes = posts.reduce((sum, p) => sum + (p.like_count || 0), 0);
-  const totalComments = posts.reduce((sum, p) => sum + (p.comment_count || 0), 0);
-  const avgLikes = postsAnalyzed > 0 ? Math.round(totalLikes / postsAnalyzed) : 0;
-  const avgComments = postsAnalyzed > 0 ? Math.round((totalComments / postsAnalyzed) * 10) / 10 : 0;
-  const engagementRate = followerCount > 0 && postsAnalyzed > 0
-    ? Math.round(((totalLikes + totalComments) / postsAnalyzed / followerCount) * 10000) / 100
-    : 0;
-  const likeToFollowerRatio = followerCount > 0 && postsAnalyzed > 0
-    ? Math.round((totalLikes / postsAnalyzed / followerCount) * 10000) / 100
-    : 0;
-
-  // Post type breakdown (1=Photo, 2=Reel, 8=Carousel)
-  const typeNames = { 1: 'Photo', 2: 'Reel', 8: 'Carousel' };
-  const typeGroups = {};
-  for (const p of posts) {
-    const t = p.media_type || 0;
-    if (!typeGroups[t]) typeGroups[t] = { count: 0, totalEng: 0 };
-    typeGroups[t].count++;
-    typeGroups[t].totalEng += (p.like_count || 0) + (p.comment_count || 0);
-  }
-  const postTypeBreakdown = {};
-  for (const [type, data] of Object.entries(typeGroups)) {
-    const name = typeNames[type] || `Type ${type}`;
-    postTypeBreakdown[name] = {
-      count: data.count,
-      avgEngagement: Math.round(data.totalEng / data.count),
-    };
+  // Scan data arrives pre-aggregated from the client.
+  // Map the client shape to the metrics shape used by buildUserPrompt and the response.
+  var typeNames = { 'photo': 'Photo', 'video': 'Reel', 'carousel': 'Carousel' };
+  var postTypeBreakdown = {};
+  var breakdown = scan.post_type_breakdown || {};
+  for (var key in breakdown) {
+    var displayName = typeNames[key] || key;
+    postTypeBreakdown[displayName] = { count: breakdown[key], avgEngagement: 0 };
   }
 
-  // Engagement by day of week and hour
-  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const dayData = Array.from({ length: 7 }, (_, i) => ({ day: dayNames[i], totalEng: 0, postCount: 0 }));
-  const hourData = {};
+  var dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  var bestDays = scan.best_posting_days || {};
+  var engagementByDayOfWeek = dayNames.map(function(day) {
+    return { day: day, avgEngagement: bestDays[day] || 0, postCount: 0 };
+  });
 
-  for (const p of posts) {
-    if (!p.taken_at) continue;
-    const date = new Date(p.taken_at * 1000);
-    const eng = (p.like_count || 0) + (p.comment_count || 0);
-    const dow = date.getUTCDay();
-    dayData[dow].totalEng += eng;
-    dayData[dow].postCount++;
-    const hour = date.getUTCHours();
-    if (!hourData[hour]) hourData[hour] = { totalEng: 0, postCount: 0 };
-    hourData[hour].totalEng += eng;
-    hourData[hour].postCount++;
-  }
+  var bestHours = scan.best_posting_hours || {};
+  var engagementByHour = Object.keys(bestHours)
+    .map(function(h) { return { hour: parseInt(h), avgEngagement: bestHours[h] || 0, postCount: 0 }; })
+    .sort(function(a, b) { return a.hour - b.hour; });
 
-  const engagementByDayOfWeek = dayData.map(d => ({
-    day: d.day,
-    avgEngagement: d.postCount > 0 ? Math.round(d.totalEng / d.postCount) : 0,
-    postCount: d.postCount,
-  }));
-
-  const engagementByHour = Object.entries(hourData)
-    .map(([hour, d]) => ({
-      hour: parseInt(hour),
-      avgEngagement: d.postCount > 0 ? Math.round(d.totalEng / d.postCount) : 0,
-      postCount: d.postCount,
-    }))
-    .sort((a, b) => a.hour - b.hour);
-
-  // Best posting time and day
-  const bestHourEntry = engagementByHour.length > 0
-    ? engagementByHour.reduce((best, cur) => cur.avgEngagement > best.avgEngagement ? cur : best)
+  var bestHourEntry = engagementByHour.length > 0
+    ? engagementByHour.reduce(function(best, cur) { return cur.avgEngagement > best.avgEngagement ? cur : best; })
     : null;
-  const bestPostingTime = bestHourEntry ? bestHourEntry.hour : null;
-
-  const bestDayEntry = engagementByDayOfWeek.reduce((best, cur) =>
-    cur.avgEngagement > best.avgEngagement ? cur : best
-  );
-  const bestPostingDay = bestDayEntry.postCount > 0 ? bestDayEntry.day : null;
-
-  // Post frequency (posts per week)
-  let postFrequency = 0;
-  if (postsAnalyzed >= 2) {
-    const timestamps = posts.filter(p => p.taken_at).map(p => p.taken_at).sort((a, b) => a - b);
-    if (timestamps.length >= 2) {
-      const spanSeconds = timestamps[timestamps.length - 1] - timestamps[0];
-      const spanWeeks = spanSeconds / (7 * 24 * 60 * 60);
-      postFrequency = spanWeeks > 0 ? Math.round((timestamps.length / spanWeeks) * 10) / 10 : 0;
-    }
-  }
-
-  // Engagement trend (older half vs newer half)
-  let engagementTrend = 0;
-  if (postsAnalyzed >= 4) {
-    const sorted = [...posts].sort((a, b) => (a.taken_at || 0) - (b.taken_at || 0));
-    const mid = Math.floor(sorted.length / 2);
-    const olderHalf = sorted.slice(0, mid);
-    const newerHalf = sorted.slice(mid);
-    const olderAvg = olderHalf.reduce((s, p) => s + (p.like_count || 0) + (p.comment_count || 0), 0) / olderHalf.length;
-    const newerAvg = newerHalf.reduce((s, p) => s + (p.like_count || 0) + (p.comment_count || 0), 0) / newerHalf.length;
-    engagementTrend = olderAvg > 0
-      ? Math.round(((newerAvg - olderAvg) / olderAvg) * 10000) / 100
-      : 0;
-  }
-
-  // Caption analysis
-  const shortCaptions = posts.filter(p => (p.caption_length || 0) < 100);
-  const longCaptions = posts.filter(p => (p.caption_length || 0) >= 100);
-  const captionAnalysis = {
-    short: {
-      count: shortCaptions.length,
-      avgEngagement: shortCaptions.length > 0
-        ? Math.round(shortCaptions.reduce((s, p) => s + (p.like_count || 0) + (p.comment_count || 0), 0) / shortCaptions.length)
-        : 0,
-    },
-    long: {
-      count: longCaptions.length,
-      avgEngagement: longCaptions.length > 0
-        ? Math.round(longCaptions.reduce((s, p) => s + (p.like_count || 0) + (p.comment_count || 0), 0) / longCaptions.length)
-        : 0,
-    },
-  };
-
-  // Top 3 posts by total engagement
-  const topPosts = [...posts]
-    .map(p => ({
-      likeCount: p.like_count || 0,
-      commentCount: p.comment_count || 0,
-      totalEngagement: (p.like_count || 0) + (p.comment_count || 0),
-      mediaType: typeNames[p.media_type] || `Type ${p.media_type}`,
-      captionLength: p.caption_length || 0,
-      takenAt: p.taken_at ? new Date(p.taken_at * 1000).toISOString() : null,
-    }))
-    .sort((a, b) => b.totalEngagement - a.totalEngagement)
-    .slice(0, 3);
+  var bestDayEntry = engagementByDayOfWeek.reduce(function(best, cur) {
+    return cur.avgEngagement > best.avgEngagement ? cur : best;
+  });
 
   return {
-    followerCount,
-    followingCount,
-    postsAnalyzed,
-    avgLikes,
-    avgComments,
-    engagementRate,
-    likeToFollowerRatio,
-    postTypeBreakdown,
-    engagementByDayOfWeek,
-    engagementByHour,
-    bestPostingTime,
-    bestPostingDay,
-    postFrequency,
-    engagementTrend,
-    captionAnalysis,
-    topPosts,
+    followerCount: scan.follower_count || 0,
+    followingCount: scan.following_count || 0,
+    postsAnalyzed: scan.total_posts_scanned || 0,
+    avgLikes: scan.avg_likes_per_post || 0,
+    avgComments: scan.avg_comments_per_post || 0,
+    engagementRate: scan.engagement_rate || 0,
+    likeToFollowerRatio: scan.follower_count > 0
+      ? Math.round((scan.avg_likes_per_post / scan.follower_count) * 10000) / 100
+      : 0,
+    postTypeBreakdown: postTypeBreakdown,
+    engagementByDayOfWeek: engagementByDayOfWeek,
+    engagementByHour: engagementByHour,
+    bestPostingTime: bestHourEntry ? bestHourEntry.hour : null,
+    bestPostingDay: bestDayEntry.avgEngagement > 0 ? bestDayEntry.day : null,
+    postFrequency: 0,
+    engagementTrend: 0,
+    captionAnalysis: { short: { count: 0, avgEngagement: 0 }, long: { count: 0, avgEngagement: 0 } },
+    topPosts: [],
   };
 }
 
