@@ -574,5 +574,51 @@ test('shipResults via encode/decode round-trip', async () => {
     assert(result.media_type === 2, 'reel should be video type');
   });
 </script>
+
+<script>
+  // ─── React fiber fallback tests ────────────────────────────────
+
+  test('getFiberKey finds React fiber property', function () {
+    var el = document.createElement('div');
+    el['__reactFiber$abc123'] = { memoizedProps: {} };
+    var key = window.__followRadarTest.getFiberKey(el);
+    assert(key === '__reactFiber$abc123', 'should find fiber key');
+  });
+
+  test('getFiberKey returns null for non-React elements', function () {
+    var el = document.createElement('div');
+    var key = window.__followRadarTest.getFiberKey(el);
+    assert(key === null, 'should return null');
+  });
+
+  test('getReactFiberData finds data walking up fiber tree', function () {
+    var el = document.createElement('div');
+    var mockUsers = [{ username: 'test1' }, { username: 'test2' }];
+    el['__reactFiber$xyz'] = {
+      memoizedProps: {},
+      return: {
+        memoizedProps: { users: mockUsers },
+        return: null
+      },
+      child: null,
+      sibling: null
+    };
+    var result = window.__followRadarTest.getReactFiberData(el, 'users');
+    assert(result === mockUsers, 'should find users array walking up');
+    assert(result.length === 2, 'should have 2 users');
+  });
+
+  test('getReactFiberData returns null when key not found', function () {
+    var el = document.createElement('div');
+    el['__reactFiber$xyz'] = {
+      memoizedProps: { other: 'data' },
+      return: null,
+      child: null,
+      sibling: null
+    };
+    var result = window.__followRadarTest.getReactFiberData(el, 'users');
+    assert(result === null, 'should return null when key not found');
+  });
+</script>
 </body>
 </html>

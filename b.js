@@ -478,6 +478,58 @@
     return posts;
   }
 
+  // ─── React fiber fallback ───────────────────────────────────────
+
+  function getFiberKey(element) {
+    var keys = Object.keys(element);
+    for (var i = 0; i < keys.length; i++) {
+      if (keys[i].indexOf('__reactFiber$') === 0 || keys[i].indexOf('__reactInternalInstance$') === 0) {
+        return keys[i];
+      }
+    }
+    return null;
+  }
+
+  function walkFiber(fiber, predicate, maxDepth) {
+    if (!fiber || maxDepth <= 0) return null;
+    if (predicate(fiber)) return fiber;
+    var result = walkFiber(fiber.child, predicate, maxDepth - 1);
+    if (result) return result;
+    return walkFiber(fiber.sibling, predicate, maxDepth - 1);
+  }
+
+  function getReactFiberData(element, dataKey) {
+    var fiberKey = getFiberKey(element);
+    if (!fiberKey) return null;
+    var fiber = element[fiberKey];
+
+    // Walk up to find a fiber with memoizedProps containing user data
+    var node = fiber;
+    for (var i = 0; i < 20 && node; i++) {
+      var props = node.memoizedProps || {};
+      if (props[dataKey] && Array.isArray(props[dataKey])) {
+        return props[dataKey];
+      }
+      props = node.pendingProps || {};
+      if (props[dataKey] && Array.isArray(props[dataKey])) {
+        return props[dataKey];
+      }
+      node = node.return;
+    }
+
+    // Walk down as well
+    var found = walkFiber(fiber, function (f) {
+      var p = f.memoizedProps || f.pendingProps || {};
+      return p[dataKey] && Array.isArray(p[dataKey]);
+    }, 15);
+
+    if (found) {
+      var p = found.memoizedProps || found.pendingProps || {};
+      return p[dataKey];
+    }
+    return null;
+  }
+
   // ─── Fetch + classification ──────────────────────────────────────
 
   // doFetch is replaceable in tests via window.__followRadarTest.setFetch().
@@ -1126,6 +1178,9 @@
     window.__followRadarTest.scrapeModal = scrapeModal;
     window.__followRadarTest.readPostTile = readPostTile;
     window.__followRadarTest.scrapePostGrid = scrapePostGrid;
+    window.__followRadarTest.getFiberKey = getFiberKey;
+    window.__followRadarTest.walkFiber = walkFiber;
+    window.__followRadarTest.getReactFiberData = getReactFiberData;
     window.__followRadarTest.findScrollableChild = findScrollableChild;
     window.__followRadarTest.readUserRow = readUserRow;
     window.__followRadarTest.constants.SCROLL_PAUSE_MS = SCROLL_PAUSE_MS;
