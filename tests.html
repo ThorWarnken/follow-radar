@@ -396,5 +396,74 @@ test('shipResults via encode/decode round-trip', async () => {
   assertEq(back, obj);
 });
 </script>
+
+<script>
+  // ─── DOM utility tests ─────────────────────────────────────────
+
+  test('sleep delays for at least the specified time', async function () {
+    var start = Date.now();
+    await window.__followRadarTest.sleep(50);
+    var elapsed = Date.now() - start;
+    assert(elapsed >= 45, 'sleep should delay at least ~50ms, got ' + elapsed);
+  });
+
+  test('waitForEl resolves when element appears', async function () {
+    var container = document.createElement('div');
+    document.body.appendChild(container);
+    setTimeout(function () {
+      var el = document.createElement('span');
+      el.setAttribute('data-test', 'wfe');
+      container.appendChild(el);
+    }, 50);
+    var found = await window.__followRadarTest.waitForEl(container, '[data-test="wfe"]', 2000);
+    assert(found !== null, 'should find the element');
+    assert(found.getAttribute('data-test') === 'wfe', 'should be the right element');
+    container.remove();
+  });
+
+  test('waitForEl rejects on timeout', async function () {
+    var container = document.createElement('div');
+    try {
+      await window.__followRadarTest.waitForEl(container, '[data-test="nope"]', 100);
+      assert(false, 'should have thrown');
+    } catch (e) {
+      assert(e.message.indexOf('timed out') !== -1, 'should mention timeout');
+    }
+  });
+
+  test('findByText finds element by case-insensitive text', function () {
+    var container = document.createElement('div');
+    var a = document.createElement('a');
+    a.textContent = '1,234 followers';
+    var b = document.createElement('a');
+    b.textContent = '567 following';
+    container.appendChild(a);
+    container.appendChild(b);
+    var found = window.__followRadarTest.findByText(container, 'followers');
+    assert(found === a, 'should find the followers link');
+    var found2 = window.__followRadarTest.findByText(container, 'Followers');
+    assert(found2 === a, 'should be case-insensitive');
+  });
+
+  test('extractUsernameFromHref parses username from profile links', function () {
+    var ex = window.__followRadarTest.extractUsernameFromHref;
+    assert(ex('/johndoe/') === 'johndoe', 'simple username');
+    assert(ex('https://www.instagram.com/johndoe/') === 'johndoe', 'full URL');
+    assert(ex('/explore/') === null, 'reserved path');
+    assert(ex('/reels/') === null, 'reserved path reels');
+    assert(ex('/p/ABC123/') === null, 'post link');
+    assert(ex('/stories/johndoe/') === null, 'stories link');
+  });
+
+  test('parseMutualText extracts mutual count from IG text', function () {
+    var p = window.__followRadarTest.parseMutualText;
+    assert(p('Followed by sarah_j and 3 others') === 4, '1 named + 3 others = 4');
+    assert(p('Followed by sarah_j, mike and 5 others') === 7, '2 named + 5 others = 7');
+    assert(p('Followed by sarah_j and mike') === 2, '2 named no others');
+    assert(p('Followed by sarah_j') === 1, '1 named');
+    assert(p('') === 0, 'empty string');
+    assert(p('Some random text') === 0, 'no match');
+  });
+</script>
 </body>
 </html>

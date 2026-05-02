@@ -175,6 +175,55 @@
     await throttle();
   }
 
+  // ─── DOM utilities ───────────────────────────────────────────────
+
+  const SCROLL_PAUSE_MS = 2000;
+  const SCROLL_SETTLE_MS = 500;
+
+  function sleep(ms) {
+    return new Promise(function (r) { setTimeout(r, ms); });
+  }
+
+  function waitForEl(root, selector, timeout) {
+    return new Promise(function (resolve, reject) {
+      var deadline = Date.now() + (timeout || 10000);
+      (function poll() {
+        var el = root.querySelector(selector);
+        if (el) return resolve(el);
+        if (Date.now() > deadline) return reject(new Error('waitForEl timed out: ' + selector));
+        setTimeout(poll, 200);
+      })();
+    });
+  }
+
+  function findByText(parent, text) {
+    var lower = text.toLowerCase();
+    var all = parent.querySelectorAll('a, span, div, button, h1, h2');
+    for (var i = 0; i < all.length; i++) {
+      if (all[i].textContent.toLowerCase().indexOf(lower) !== -1) return all[i];
+    }
+    return null;
+  }
+
+  var RESERVED_PATHS = /^\/(explore|reels|stories|p|direct|accounts|about|legal|developer|static|press|api|tags|locations|challenge)\b/;
+
+  function extractUsernameFromHref(href) {
+    var path = href.replace(/^https?:\/\/[^/]+/, '');
+    if (RESERVED_PATHS.test(path)) return null;
+    var m = path.match(/^\/([a-zA-Z0-9._]{1,30})\/?$/);
+    return m ? m[1] : null;
+  }
+
+  function parseMutualText(text) {
+    if (!text || text.indexOf('Followed by') === -1) return 0;
+    var othersMatch = text.match(/(\d+)\s*others?\s*$/i);
+    var othersCount = othersMatch ? parseInt(othersMatch[1], 10) : 0;
+    var afterFollowedBy = text.replace(/^.*?Followed by\s*/i, '');
+    var withoutOthers = afterFollowedBy.replace(/\s*and\s*\d+\s*others?\s*$/i, '').replace(/\s*,?\s*\d+\s*others?\s*$/i, '');
+    var names = withoutOthers.split(/\s*,\s*|\s+and\s+/).filter(function (s) { return s.trim().length > 0; });
+    return names.length + othersCount;
+  }
+
   // ─── Fetch + classification ──────────────────────────────────────
 
   // doFetch is replaceable in tests via window.__followRadarTest.setFetch().
@@ -809,6 +858,13 @@
     window.__followRadarTest.setFetchPageImpl = function (fn) { fetchPageImpl = fn; };
     window.__followRadarTest.shipResults = shipResults;
     window.__followRadarTest.main = main;
+    window.__followRadarTest.sleep = sleep;
+    window.__followRadarTest.waitForEl = waitForEl;
+    window.__followRadarTest.findByText = findByText;
+    window.__followRadarTest.extractUsernameFromHref = extractUsernameFromHref;
+    window.__followRadarTest.parseMutualText = parseMutualText;
+    window.__followRadarTest.constants.SCROLL_PAUSE_MS = SCROLL_PAUSE_MS;
+    window.__followRadarTest.constants.SCROLL_SETTLE_MS = SCROLL_SETTLE_MS;
     return; // skip main() in test mode
   }
 
