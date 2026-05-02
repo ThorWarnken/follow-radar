@@ -223,17 +223,23 @@
   }
 
   async function waitForProfileRender(popup, timeout) {
-    var deadline = Date.now() + (timeout || 20000);
+    var deadline = Date.now() + (timeout || 30000);
     while (Date.now() < deadline) {
       if (popup.closed) throw new Error('Popup was closed before profile loaded.');
       try {
         var doc = popup.document;
+        // Try multiple selectors -- Instagram's DOM varies
         var links = doc.querySelectorAll('a[href*="/followers"]');
         if (links.length > 0) return;
+        // Also check for the text "followers" in any link
+        var allLinks = doc.querySelectorAll('a');
+        for (var i = 0; i < allLinks.length; i++) {
+          if (/\d+\s*followers/i.test(allLinks[i].textContent)) return;
+        }
       } catch (e) {
         // Cross-origin or not-ready -- keep polling
       }
-      await sleep(500);
+      await sleep(1000);
     }
     throw new Error('Profile did not load in time. Check your connection and try again.');
   }
@@ -755,7 +761,7 @@
     }
 
     try {
-      await waitForProfileRender(popup, 20000);
+      await waitForProfileRender(popup, 30000);
     } catch (e) {
       closeScanPopup();
       alert(e.message);
