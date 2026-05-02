@@ -465,5 +465,45 @@ test('shipResults via encode/decode round-trip', async () => {
     assert(p('Some random text') === 0, 'no match');
   });
 </script>
+
+<script>
+  // ─── Popup management tests ────────────────────────────────────
+
+  test('parseCountText parses various count formats', function () {
+    var p = window.__followRadarTest.parseCountText;
+    assert(p('1,234') === 1234, 'comma-separated');
+    assert(p('567') === 567, 'plain number');
+    assert(p('12.5K') === 12500, 'K suffix');
+    assert(p('1.2M') === 1200000, 'M suffix');
+    assert(p('0') === 0, 'zero');
+  });
+
+  test('openScanPopup is a callable function', function () {
+    var fn = window.__followRadarTest.openScanPopup;
+    assert(typeof fn === 'function', 'should be exported');
+  });
+
+  test('readAccountSize reads from mock DOM', function () {
+    // Create a mock popup-like object with a mock document
+    var container = document.createElement('div');
+    var followersLink = document.createElement('a');
+    followersLink.setAttribute('href', '/testuser/followers/');
+    followersLink.textContent = '1,234 followers';
+    var followingLink = document.createElement('a');
+    followingLink.setAttribute('href', '/testuser/following/');
+    followingLink.textContent = '567 following';
+    container.appendChild(followersLink);
+    container.appendChild(followingLink);
+
+    // Mock popup with querySelectorAll
+    var mockDoc = {
+      querySelectorAll: function(sel) { return container.querySelectorAll(sel); }
+    };
+    var mockPopup = { document: mockDoc };
+    var result = window.__followRadarTest.readAccountSize(mockPopup);
+    assert(result.followers === 1234, 'followers count, got ' + result.followers);
+    assert(result.following === 567, 'following count, got ' + result.following);
+  });
+</script>
 </body>
 </html>

@@ -224,6 +224,73 @@
     return names.length + othersCount;
   }
 
+  // ─── Popup management ───────────────────────────────────────────
+
+  var scanPopup = null;
+
+  function openScanPopup(username) {
+    var w = 420, h = 720;
+    var left = window.screen.availWidth - w - 40;
+    var top = 60;
+    var features = 'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top +
+                   ',resizable=yes,scrollbars=yes';
+    scanPopup = window.open(
+      'https://www.instagram.com/' + encodeURIComponent(username) + '/',
+      'flock-scan',
+      features
+    );
+    return scanPopup;
+  }
+
+  function closeScanPopup() {
+    if (scanPopup && !scanPopup.closed) scanPopup.close();
+    scanPopup = null;
+  }
+
+  async function waitForProfileRender(popup, timeout) {
+    var deadline = Date.now() + (timeout || 20000);
+    while (Date.now() < deadline) {
+      if (popup.closed) throw new Error('Popup was closed before profile loaded.');
+      try {
+        var doc = popup.document;
+        var links = doc.querySelectorAll('a[href*="/followers"]');
+        if (links.length > 0) return;
+      } catch (e) {
+        // Cross-origin or not-ready — keep polling
+      }
+      await sleep(500);
+    }
+    throw new Error('Profile did not load in time. Check your connection and try again.');
+  }
+
+  // Parse "1,234" or "12.5K" or "1.2M" to a number
+  function parseCountText(s) {
+    s = s.replace(/,/g, '').trim();
+    if (/[Kk]$/.test(s)) return Math.round(parseFloat(s) * 1000);
+    if (/[Mm]$/.test(s)) return Math.round(parseFloat(s) * 1000000);
+    return parseInt(s, 10) || 0;
+  }
+
+  function readAccountSize(popup) {
+    var doc = popup.document;
+    var followers = 0, following = 0;
+
+    var allLinks = doc.querySelectorAll('a[href]');
+    for (var i = 0; i < allLinks.length; i++) {
+      var href = allLinks[i].getAttribute('href') || '';
+      var text = allLinks[i].textContent.replace(/,/g, '').trim();
+      var numMatch = text.match(/([\d.]+[KkMm]?)/);
+      if (!numMatch) continue;
+      var num = parseCountText(numMatch[1]);
+      if (href.indexOf('/followers') !== -1 && href.indexOf('/following') === -1) {
+        followers = num;
+      } else if (href.indexOf('/following') !== -1) {
+        following = num;
+      }
+    }
+    return { followers: followers, following: following };
+  }
+
   // ─── Fetch + classification ──────────────────────────────────────
 
   // doFetch is replaceable in tests via window.__followRadarTest.setFetch().
@@ -863,6 +930,11 @@
     window.__followRadarTest.findByText = findByText;
     window.__followRadarTest.extractUsernameFromHref = extractUsernameFromHref;
     window.__followRadarTest.parseMutualText = parseMutualText;
+    window.__followRadarTest.openScanPopup = openScanPopup;
+    window.__followRadarTest.closeScanPopup = closeScanPopup;
+    window.__followRadarTest.waitForProfileRender = waitForProfileRender;
+    window.__followRadarTest.parseCountText = parseCountText;
+    window.__followRadarTest.readAccountSize = readAccountSize;
     window.__followRadarTest.constants.SCROLL_PAUSE_MS = SCROLL_PAUSE_MS;
     window.__followRadarTest.constants.SCROLL_SETTLE_MS = SCROLL_SETTLE_MS;
     return; // skip main() in test mode
