@@ -231,7 +231,7 @@
         var links = doc.querySelectorAll('a[href*="/followers"]');
         if (links.length > 0) return;
       } catch (e) {
-        // Cross-origin or not-ready — keep polling
+        // Cross-origin or not-ready -- keep polling
       }
       await sleep(500);
     }
@@ -610,7 +610,7 @@
 
     // Status text
     overlayTextEl = overlayDoc.createElement('div');
-    overlayTextEl.textContent = 'Starting\u2026';
+    overlayTextEl.textContent = 'Starting...';
     overlayTextEl.setAttribute('style', 'font-size:12px;color:rgba(255,255,255,0.65);font-variant-numeric:tabular-nums;margin-bottom:12px');
     content.appendChild(overlayTextEl);
 
@@ -781,7 +781,7 @@
     if (!resume) {
       var ok = confirm(
         'This scan takes about ' + estMinutes + ' minutes. ' +
-        'Flock opens a small window and scrolls through your follower list \u2014 nothing is shared with us or any server.\n\n' +
+        'Flock opens a small window and scrolls through your follower list -- nothing is shared with us or any server.\n\n' +
         'Keep the scan window open while it runs. You can use other windows and apps in the meantime.\n\n' +
         'Ready to scan?'
       );
@@ -802,27 +802,27 @@
     try {
       // Phase 1: Scrape followers
       if (phase === 'followers') {
-        updateOverlay('Scanning followers\u2026 (~' + estMinutes + ' min)', 0);
+        updateOverlay('Scanning followers... (~' + estMinutes + ' min)', 0);
         await openListModal(popup, 'followers');
         followers = await scrapeModal(popup, SCAN_CAP, function (n) {
-          updateOverlay('Scanning followers\u2026 ' + n, 0.05 + Math.min(0.4, n / SCAN_CAP));
+          updateOverlay('Scanning followers... ' + n, 0.05 + Math.min(0.4, n / SCAN_CAP));
         });
         phase = 'following';
       }
 
       // Phase 2: Scrape following
-      updateOverlay('Scanning following\u2026', 0.5);
+      updateOverlay('Scanning following...', 0.5);
       await openListModal(popup, 'following');
       following = await scrapeModal(popup, SCAN_CAP, function (n) {
-        updateOverlay('Scanning following\u2026 ' + n, 0.5 + Math.min(0.35, n / SCAN_CAP));
+        updateOverlay('Scanning following... ' + n, 0.5 + Math.min(0.35, n / SCAN_CAP));
       });
 
       // Phase 3: Scrape posts
-      updateOverlay('Analyzing your posts\u2026', 0.9);
+      updateOverlay('Analyzing your posts...', 0.9);
       var posts = [];
       try {
         posts = await scrapePostGrid(popup, 50);
-        updateOverlay('Analyzing your posts\u2026 ' + posts.length + ' found', 0.98);
+        updateOverlay('Analyzing your posts... ' + posts.length + ' found', 0.98);
       } catch (e) {
         console.warn('[flock] post scrape failed:', e);
       }
@@ -942,7 +942,7 @@
     }
 
     if (_username) {
-      openScanPopup(_username); // synchronous — preserves user gesture for popup
+      openScanPopup(_username); // synchronous -- preserves user gesture for popup
     }
 
     main().catch(e => {
