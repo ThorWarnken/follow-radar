@@ -270,7 +270,7 @@ Return your response as valid JSON matching the exact schema provided. Do not in
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 4096,
+        max_tokens: 16384,
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }],
       }),
@@ -286,6 +286,9 @@ Return your response as valid JSON matching the exact schema provided. Do not in
     }
 
     const result = await response.json();
+    if (result.stop_reason === 'max_tokens') {
+      console.error('Claude response truncated — hit max_tokens limit');
+    }
     const textContent = result.content?.[0]?.text;
     if (!textContent) {
       console.error('Claude API returned no text content');
