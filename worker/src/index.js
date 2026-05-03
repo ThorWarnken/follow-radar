@@ -292,17 +292,26 @@ Return your response as valid JSON matching the exact schema provided. Do not in
       return json({ error: 'AI returned empty response' }, 502, corsHeaders);
     }
 
-    // Extract JSON from Claude's response (handle markdown code fences and whitespace)
+    // Extract JSON from Claude's response
     let report;
     try {
       let jsonStr = textContent.trim();
-      // Remove markdown code fences if present
-      const fenceMatch = jsonStr.match(/```(?:json)?\s*\n?([\s\S]*?)\n?\s*```/);
+      // Remove markdown code fences if present (greedy match for large responses)
+      const fenceMatch = jsonStr.match(/```(?:json)?\s*\n?([\s\S]*)\n?\s*```/);
       if (fenceMatch) jsonStr = fenceMatch[1].trim();
+      // Try to find JSON object if there's text before/after it
+      if (jsonStr.charAt(0) !== '{') {
+        const firstBrace = jsonStr.indexOf('{');
+        if (firstBrace !== -1) jsonStr = jsonStr.slice(firstBrace);
+      }
+      const lastBrace = jsonStr.lastIndexOf('}');
+      if (lastBrace !== -1 && lastBrace < jsonStr.length - 1) {
+        jsonStr = jsonStr.slice(0, lastBrace + 1);
+      }
       report = JSON.parse(jsonStr);
     } catch (e) {
-      console.error('Failed to parse Claude JSON response:', e.message, textContent.slice(0, 200));
-      return json({ error: 'AI returned invalid JSON' }, 502, corsHeaders);
+      console.error('Failed to parse Claude JSON response:', e.message, textContent.slice(0, 500));
+      return json({ error: 'AI returned invalid JSON: ' + e.message + ' | Start: ' + textContent.slice(0, 100) }, 502, corsHeaders);
     }
 
     return json({ success: true, metrics, report }, 200, corsHeaders);
