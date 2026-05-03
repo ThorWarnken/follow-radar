@@ -1734,12 +1734,22 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
       var res = await fetch('https://flock-payments.warnkenc.workers.dev/verify?email=' + encodeURIComponent(savedEmail));
       var data = await res.json();
       if (data.plan === 'business-monthly' || data.plan === 'business-yearly') {
-        // Active subscriber returning - skip pricing/form, show scan directly
-        scanSection.classList.add('show');
-        // Scroll past the hero to the scan section after a short delay
-        setTimeout(function() {
-          scanSection.scrollIntoView({ behavior: 'smooth' });
-        }, 500);
+        // Active subscriber returning — check if they've filled out company data
+        var profile = null;
+        try { profile = JSON.parse(savedProfile); } catch(e) {}
+        if (profile && profile.businessName) {
+          // Profile complete — show scan directly
+          scanSection.classList.add('show');
+          setTimeout(function() {
+            scanSection.scrollIntoView({ behavior: 'smooth' });
+          }, 500);
+        } else {
+          // No profile yet — show onboarding form first
+          onboardSection.classList.add('show');
+          setTimeout(function() {
+            onboardSection.scrollIntoView({ behavior: 'smooth' });
+          }, 500);
+        }
       }
     } catch(e) { /* silent fail, they can verify manually */ }
   })();
