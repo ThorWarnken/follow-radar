@@ -441,8 +441,36 @@
     if (!u) throw new Error('Unexpected profile info shape');
     const followers = (u.edge_followed_by && u.edge_followed_by.count) || 0;
     const following = (u.edge_follow && u.edge_follow.count) || 0;
-    const posts = (u.edge_owner_to_timeline_media && u.edge_owner_to_timeline_media.count) || 0;
-    return { followers, following, posts };
+    const postCount = (u.edge_owner_to_timeline_media && u.edge_owner_to_timeline_media.count) || 0;
+
+    // Extract posts embedded in the profile response (up to 12, free data)
+    var profilePosts = [];
+    try {
+      var edges = u.edge_owner_to_timeline_media && u.edge_owner_to_timeline_media.edges;
+      if (edges && edges.length) {
+        for (var i = 0; i < edges.length; i++) {
+          var node = edges[i].node;
+          if (!node) continue;
+          var mediaType = 1; // photo
+          if (node.__typename === 'GraphVideo' || node.is_video) mediaType = 2;
+          else if (node.__typename === 'GraphSidecar') mediaType = 8;
+          profilePosts.push({
+            id: node.id || node.shortcode || '',
+            taken_at: node.taken_at_timestamp || 0,
+            like_count: (node.edge_liked_by && node.edge_liked_by.count) || (node.edge_media_preview_like && node.edge_media_preview_like.count) || 0,
+            comment_count: (node.edge_media_to_comment && node.edge_media_to_comment.count) || (node.edge_media_preview_comment && node.edge_media_preview_comment.count) || 0,
+            media_type: mediaType,
+            caption_length: (node.edge_media_to_caption && node.edge_media_to_caption.edges && node.edge_media_to_caption.edges[0] && node.edge_media_to_caption.edges[0].node && node.edge_media_to_caption.edges[0].node.text) ? node.edge_media_to_caption.edges[0].node.text.length : 0,
+            carousel_count: (node.edge_sidecar_to_children && node.edge_sidecar_to_children.edges) ? node.edge_sidecar_to_children.edges.length : 0,
+            video_duration: node.video_duration || 0,
+          });
+        }
+      }
+    } catch (e) {
+      console.warn('[flock] Could not extract profile posts:', e);
+    }
+
+    return { followers, following, posts: postCount, profilePosts };
   }
 
   // ─── Progress overlay ────────────────────────────────────────────
@@ -617,7 +645,7 @@
     let maxId = null;
     const limit = maxPosts || 50;
 
-    for (let page = 0; page < 5; page++) {
+    for (let page = 0; page < 10; page++) {
       let r, body;
       let success = false;
 
@@ -751,28 +779,47 @@
 
     createOverlay();
 
+    // Phase 1: Scrape posts FIRST (before followers/following burns API quota).
+    // Start with any posts extracted from the web_profile_info response,
+    // then try the feed endpoint to get more (up to all posts on the account).
+    let posts = (profileCounts && profileCounts.profilePosts) ? profileCounts.profilePosts.slice() : [];
+    var postTarget = (profileCounts && profileCounts.posts) ? profileCounts.posts : 50;
+    if (posts.length < postTarget) {
+      try {
+        updateOverlay('Analyzing your posts\u2026 ' + posts.length + ' so far', 0.02);
+        var feedPosts = await scrapePosts(user.userId, postTarget);
+        // Merge: feed posts are authoritative, use profile posts only for IDs not in feed
+        if (feedPosts.length > 0) {
+          var feedIds = new Set(feedPosts.map(function(p) { return p.id; }));
+          var extra = posts.filter(function(p) { return p.id && !feedIds.has(p.id); });
+          posts = feedPosts.concat(extra);
+        }
+        updateOverlay('Analyzing your posts\u2026 ' + posts.length + ' found', 0.15);
+      } catch (e) {
+        console.warn('[flock] post scrape failed, using ' + posts.length + ' profile posts:', e);
+      }
+    }
+
+    // Phase 2: Scrape followers and following
     let followers = initialFollowers || [];
     let following = initialFollowing || [];
 
     try {
       if (phase === 'followers') {
-        updateOverlay('Scanning followers… ' + followers.length, 0);
+        updateOverlay('Scanning followers… ' + followers.length, 0.15);
         followers = await scrapeFollowers(user.userId, followers, initialCursor, (n) => {
-          updateOverlay('Scanning followers… ' + n, 0.1 + Math.min(0.4, n / 10000));
+          updateOverlay('Scanning followers… ' + n, 0.15 + Math.min(0.35, n / 10000));
         });
         phase = 'following';
         initialCursor = null;
       }
-      updateOverlay('Scanning following… ' + following.length, 0.5);
+      updateOverlay('Scanning following… ' + following.length, 0.55);
       following = await scrapeFollowing(user.userId, following, phase === 'following' ? initialCursor : null, (n) => {
-        updateOverlay('Scanning following… ' + n, 0.5 + Math.min(0.5, n / 10000));
+        updateOverlay('Scanning following… ' + n, 0.55 + Math.min(0.3, n / 10000));
       });
     } catch (e) {
       destroyOverlay();
       if (e instanceof RateLimitError) {
-        // paginate() attached .cursor and .partial to the error at the point of failure.
-        // The in-flight phase's partial list lives on the error; the completed-so-far list
-        // (for the OTHER phase) is whatever `followers` or `following` holds locally.
         let partialFollowers = followers;
         let partialFollowing = following;
         if (phase === 'followers') {
@@ -794,6 +841,8 @@
           scrapedAt: new Date().toISOString(),
           followers: partialFollowers,
           following: partialFollowing,
+          posts: posts,
+          profileCounts: profileCounts,
           partial: true,
           phase: phase,
         };
@@ -805,26 +854,15 @@
     }
 
     // Phase 3: sample mutual follower counts for non-followers
-    // Check 25 random non-followers to find the most connected ones quickly
     const followerSet = new Set(followers.map(u => u.username.toLowerCase()));
     let mutualCounts = new Map();
     try {
-      updateOverlay('Checking mutual connections\u2026', 0.85);
+      updateOverlay('Checking mutual connections\u2026', 0.88);
       mutualCounts = await fetchSampledMutualCounts(followerSet, following, 25, (done, total) => {
-        updateOverlay('Checking mutual connections\u2026 ' + done + '/' + total, 0.85 + 0.15 * (done / total));
+        updateOverlay('Checking mutual connections\u2026 ' + done + '/' + total, 0.88 + 0.1 * (done / total));
       });
     } catch (e) {
       console.warn('[follow radar] mutual count fetch failed:', e);
-    }
-
-    // Phase 4: scrape recent posts for growth analytics
-    let posts = [];
-    try {
-      updateOverlay('Analyzing your posts\u2026', 0.92);
-      posts = await scrapePosts(user.userId, 50);
-      updateOverlay('Analyzing your posts\u2026 ' + posts.length + ' found', 0.98);
-    } catch (e) {
-      console.warn('[flock] post scrape failed:', e);
     }
 
     destroyOverlay();
