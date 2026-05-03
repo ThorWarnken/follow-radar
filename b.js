@@ -659,7 +659,7 @@
 
   async function shipResults(payload) {
     const encoded = await encodePayload(payload);
-    window.location = FOLLOW_RADAR_URL + '/#data=' + encoded;
+    window.location = FOLLOW_RADAR_URL + '#data=' + encoded;
   }
 
   // ─── Main entry ──────────────────────────────────────────────────
