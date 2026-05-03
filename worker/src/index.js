@@ -234,7 +234,13 @@ async function handleReport(request, env, corsHeaders) {
   }
 
   // 3. Compute metrics from scan data
-  const metrics = computeMetrics(scan);
+  let metrics;
+  try {
+    metrics = computeMetrics(scan);
+  } catch (e) {
+    console.error('computeMetrics error:', e.message, JSON.stringify(scan).slice(0, 500));
+    return json({ error: 'Failed to compute metrics: ' + e.message }, 500, corsHeaders);
+  }
 
   // 4. Build prompt and call Claude API
   const systemPrompt = `You are an expert Instagram growth strategist who helps businesses increase their revenue through social media. You analyze Instagram data and generate specific, actionable recommendations tailored to each business's type, audience, and challenges.
@@ -273,7 +279,7 @@ Return your response as valid JSON matching the exact schema provided. Do not in
     if (!response.ok) {
       const errText = await response.text();
       console.error('Claude API error:', response.status, errText);
-      return json({ error: 'AI report generation failed' }, 502, corsHeaders);
+      return json({ error: 'AI report generation failed (status ' + response.status + ')' }, 502, corsHeaders);
     }
 
     const result = await response.json();
