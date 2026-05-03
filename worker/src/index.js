@@ -366,7 +366,13 @@ function computeMetrics(scan) {
   var breakdown = scan.post_type_breakdown || {};
   for (var key in breakdown) {
     var displayName = typeNames[key] || key;
-    postTypeBreakdown[displayName] = { count: breakdown[key], avgEngagement: 0 };
+    var entry = breakdown[key];
+    // Handle both old format (just a count number) and new format ({count, avgEngagement})
+    if (typeof entry === 'object' && entry !== null) {
+      postTypeBreakdown[displayName] = { count: entry.count || 0, avgEngagement: entry.avgEngagement || 0 };
+    } else {
+      postTypeBreakdown[displayName] = { count: entry || 0, avgEngagement: 0 };
+    }
   }
 
   var dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -405,7 +411,14 @@ function computeMetrics(scan) {
     totalPostCount: scan.total_post_count || scan.total_posts_scanned || 0,
     postFrequency: 0,
     engagementTrend: 0,
-    captionAnalysis: { short: { count: 0, avgEngagement: 0 }, long: { count: 0, avgEngagement: 0 } },
+    captionAnalysis: scan.caption_analysis ? {
+      short: { count: scan.caption_analysis.shortCount || 0, avgEngagement: scan.caption_analysis.shortAvg || 0 },
+      long: { count: scan.caption_analysis.longCount || 0, avgEngagement: scan.caption_analysis.longAvg || 0 },
+      shortAvg: scan.caption_analysis.shortAvg || 0,
+      shortCount: scan.caption_analysis.shortCount || 0,
+      longAvg: scan.caption_analysis.longAvg || 0,
+      longCount: scan.caption_analysis.longCount || 0
+    } : { short: { count: 0, avgEngagement: 0 }, long: { count: 0, avgEngagement: 0 }, shortAvg: 0, shortCount: 0, longAvg: 0, longCount: 0 },
     topPosts: [],
   };
 }

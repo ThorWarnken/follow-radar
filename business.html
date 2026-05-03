@@ -680,6 +680,12 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
   font-size:0.82rem;color:var(--text-muted);
   text-transform:uppercase;letter-spacing:0.06em;
 }
+.report-stat-card .stat-detail{
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.7rem;color:var(--text-muted);
+  margin-top:0.35rem;line-height:1.4;
+  opacity:0.7;
+}
 
 /* Bar chart */
 .report-chart{
@@ -2064,7 +2070,7 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
     html += '<h2 class="report-section-title"><span class="section-badge">Overview</span> Account Health Snapshot</h2>';
     html += '<div class="report-stats">';
     html += '<div class="report-stat-card"><div class="stat-value">' + fmtNum(m.followerCount) + '</div><div class="stat-label">Followers</div></div>';
-    html += '<div class="report-stat-card"><div class="stat-value">' + fmtNum(m.engagementRate) + '%</div><div class="stat-label">Engagement Rate</div></div>';
+    html += '<div class="report-stat-card"><div class="stat-value">' + fmtNum(m.engagementRate) + '%</div><div class="stat-label">Engagement Rate</div><div class="stat-detail">' + fmtNum(m.avgLikes) + ' avg likes + ' + fmtNum(m.avgComments) + ' avg comments per post / ' + fmtNum(m.followerCount) + ' followers</div></div>';
     html += '<div class="report-stat-card"><div class="stat-value">' + fmtNum(m.avgLikes) + '</div><div class="stat-label">Avg Likes</div></div>';
     html += '<div class="report-stat-card"><div class="stat-value">' + fmtNum(m.totalPostCount || m.postsAnalyzed) + '</div><div class="stat-label">Total Posts</div></div>';
     html += '</div>';
@@ -2225,7 +2231,7 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
       var ptItems = [];
       Object.keys(m.postTypeBreakdown).forEach(function(key) {
         var d = m.postTypeBreakdown[key];
-        ptItems.push({ label: key, value: d.avgEngagement || 0, display: fmtNum(d.avgEngagement || 0) + '% avg' });
+        ptItems.push({ label: key + ' (' + (d.count || 0) + ')', value: d.avgEngagement || 0, display: fmtNum(d.avgEngagement || 0) + ' avg' });
       });
       renderBarChart('chart-post-type', ptItems);
     }
@@ -2321,25 +2327,41 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
     var realPostCount = (pc && pc.posts) ? pc.posts : posts.length;
 
     var totalLikes = 0, totalComments = 0;
-    var typeBreakdown = { photo: 0, video: 0, carousel: 0 };
+    var typeCount = { photo: 0, video: 0, carousel: 0 };
+    var typeEng = { photo: 0, video: 0, carousel: 0 };
     var typeNames = { 1: 'photo', 2: 'video', 8: 'carousel' };
     var dayEngagement = {};
     var hourEngagement = {};
     var dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    var shortCaptions = { count: 0, totalEng: 0 };
+    var longCaptions = { count: 0, totalEng: 0 };
 
     for (var i = 0; i < posts.length; i++) {
       var p = posts[i];
       var likes = p.like_count || 0;
       var comments = p.comment_count || 0;
+      var eng = likes + comments;
       totalLikes += likes;
       totalComments += comments;
 
       var typeName = typeNames[p.media_type] || 'photo';
-      typeBreakdown[typeName] = (typeBreakdown[typeName] || 0) + 1;
+      typeCount[typeName] = (typeCount[typeName] || 0) + 1;
+      typeEng[typeName] = (typeEng[typeName] || 0) + eng;
+
+      // Caption analysis
+      var capLen = p.caption_length || 0;
+      if (capLen > 0) {
+        if (capLen < 100) {
+          shortCaptions.count++;
+          shortCaptions.totalEng += eng;
+        } else {
+          longCaptions.count++;
+          longCaptions.totalEng += eng;
+        }
+      }
 
       if (p.taken_at) {
         var date = new Date(p.taken_at * 1000);
-        var eng = likes + comments;
         var day = dayNames[date.getUTCDay()];
         if (!dayEngagement[day]) dayEngagement[day] = { total: 0, count: 0 };
         dayEngagement[day].total += eng;
@@ -2358,6 +2380,17 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
       ? Math.round(((totalLikes + totalComments) / posts.length / realFollowerCount) * 10000) / 100
       : 0;
 
+    // Build post type breakdown with avg engagement per type
+    var typeBreakdown = {};
+    for (var t in typeCount) {
+      if (typeCount[t] > 0) {
+        typeBreakdown[t] = {
+          count: typeCount[t],
+          avgEngagement: Math.round(typeEng[t] / typeCount[t])
+        };
+      }
+    }
+
     var bestDays = {};
     for (var d in dayEngagement) {
       bestDays[d] = dayEngagement[d].count > 0
@@ -2370,6 +2403,16 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
         ? Math.round(hourEngagement[h].total / hourEngagement[h].count)
         : 0;
     }
+
+    // Caption analysis: avg engagement rate per category
+    var captionAnalysis = {
+      shortCount: shortCaptions.count,
+      shortAvg: shortCaptions.count > 0 && realFollowerCount > 0
+        ? Math.round((shortCaptions.totalEng / shortCaptions.count / realFollowerCount) * 10000) / 100 : 0,
+      longCount: longCaptions.count,
+      longAvg: longCaptions.count > 0 && realFollowerCount > 0
+        ? Math.round((longCaptions.totalEng / longCaptions.count / realFollowerCount) * 10000) / 100 : 0
+    };
 
     return {
       username: scan.username,
@@ -2386,7 +2429,8 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
       engagement_rate: engagementRate,
       post_type_breakdown: typeBreakdown,
       best_posting_days: bestDays,
-      best_posting_hours: bestHours
+      best_posting_hours: bestHours,
+      caption_analysis: captionAnalysis
     };
   }
 
