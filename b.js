@@ -439,7 +439,8 @@
     if (!u) throw new Error('Unexpected profile info shape');
     const followers = (u.edge_followed_by && u.edge_followed_by.count) || 0;
     const following = (u.edge_follow && u.edge_follow.count) || 0;
-    return { followers, following };
+    const posts = (u.edge_owner_to_timeline_media && u.edge_owner_to_timeline_media.count) || 0;
+    return { followers, following, posts };
   }
 
   // ─── Progress overlay ────────────────────────────────────────────
@@ -692,9 +693,12 @@
     let phase = (resume && resume.phase) || 'followers';
 
     // Size check (only on fresh runs, not on resume).
+    // Also captures real profile counts for accurate reporting.
+    let profileCounts = null;
     if (!resume) {
       try {
         const sizes = await checkAccountSize(user.username);
+        profileCounts = sizes;
         if (sizes.followers > MAX_ACCOUNT_SIZE || sizes.following > MAX_ACCOUNT_SIZE) {
           alert(
             "Flock is built for accounts under " + MAX_ACCOUNT_SIZE.toLocaleString() + " followers/following.\n\n" +
@@ -803,6 +807,7 @@
       followers: followers,
       following: followingWithMutuals,
       posts: posts,
+      profileCounts: profileCounts,
     };
     try {
       await shipResults(payload);

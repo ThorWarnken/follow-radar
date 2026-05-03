@@ -251,6 +251,11 @@ Your recommendations must be:
 - Tied to revenue impact (not just engagement)
 - Realistic and grounded in their actual metrics
 
+Writing style rules:
+- NEVER use em dashes (\u2014). Use commas, periods, or semicolons instead.
+- NEVER use en dashes (\u2013). Use hyphens (-) for ranges or compound words.
+- Keep sentences clear and concise.
+
 Return your response as valid JSON matching the exact schema provided. Do not include any text outside the JSON.`;
 
   const userPrompt = buildUserPrompt(profile, metrics);
@@ -397,6 +402,7 @@ function computeMetrics(scan) {
     engagementByHour: engagementByHour,
     bestPostingTime: bestHourEntry ? bestHourEntry.hour : null,
     bestPostingDay: bestDayEntry.avgEngagement > 0 ? bestDayEntry.day : null,
+    totalPostCount: scan.total_post_count || scan.total_posts_scanned || 0,
     postFrequency: 0,
     engagementTrend: 0,
     captionAnalysis: { short: { count: 0, avgEngagement: 0 }, long: { count: 0, avgEngagement: 0 } },
@@ -420,7 +426,8 @@ BUSINESS PROFILE:
 ACCOUNT METRICS:
 - Followers: ${metrics.followerCount}
 - Following: ${metrics.followingCount}
-- Posts Analyzed: ${metrics.postsAnalyzed}
+- Total Posts on Account: ${metrics.totalPostCount || metrics.postsAnalyzed}
+- Posts Analyzed (sampled): ${metrics.postsAnalyzed}
 - Average Likes per Post: ${metrics.avgLikes}
 - Average Comments per Post: ${metrics.avgComments}
 - Engagement Rate: ${metrics.engagementRate}%
@@ -448,6 +455,8 @@ ${JSON.stringify(metrics.topPosts, null, 2)}
 
 Generate a report as JSON matching this exact schema. Make the actionPlan the most detailed section with 5-8 items ranked by revenue impact. Reference specific numbers from the data above in your recommendations. Consider their business type (${profile.businessType}) and tailor advice to that industry.
 
+For revenueLevers, be highly specific and actionable. Each lever must include concrete step-by-step instructions the user can follow right now, and real resource links (URLs) to the platforms, tools, or setup pages they need. For example, if you recommend affiliate marketing, link to the actual signup page for an affiliate network. If you recommend a Linktree, link to linktree.com. If you recommend Instagram Shopping, link to the Facebook Commerce Manager setup page. Give them everything they need to go from reading to doing.
+
 {
   "whatsWorking": [
     { "title": "string", "detail": "string", "dataPoint": "string" }
@@ -459,7 +468,15 @@ Generate a report as JSON matching this exact schema. Make the actionPlan the mo
     { "day": "string", "time": "string", "format": "string", "topic": "string", "why": "string" }
   ],
   "revenueLevers": [
-    { "title": "string", "detail": "string", "estimatedImpact": "string" }
+    {
+      "title": "string",
+      "detail": "string",
+      "estimatedImpact": "string",
+      "steps": ["string - each step should be a concrete action the user can take right now"],
+      "resources": [
+        { "name": "string - name of tool/platform", "url": "string - direct URL to the relevant setup or signup page", "note": "string - what they will do here" }
+      ]
+    }
   ],
   "actionPlan": [
     {
