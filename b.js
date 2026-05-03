@@ -615,34 +615,52 @@
     let maxId = null;
     const limit = maxPosts || 50;
 
-    for (let page = 0; page < 5; page++) { // max 5 pages to be safe
-      await throttle();
-      let url = 'https://i.instagram.com/api/v1/feed/user/' + userId + '/?count=33';
-      if (maxId) url += '&max_id=' + encodeURIComponent(maxId);
-
+    for (let page = 0; page < 5; page++) {
       let r, body;
-      try {
-        r = await doFetch(url, {
-          credentials: 'include',
-          headers: igHeaders,
-        });
-      } catch (e) {
-        console.warn('[flock] post fetch network error:', e);
+      let success = false;
+
+      // Retry up to 3 times per page (rate limits after follower scraping are common)
+      for (let attempt = 0; attempt <= 2; attempt++) {
+        await throttle();
+        if (attempt > 0) await new Promise(function(resolve) { setTimeout(resolve, 3000 * attempt); });
+
+        let url = 'https://i.instagram.com/api/v1/feed/user/' + userId + '/?count=33';
+        if (maxId) url += '&max_id=' + encodeURIComponent(maxId);
+
+        try {
+          r = await doFetch(url, {
+            credentials: 'include',
+            headers: igHeaders,
+          });
+        } catch (e) {
+          console.warn('[flock] post fetch network error (attempt ' + (attempt + 1) + '):', e);
+          if (attempt < 2) continue;
+          break;
+        }
+
+        if (r.status === 429 || r.status === 401) {
+          console.warn('[flock] post fetch rate limited (attempt ' + (attempt + 1) + ')');
+          if (attempt < 2) continue;
+          break;
+        }
+
+        if (!r.ok) {
+          console.warn('[flock] post fetch http ' + r.status);
+          break;
+        }
+
+        try {
+          body = await r.json();
+        } catch (e) {
+          if (attempt < 2) continue;
+          break;
+        }
+
+        success = true;
         break;
       }
 
-      if (!r.ok) {
-        console.warn('[flock] post fetch http ' + r.status);
-        break;
-      }
-
-      try {
-        body = await r.json();
-      } catch (e) {
-        break;
-      }
-
-      if (!body || !Array.isArray(body.items)) break;
+      if (!success || !body || !Array.isArray(body.items)) break;
 
       for (const item of body.items) {
         posts.push(trimPost(item));
