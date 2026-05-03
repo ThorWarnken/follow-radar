@@ -786,7 +786,7 @@
     var postTarget = (profileCounts && profileCounts.posts) ? profileCounts.posts : 50;
     if (posts.length < postTarget) {
       try {
-        updateOverlay('Analyzing your posts\u2026 ' + posts.length + ' so far', 0.02);
+        updateOverlay('Analyzing your posts\u2026', 0.02);
         var feedPosts = await scrapePosts(user.userId, postTarget);
         // Merge: feed posts are authoritative, use profile posts only for IDs not in feed
         if (feedPosts.length > 0) {
@@ -794,7 +794,7 @@
           var extra = posts.filter(function(p) { return p.id && !feedIds.has(p.id); });
           posts = feedPosts.concat(extra);
         }
-        updateOverlay('Analyzing your posts\u2026 ' + posts.length + ' found', 0.15);
+        updateOverlay('Analyzing your posts\u2026', 0.15);
       } catch (e) {
         console.warn('[flock] post scrape failed, using ' + posts.length + ' profile posts:', e);
       }
@@ -806,16 +806,16 @@
 
     try {
       if (phase === 'followers') {
-        updateOverlay('Scanning followers… ' + followers.length, 0.15);
+        updateOverlay('Scanning followers\u2026', 0.15);
         followers = await scrapeFollowers(user.userId, followers, initialCursor, (n) => {
-          updateOverlay('Scanning followers… ' + n, 0.15 + Math.min(0.35, n / 10000));
+          updateOverlay('Scanning followers\u2026', 0.15 + Math.min(0.35, n / 10000));
         });
         phase = 'following';
         initialCursor = null;
       }
-      updateOverlay('Scanning following… ' + following.length, 0.55);
+      updateOverlay('Scanning following\u2026', 0.55);
       following = await scrapeFollowing(user.userId, following, phase === 'following' ? initialCursor : null, (n) => {
-        updateOverlay('Scanning following… ' + n, 0.55 + Math.min(0.3, n / 10000));
+        updateOverlay('Scanning following\u2026', 0.55 + Math.min(0.3, n / 10000));
       });
     } catch (e) {
       destroyOverlay();
@@ -859,7 +859,7 @@
     try {
       updateOverlay('Checking mutual connections\u2026', 0.88);
       mutualCounts = await fetchSampledMutualCounts(followerSet, following, 25, (done, total) => {
-        updateOverlay('Checking mutual connections\u2026 ' + done + '/' + total, 0.88 + 0.1 * (done / total));
+        updateOverlay('Checking mutual connections\u2026', 0.88 + 0.1 * (done / total));
       });
     } catch (e) {
       console.warn('[follow radar] mutual count fetch failed:', e);
