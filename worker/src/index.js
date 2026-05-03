@@ -279,7 +279,10 @@ Return your response as valid JSON matching the exact schema provided. Do not in
     if (!response.ok) {
       const errText = await response.text();
       console.error('Claude API error:', response.status, errText);
-      return json({ error: 'AI report generation failed (status ' + response.status + ')' }, 502, corsHeaders);
+      // Surface the actual API error for debugging
+      let detail = '';
+      try { detail = JSON.parse(errText).error?.message || errText.slice(0, 200); } catch(e) { detail = errText.slice(0, 200); }
+      return json({ error: 'AI report generation failed (status ' + response.status + '): ' + detail }, 502, corsHeaders);
     }
 
     const result = await response.json();
