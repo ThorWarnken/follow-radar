@@ -261,6 +261,8 @@ Return your response as valid JSON matching the exact schema provided. Do not in
   }
 
   try {
+    // Use streaming to prevent proxy timeouts — data flows continuously
+    // so no idle connection gets killed
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -271,6 +273,7 @@ Return your response as valid JSON matching the exact schema provided. Do not in
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: 8192,
+        stream: true,
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }],
       }),
@@ -279,30 +282,49 @@ Return your response as valid JSON matching the exact schema provided. Do not in
     if (!response.ok) {
       const errText = await response.text();
       console.error('Claude API error:', response.status, errText);
-      // Surface the actual API error for debugging
       let detail = '';
       try { detail = JSON.parse(errText).error?.message || errText.slice(0, 200); } catch(e) { detail = errText.slice(0, 200); }
       return json({ error: 'AI report generation failed (status ' + response.status + '): ' + detail }, 502, corsHeaders);
     }
 
-    const result = await response.json();
-    if (result.stop_reason === 'max_tokens') {
-      console.error('Claude response truncated — hit max_tokens limit');
+    // Read the streamed SSE response and accumulate the text
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let textContent = '';
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      // Parse SSE events from buffer
+      const lines = buffer.split('\n');
+      buffer = lines.pop(); // keep incomplete line in buffer
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6);
+        if (data === '[DONE]') continue;
+        try {
+          const event = JSON.parse(data);
+          if (event.type === 'content_block_delta' && event.delta?.text) {
+            textContent += event.delta.text;
+          }
+        } catch (e) { /* skip unparseable SSE lines */ }
+      }
     }
-    const textContent = result.content?.[0]?.text;
+
     if (!textContent) {
-      console.error('Claude API returned no text content');
+      console.error('Claude streaming returned no text content');
       return json({ error: 'AI returned empty response' }, 502, corsHeaders);
     }
 
-    // Extract JSON from Claude's response
+    // Extract JSON from accumulated text
     let report;
     try {
       let jsonStr = textContent.trim();
-      // Remove markdown code fences if present (greedy match for large responses)
       const fenceMatch = jsonStr.match(/```(?:json)?\s*\n?([\s\S]*)\n?\s*```/);
       if (fenceMatch) jsonStr = fenceMatch[1].trim();
-      // Try to find JSON object if there's text before/after it
       if (jsonStr.charAt(0) !== '{') {
         const firstBrace = jsonStr.indexOf('{');
         if (firstBrace !== -1) jsonStr = jsonStr.slice(firstBrace);
@@ -320,7 +342,7 @@ Return your response as valid JSON matching the exact schema provided. Do not in
     return json({ success: true, metrics, report }, 200, corsHeaders);
   } catch (err) {
     console.error('Claude API request failed:', err);
-    return json({ error: 'AI report generation failed' }, 502, corsHeaders);
+    return json({ error: 'AI report generation failed: ' + (err.message || err) }, 502, corsHeaders);
   }
 }
 
