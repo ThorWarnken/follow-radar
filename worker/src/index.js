@@ -272,7 +272,7 @@ Return your response as valid JSON matching the exact schema provided. Do not in
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 8192,
+        max_tokens: 16384,
         stream: true,
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }],
