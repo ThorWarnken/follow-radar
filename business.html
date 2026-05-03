@@ -1571,6 +1571,16 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
   <p class="loading-sub">This takes about 30 seconds.</p>
 </div>
 
+<!-- Paywall Prompt -->
+<div class="report-error" id="paywall-prompt" style="display:none">
+  <h2 style="color:#D4A843">Your scan is ready</h2>
+  <p style="margin-bottom:12px">Subscribe to a Flock Business plan to unlock your AI growth report. Your scan data has been saved and will be used automatically after purchase.</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px">
+    <a href="#pricing" onclick="document.getElementById('paywall-prompt').style.display='none';document.querySelector('.pricing').scrollIntoView({behavior:'smooth'});return false" style="display:inline-block;padding:12px 28px;background:#D4A843;color:#000;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px">View Plans</a>
+  </div>
+  <p style="margin-top:16px;font-size:13px;color:rgba(255,255,255,0.5)">Already subscribed? <a href="#" id="paywall-verify-link" style="color:#D4A843;text-decoration:underline">Enter your email</a></p>
+</div>
+
 <!-- Report Error -->
 <div class="report-error" id="report-error">
   <h2>Report generation failed.</h2>
@@ -2153,6 +2163,29 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
     document.getElementById('report-error').classList.add('show');
   }
 
+  function showPaywallPrompt() {
+    hideAllSections();
+    document.getElementById('paywall-prompt').style.display = 'block';
+    // Show pricing section below the prompt
+    var pricing = document.querySelector('.pricing');
+    if (pricing) pricing.style.display = '';
+    // Wire up "Enter your email" link to scroll to verify section
+    var verifyLink = document.getElementById('paywall-verify-link');
+    if (verifyLink) {
+      verifyLink.onclick = function(e) {
+        e.preventDefault();
+        document.getElementById('paywall-prompt').style.display = 'none';
+        var verifySection = document.getElementById('biz-verify-section');
+        if (verifySection) {
+          verifySection.style.display = '';
+          verifySection.classList.add('show');
+          verifySection.scrollIntoView({ behavior: 'smooth' });
+        }
+      };
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   function hideAllSections() {
     ['hero', 'features', 'pricing', 'get-started', 'biz-scan-section', 'biz-verify-section'].forEach(function(id) {
       var el = document.getElementById(id);
@@ -2256,6 +2289,24 @@ textarea.form-input{min-height:80px;resize:vertical;line-height:1.6}
       var profileRaw = localStorage.getItem('flock-business:profile');
       var profile = profileRaw ? JSON.parse(profileRaw) : {};
       var email = localStorage.getItem('flock-business:email') || '';
+
+      /* Verify subscription before sending data to the server */
+      if (!email) {
+        document.getElementById('report-loading').classList.remove('show');
+        showPaywallPrompt();
+        return;
+      }
+      try {
+        var verifyRes = await fetch('https://flock-payments.warnkenc.workers.dev/verify?email=' + encodeURIComponent(email));
+        var verifyData = await verifyRes.json();
+        if (!verifyData.unlocked || (verifyData.plan !== 'business-monthly' && verifyData.plan !== 'business-yearly')) {
+          document.getElementById('report-loading').classList.remove('show');
+          showPaywallPrompt();
+          return;
+        }
+      } catch (e) {
+        console.warn('[Flock] Could not verify subscription, proceeding anyway:', e);
+      }
 
       /* Aggregate scan data — no raw usernames or post records leave the browser */
       var aggregated = aggregateScanData(scanData);
