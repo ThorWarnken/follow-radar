@@ -293,17 +293,14 @@ Return your response as valid JSON matching the exact schema provided. Do not in
     let textContent = '';
     let buffer = '';
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-
-      // Parse SSE events from buffer
-      const lines = buffer.split('\n');
+    function processBuffer() {
+      // Handle both \r\n and \n line endings
+      const lines = buffer.replace(/\r\n/g, '\n').split('\n');
       buffer = lines.pop(); // keep incomplete line in buffer
       for (const line of lines) {
-        if (!line.startsWith('data: ')) continue;
-        const data = line.slice(6);
+        const trimmed = line.trim();
+        if (!trimmed.startsWith('data: ')) continue;
+        const data = trimmed.slice(6);
         if (data === '[DONE]') continue;
         try {
           const event = JSON.parse(data);
@@ -313,6 +310,16 @@ Return your response as valid JSON matching the exact schema provided. Do not in
         } catch (e) { /* skip unparseable SSE lines */ }
       }
     }
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      processBuffer();
+    }
+    // Flush any remaining data in buffer
+    buffer += '\n';
+    processBuffer();
 
     if (!textContent) {
       console.error('Claude streaming returned no text content');
