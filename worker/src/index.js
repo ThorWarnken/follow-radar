@@ -84,17 +84,22 @@ async function handleCheckoutCompleted(session, env) {
     expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
     ttl = 86400; // KV TTL in seconds
   } else if (mode === 'subscription') {
-    // Use amount_subtotal (before discounts) so promo codes don't break plan detection
+    // Use amount_subtotal (before discounts) so promo codes don't break plan detection.
+    // Thresholds sit between price tiers: monthly $99 (9900c), yearly $799 (79900c),
+    // personal yearly ~$20-50 range. Business yearly must be > 50000c ($500).
     const amountTotal = session.amount_subtotal || session.amount_total || 0;
-    if (amountTotal >= 49000) {
+    if (amountTotal >= 50000) {
+      // $799/yr business yearly (79900 cents)
       plan = 'business-yearly';
       expiresAt = Date.now() + 365 * 24 * 60 * 60 * 1000;
       ttl = 365 * 86400;
-    } else if (amountTotal >= 4500) {
+    } else if (amountTotal >= 7000) {
+      // $99/mo business monthly (9900 cents)
       plan = 'business-monthly';
       expiresAt = Date.now() + 31 * 24 * 60 * 60 * 1000;
       ttl = 31 * 86400;
-    } else if (amountTotal >= 2000) {
+    } else if (amountTotal >= 1500) {
+      // Personal yearly (assumed $20-50 range)
       plan = 'yearly';
       expiresAt = Date.now() + 365 * 24 * 60 * 60 * 1000;
       ttl = 365 * 86400;
