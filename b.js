@@ -706,29 +706,45 @@
       return;
     }
 
-    const resume = existing;
-    const initialFollowers = (resume && resume.partialFollowers) || null;
-    const initialFollowing = (resume && resume.partialFollowing) || null;
-    let initialCursor = (resume && resume.cursor) || null;
-    let phase = (resume && resume.phase) || 'followers';
+    let resume = existing;
+
+    // Always fetch real profile counts for accurate reporting.
+    let profileCounts = null;
+    try {
+      profileCounts = await checkAccountSize(user.username);
+    } catch (e) {
+      console.warn('[flock] Could not fetch profile counts:', e);
+    }
+
+    // Discard stale resume states: if the partial followers list has less than
+    // half the real count, the resume cursor is likely stale and will produce
+    // incomplete results. Start fresh instead.
+    if (resume && profileCounts) {
+      var partialCount = (resume.partialFollowers && resume.partialFollowers.length) || 0;
+      if (profileCounts.followers > 0 && partialCount < profileCounts.followers * 0.5) {
+        console.warn('[flock] Discarding stale resume state: ' + partialCount + ' partial vs ' + profileCounts.followers + ' real followers');
+        clearResumeState();
+        resume = null;
+      }
+    }
+
+    var initialFollowers = (resume && resume.partialFollowers) || null;
+    var initialFollowing = (resume && resume.partialFollowing) || null;
+    var initialCursor = (resume && resume.cursor) || null;
+    var phase = (resume && resume.phase) || 'followers';
 
     // Size check (only on fresh runs, not on resume).
-    // Also captures real profile counts for accurate reporting.
-    let profileCounts = null;
     if (!resume) {
-      try {
-        const sizes = await checkAccountSize(user.username);
-        profileCounts = sizes;
-        if (sizes.followers > MAX_ACCOUNT_SIZE || sizes.following > MAX_ACCOUNT_SIZE) {
-          alert(
-            "Flock is built for accounts under " + MAX_ACCOUNT_SIZE.toLocaleString() + " followers/following.\n\n" +
-            "Yours has " + sizes.followers.toLocaleString() + " followers and " + sizes.following.toLocaleString() + " following.\n\n" +
-            "If you really need this for a bigger account, the code is open source — fork it and remove the cap."
-          );
-          return;
-        }
-      } catch (e) {
-        alert("Could not check account size: " + e.message);
+      if (profileCounts && (profileCounts.followers > MAX_ACCOUNT_SIZE || profileCounts.following > MAX_ACCOUNT_SIZE)) {
+        alert(
+          "Flock is built for accounts under " + MAX_ACCOUNT_SIZE.toLocaleString() + " followers/following.\n\n" +
+          "Yours has " + profileCounts.followers.toLocaleString() + " followers and " + profileCounts.following.toLocaleString() + " following.\n\n" +
+          "If you really need this for a bigger account, the code is open source — fork it and remove the cap."
+        );
+        return;
+      }
+      if (!profileCounts) {
+        alert("Could not check account size. Please try again.");
         return;
       }
     }
