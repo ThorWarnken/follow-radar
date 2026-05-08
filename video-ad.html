@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flock Business — Video Ad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Chart.js removed — all visuals are now SVG/CSS -->
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #08080f;
+  --bg-card: #12121f;
+  --border: #1e1e30;
+  --gold: #D4A843;
+  --gold-bg: rgba(212,168,67,0.08);
+  --gold-border: rgba(212,168,67,0.15);
+  --gradient-gold: linear-gradient(135deg,#D4A843,#C49530);
+  --red: #e85454;
+  --text: #FFFFFF;
+  --text-soft: #d0d0e0;
+  --text-muted: #6b6b80;
+}
+
+body {
+  background: #050508;
+  color: var(--text);
+  font-family: 'Quicksand', sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  overflow: hidden;
+  user-select: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Nunito', sans-serif;
+}
+
+/* --- Video Frame --- */
+#frame-wrap {
+  position: relative;
+}
+#video-frame {
+  width: 1080px;
+  height: 1920px;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+  transform-origin: top center;
+}
+#video-frame.landscape {
+  width: 1920px;
+  height: 1080px;
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40px 56px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.scene.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* --- Eyebrow --- */
+.eyebrow {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  right: 0;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  text-align: center;
+}
+
+/* --- Bottom insight --- */
+.bottom-insight {
+  position: absolute;
+  bottom: 40px;
+  left: 56px;
+  right: 56px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.4;
+  padding-top: 16px;
+}
+
+/* --- Logo --- */
+.flock-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.flock-logo .logo-text {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 28px;
+  color: #fff;
+}
+.flock-logo .logo-badge {
+  background: linear-gradient(135deg,#D4A843,#C49530);
+  color: #08080f;
+  border-radius: 4px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  padding: 3px 8px;
+  text-transform: uppercase;
+}
+.flock-logo.large .logo-text { font-size: 48px; }
+.flock-logo.large .logo-badge { font-size: 16px; padding: 5px 12px; }
+
+/* --- Lower-third overlays --- */
+.lower-third {
+  position: absolute;
+  bottom: 30px;
+  left: 0;
+  background: rgba(8,8,15,0.85);
+  border-left: 3px solid var(--gold);
+  padding: 14px 28px 14px 20px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 18px;
+  color: var(--text-muted);
+  font-weight: 500;
+  transform: translateX(-110%);
+  transition: transform 0.5s cubic-bezier(0.22,1,0.36,1);
+  z-index: 50;
+  white-space: nowrap;
+}
+.lower-third.visible {
+  transform: translateX(0);
+}
+
+/* --- Controls --- */
+#controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  background: #111;
+  border-radius: 12px;
+  margin-top: 16px;
+  min-width: 400px;
+  max-width: 90vw;
+}
+#play-btn {
+  background: none;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+#play-btn:hover { background: var(--gold-bg); }
+#scrubber-wrap {
+  flex: 1;
+  height: 6px;
+  background: #222;
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+}
+#scrubber-fill {
+  height: 100%;
+  background: var(--gradient-gold);
+  border-radius: 3px;
+  width: 0%;
+  pointer-events: none;
+}
+#time-display {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 13px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  min-width: 80px;
+  text-align: right;
+}
+#format-toggle {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-soft);
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+#format-toggle:hover { border-color: var(--gold); color: var(--gold); }
+#replay-btn {
+  position: absolute;
+  inset: 0;
+  background: rgba(8,8,15,0.88);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 20px;
+  z-index: 100;
+  cursor: pointer;
+}
+#replay-btn .replay-icon {
+  width: 80px;
+  height: 80px;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#replay-btn .replay-label {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--gold);
+}
+
+/* --- Scene 1 specifics --- */
+#scene-hook .hook-line {
+  text-align: center;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--text-soft);
+  line-height: 1.5;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+#scene-hook .hook-line.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+#scene-hook .hook-line.slam {
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.hook-number {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 72px;
+  color: var(--gold);
+  display: inline-block;
+  position: relative;
+  line-height: 1.1;
+}
+.hook-number .glow {
+  position: absolute;
+  inset: -20px;
+  background: radial-gradient(circle, rgba(212,168,67,0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: pulse-glow 2s ease-in-out infinite;
+  z-index: -1;
+}
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.4; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+.hook-effort {
+  color: var(--gold);
+  text-shadow: 0 0 20px rgba(212,168,67,0.5);
+  font-weight: 700;
+}
+.hook-source {
+  font-size: 16px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* --- Scene 2 specifics --- */
+.donut-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+.donut-container {
+  position: relative;
+  width: 560px;
+  height: 560px;
+}
+.donut-center-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+.donut-center-text .big {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 72px;
+  color: var(--gold);
+  line-height: 1;
+}
+.donut-center-text .small {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 18px;
+  color: var(--text-soft);
+  margin-top: 4px;
+}
+.donut-label {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 22px;
+  color: var(--text-soft);
+  text-align: center;
+  line-height: 1.4;
+}
+.stat-pills {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.stat-pill {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  width: 100%;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 20px;
+  color: var(--text-soft);
+  font-weight: 500;
+}
+.stat-pill svg {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+.callout-box {
+  background: var(--gold-bg);
+  border: 1px solid var(--gold-border);
+  border-radius: 12px;
+  padding: 18px 28px;
+  text-align: center;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 24px;
+  color: var(--gold);
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.callout-box.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --- Scene 3 Format specifics --- */
+.format-headline {
+  text-align: center;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 26px;
+  color: var(--text);
+  margin-top: 20px;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.format-headline.visible { opacity: 1; }
+/* --- Scene 5 specifics --- */
+.calc-line {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 26px;
+  font-weight: 500;
+  color: var(--text-soft);
+  line-height: 1.4;
+  margin-bottom: 24px;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.calc-line.visible { opacity: 1; }
+.calc-line .gold { color: var(--gold); font-weight: 700; }
+.calc-line .muted { color: var(--text-muted); }
+.calc-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 28px 0;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.calc-divider.visible { opacity: 1; }
+.calc-divider .line {
+  flex: 1;
+  height: 1px;
+  background: var(--gold);
+}
+.calc-divider .vs {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--gold);
+}
+.delta-block {
+  text-align: center;
+  margin-top: 32px;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.delta-block.visible { opacity: 1; }
+.delta-old {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 600;
+  font-size: 32px;
+  color: var(--text-muted);
+  margin-right: 16px;
+}
+.delta-arrow {
+  color: var(--gold);
+  font-size: 28px;
+  margin-right: 16px;
+}
+.delta-new {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 80px;
+  color: var(--gold);
+  text-shadow: 0 0 40px rgba(212,168,67,0.5);
+  animation: delta-pulse 2s ease-in-out infinite;
+}
+@keyframes delta-pulse {
+  0%, 100% { text-shadow: 0 0 30px rgba(212,168,67,0.3); }
+  50% { text-shadow: 0 0 60px rgba(212,168,67,0.7); }
+}
+.delta-sub {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 22px;
+  color: var(--text-muted);
+  margin-top: 12px;
+}
+
+/* --- Scene 6 specifics --- */
+.steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  margin: 0 auto;
+  width: 100%;
+}
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  opacity: 0;
+  transform: translateX(60px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.step-item.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+.step-num {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 24px;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+.step-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+.step-icon svg { width: 100%; height: 100%; }
+.step-content {
+  flex: 1;
+}
+.step-content .step-title {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 26px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.step-content .step-desc {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 20px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.step-check {
+  color: var(--gold);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  flex-shrink: 0;
+}
+.step-check.visible { opacity: 1; }
+.step-check svg {
+  width: 32px;
+  height: 32px;
+}
+.privacy-badge {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--gold-border);
+  border-radius: 16px;
+  padding: 24px 32px;
+  margin-top: 32px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.privacy-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--gold);
+  letter-spacing: 0.06em;
+}
+.privacy-points {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+}
+.privacy-point {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 19px;
+  color: var(--text-soft);
+  font-weight: 500;
+}
+.privacy-point svg {
+  width: 20px;
+  height: 20px;
+  color: var(--gold);
+}
+.privacy-sep {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* --- Scene 7 specifics --- */
+#scene-cta {
+  align-items: center;
+  text-align: center;
+  position: relative;
+}
+.cta-bg-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(212,168,67,0.12) 0%, transparent 70%);
+  filter: blur(60px);
+  animation: drift 12s ease-in-out infinite alternate;
+}
+@keyframes drift {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(30px, -20px); }
+  50% { transform: translate(-20px, 30px); }
+  75% { transform: translate(20px, 20px); }
+  100% { transform: translate(-10px, -30px); }
+}
+.cta-tagline {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 48px;
+  background: linear-gradient(135deg,#FFD700 0%,#FFC234 30%,#FFE066 60%,#FFD700 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 30px rgba(255,215,0,0.4));
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.cta-tagline.visible { opacity: 1; }
+.cta-subtext {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 24px;
+  color: var(--text-muted);
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.cta-subtext.visible { opacity: 1; }
+.cta-button {
+  display: inline-block;
+  background: linear-gradient(135deg,#D4A843,#C49530);
+  color: #08080f;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  padding: 18px 56px;
+  border-radius: 100px;
+  border: none;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  box-shadow: 0 0 30px rgba(212,168,67,0.3);
+  animation: btn-glow 2.5s ease-in-out infinite;
+}
+.cta-button.visible { opacity: 1; }
+@keyframes btn-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(212,168,67,0.2); }
+  50% { box-shadow: 0 0 50px rgba(212,168,67,0.5); }
+}
+
+/* --- CTA shimmer & glow --- */
+@keyframes ctaGlow {
+  0% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+.shimmer {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: shimmerSweep 3s ease-in-out infinite;
+}
+@keyframes reportPulse {
+  0%, 100% { box-shadow: 0 0 30px rgba(212,168,67,0.08); }
+  50% { box-shadow: 0 0 50px rgba(212,168,67,0.2); }
+}
+@keyframes shimmerSweep {
+  0% { left: -100%; }
+  50% { left: 100%; }
+  100% { left: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div id="frame-wrap">
+  <div id="video-frame">
+
+    <!-- SCENE 1: Hook -->
+    <div class="scene" id="scene-hook">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:80px;">
+        <div class="flock-logo">
+          <span class="logo-text">Flock</span>
+          <span class="logo-badge">BUSINESS</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:36px;" id="hook-lines">
+        <div class="hook-line" id="hook-line-1">
+          The average business posts<br>
+          <span class="hook-number"><span class="glow"></span><span id="count-18">0</span></span><br>
+          times a month.
+        </div>
+        <div class="hook-line" id="hook-line-2">
+          Only <span class="hook-number"><span class="glow"></span><span id="count-6">0</span></span> reach more than 10% of followers.
+        </div>
+        <div class="hook-line slam" id="hook-line-3">
+          The rest is <span class="hook-effort">effort</span> you'll never get back.
+        </div>
+      </div>
+      <div class="hook-source" style="padding-bottom:80px;">2026 Instagram business data</div>
+    </div>
+
+    <!-- SCENE 2: The Ghost Problem -->
+    <div class="scene" id="scene-ghosts">
+      <div class="eyebrow">THE GHOST PROBLEM</div>
+      <div style="display:flex;flex-direction:column;gap:24px;flex:1;justify-content:center;padding-top:80px;padding-bottom:80px;">
+        <h2 style="text-align:center;font-family:'Nunito',sans-serif;font-weight:900;font-size:36px;color:var(--gold);margin-bottom:16px;">Your audience isn't who you think it is.</h2>
+        <div class="donut-wrap">
+          <div class="donut-container">
+            <!-- SVG donut: 3 arcs chained with proper offsets. Circumference = 2*PI*80 ≈ 502.65 -->
+            <!-- Segment 1: ghost/bot 18.2% = 91.5 arc. Starts at 12 o'clock (rotate -90) offset 0 -->
+            <!-- Segment 2: inactive 44% = 221.2 arc. Starts where ghost ends: offset = -(91.5) -->
+            <!-- Segment 3: engaged 37.8% = 190.0 arc. Starts where inactive ends: offset = -(91.5+221.2) -->
+            <svg viewBox="0 0 200 200" width="560" height="560" id="donut-svg">
+              <circle cx="100" cy="100" r="80" fill="none" stroke="#1e1e30" stroke-width="28"/>
+              <!-- Ghost/bot: red, starts at top -->
+              <circle cx="100" cy="100" r="80" fill="none" stroke="#ef4444" stroke-width="28"
+                stroke-dasharray="0 502.65" stroke-dashoffset="0"
+                id="donut-ghost" transform="rotate(-90 100 100)"/>
+              <!-- Inactive: amber, starts after ghost -->
+              <circle cx="100" cy="100" r="80" fill="none" stroke="#f59e0b" stroke-width="28"
+                stroke-dasharray="0 502.65" stroke-dashoffset="-91.5"
+                id="donut-inactive" transform="rotate(-90 100 100)"/>
+              <!-- Engaged: green, starts after inactive -->
+              <circle cx="100" cy="100" r="80" fill="none" stroke="#22c55e" stroke-width="28"
+                stroke-dasharray="0 502.65" stroke-dashoffset="-312.7"
+                id="donut-engaged" transform="rotate(-90 100 100)"/>
+            </svg>
+            <div class="donut-center-text">
+              <div class="big" id="donut-pct">0%</div>
+              <div class="small">actually engaged</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:32px;justify-content:center;margin:16px 0;">
+            <div style="display:flex;align-items:center;gap:8px;"><span style="width:16px;height:16px;border-radius:50%;background:#ef4444;display:inline-block;"></span><span style="font-family:'Quicksand',sans-serif;font-size:18px;color:var(--text-soft);">18.2% bots/ghosts</span></div>
+            <div style="display:flex;align-items:center;gap:8px;"><span style="width:16px;height:16px;border-radius:50%;background:#f59e0b;display:inline-block;"></span><span style="font-family:'Quicksand',sans-serif;font-size:18px;color:var(--text-soft);">44% inactive</span></div>
+            <div style="display:flex;align-items:center;gap:8px;"><span style="width:16px;height:16px;border-radius:50%;background:#22c55e;display:inline-block;"></span><span style="font-family:'Quicksand',sans-serif;font-size:18px;color:var(--text-soft);">37.8% engaged</span></div>
+          </div>
+          <div class="donut-label">Less than 4 in 10 followers will ever see your post.</div>
+        </div>
+        <div class="stat-pills">
+          <div class="stat-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round"><path d="M12 2C8 2 5 5 5 8c0 2 1 3 1 3H8l-1 4h2v7h6v-7h2l-1-4h1s1-1 1-3c0-3-3-6-7-6z"/><circle cx="9" cy="8" r="1" fill="#ef4444"/><circle cx="15" cy="8" r="1" fill="#ef4444"/></svg>
+            18.2% ghost/bot avg
+          </div>
+          <div class="stat-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#6b6b80" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+            44% go inactive within 12mo
+          </div>
+          <div class="stat-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+            Only 12% avg reach rate
+          </div>
+        </div>
+        <div style="font-family:'Quicksand',sans-serif;font-size:14px;color:var(--text-muted);text-align:center;margin-top:8px;">Source: Instagram Follower Statistics 2026, sqmagazine.co.uk</div>
+        <div class="callout-box" id="ghost-callout">$1.3B lost to ghost &amp; bot accounts annually</div>
+      </div>
+      <div class="bottom-insight">Your engagement rate is a lie. Here's the real number.</div>
+    </div>
+
+    <!-- SCENE 3: Format Trap — 3 format cards -->
+    <div class="scene" id="scene-format">
+      <div class="eyebrow">THE FORMAT TRAP</div>
+      <div style="display:flex;flex-direction:column;flex:1;justify-content:center;padding-top:80px;padding-bottom:80px;gap:32px;">
+        <!-- Headline -->
+        <div style="text-align:center;">
+          <h2 style="font-family:'Nunito',sans-serif;font-weight:900;font-size:38px;color:var(--text);margin-bottom:10px;">What you post determines everything.</h2>
+          <p style="font-family:'Quicksand',sans-serif;font-size:20px;color:var(--text-muted);font-weight:500;">The algorithm picks winners before anyone sees your content.</p>
+        </div>
+        <!-- Three format cards -->
+        <div style="display:flex;gap:24px;" id="format-cards">
+          <!-- Card 1: Static -->
+          <div class="fmt-card" id="fmt-card-1" style="flex:1;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:20px;padding:36px 24px;text-align:center;opacity:0;transform:translateY(30px);transition:opacity 0.5s ease,transform 0.5s ease;">
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:16px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            <div style="font-family:'Nunito',sans-serif;font-weight:900;font-size:56px;color:#ef4444;line-height:1;">&#8595;17%</div>
+            <div style="font-family:'Quicksand',sans-serif;font-size:16px;color:var(--text-soft);margin:8px 0 16px;">YoY engagement drop</div>
+            <div style="display:inline-block;background:rgba(239,68,68,0.15);color:#ef4444;font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;padding:5px 16px;border-radius:100px;letter-spacing:0.08em;">AVOID</div>
+          </div>
+          <!-- Card 2: Carousels -->
+          <div class="fmt-card" id="fmt-card-2" style="flex:1;background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:20px;padding:36px 24px;text-align:center;opacity:0;transform:translateY(30px);transition:opacity 0.5s ease,transform 0.5s ease;">
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:16px;"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+            <div style="font-family:'Nunito',sans-serif;font-weight:900;font-size:56px;color:var(--gold);line-height:1;">0.55%</div>
+            <div style="font-family:'Quicksand',sans-serif;font-size:16px;color:var(--text-soft);margin:8px 0 16px;">Highest save rate</div>
+            <div style="display:inline-block;background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--gold);font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;padding:5px 16px;border-radius:100px;letter-spacing:0.08em;">USE THIS</div>
+          </div>
+          <!-- Card 3: Reels -->
+          <div class="fmt-card" id="fmt-card-3" style="flex:1;background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:20px;padding:36px 24px;text-align:center;opacity:0;transform:translateY(30px);transition:opacity 0.5s ease,transform 0.5s ease;">
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:16px;"><rect x="2" y="2" width="20" height="20" rx="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/><line x1="17" y1="17" x2="22" y2="17"/></svg>
+            <div style="font-family:'Nunito',sans-serif;font-weight:900;font-size:56px;color:#22c55e;line-height:1;">+47%</div>
+            <div style="font-family:'Quicksand',sans-serif;font-size:16px;color:var(--text-soft);margin:8px 0 16px;">Faster follower growth</div>
+            <div style="display:inline-block;background:rgba(34,197,94,0.1);color:#22c55e;font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;padding:5px 16px;border-radius:100px;letter-spacing:0.08em;">PRIORITY</div>
+          </div>
+        </div>
+        <!-- Bottom line + source -->
+        <div style="text-align:center;">
+          <div class="format-headline" id="format-headline" style="font-size:22px;">Flock tells you which format wins for YOUR audience.</div>
+          <div style="font-family:'Quicksand',sans-serif;font-size:13px;color:var(--text-muted);margin-top:8px;">Source: Socialinsider 2026, InfluenceFlow 2026</div>
+        </div>
+      </div>
+      <div class="bottom-insight">The format you choose determines your reach before you write a word.</div>
+    </div>
+
+    <!-- SCENE 4: The Revenue Gap -->
+    <div class="scene" id="scene-revenue">
+      <div class="eyebrow">THE REVENUE GAP</div>
+      <div style="display:flex;flex-direction:column;flex:1;justify-content:center;padding:0 40px;">
+        <div class="calc-line" id="calc-1" style="font-size:36px;font-family:'Nunito',sans-serif;font-weight:800;color:var(--text);margin-bottom:32px;">10,000 followers</div>
+        <div class="calc-line" id="calc-2" style="font-size:28px;margin-bottom:28px;"><span class="gold" style="font-size:32px;">x 37%</span> active = <span class="gold" style="font-size:32px;">3,700</span> real reach</div>
+        <div class="calc-line" id="calc-3" style="font-size:24px;color:var(--text-muted);margin-bottom:40px;">x 0.48% engagement = 17 interactions/post</div>
+        <div class="calc-divider" id="calc-div" style="margin:0 0 40px;">
+          <div class="line"></div>
+          <div class="vs">vs. Flock-optimized</div>
+          <div class="line"></div>
+        </div>
+        <div class="calc-line" id="calc-4" style="font-size:38px;font-family:'Nunito',sans-serif;font-weight:900;color:var(--gold);margin-bottom:32px;">2.4x reach. 3.1x engagement.</div>
+        <div class="delta-block" id="delta-block" style="margin-top:24px;">
+          <div>
+            <span class="delta-old">$200</span>
+            <span class="delta-arrow">&#8594;</span>
+            <span class="delta-new">$620</span>
+          </div>
+          <div class="delta-sub">per sponsored post value</div>
+          <div style="color:var(--text-muted);font-family:'Quicksand',sans-serif;font-size:16px;margin-top:16px;">CPM math based on $15 CPM, micro-influencer benchmarks</div>
+        </div>
+      </div>
+      <div class="bottom-insight">This isn't theory. This is math.</div>
+    </div>
+
+    <!-- SCENE 5: How It Works -->
+    <div class="scene" id="scene-how">
+      <div class="eyebrow">HOW IT WORKS</div>
+      <div style="display:flex;flex-direction:column;gap:8px;flex:1;justify-content:center;padding-top:80px;padding-bottom:80px;">
+        <div class="steps-list">
+          <div class="step-item" id="step-1">
+            <div class="step-num">1</div>
+            <div class="step-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+              </svg>
+            </div>
+            <div class="step-content">
+              <div class="step-title">Install the bookmarklet</div>
+              <div class="step-desc">One-time setup. 10 seconds.</div>
+            </div>
+            <div class="step-check" id="check-1">
+              <svg viewBox="0 0 32 32" fill="none" stroke="var(--gold)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 17 13 24 26 8" id="check-path-1" stroke-dasharray="40" stroke-dashoffset="40"/>
+              </svg>
+            </div>
+          </div>
+          <div class="step-item" id="step-2">
+            <div class="step-num">2</div>
+            <div class="step-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+              </svg>
+            </div>
+            <div class="step-content">
+              <div class="step-title">Visit Instagram</div>
+              <div class="step-desc">Click while logged in. That's it.</div>
+            </div>
+            <div class="step-check" id="check-2">
+              <svg viewBox="0 0 32 32" fill="none" stroke="var(--gold)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 17 13 24 26 8" id="check-path-2" stroke-dasharray="40" stroke-dashoffset="40"/>
+              </svg>
+            </div>
+          </div>
+          <div class="step-item" id="step-3">
+            <div class="step-num">3</div>
+            <div class="step-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+              </svg>
+            </div>
+            <div class="step-content">
+              <div class="step-title">Get your growth report</div>
+              <div class="step-desc">AI-powered playbook in seconds.</div>
+            </div>
+            <div class="step-check" id="check-3">
+              <svg viewBox="0 0 32 32" fill="none" stroke="var(--gold)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 17 13 24 26 8" id="check-path-3" stroke-dasharray="40" stroke-dashoffset="40"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="privacy-badge">
+          <div class="privacy-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" width="18" height="18" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            PRIVACY FIRST
+          </div>
+          <div class="privacy-points">
+            <div class="privacy-point">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+              no password
+            </div>
+            <span class="privacy-sep">&#183;</span>
+            <div class="privacy-point">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+              no stored data
+            </div>
+            <span class="privacy-sep">&#183;</span>
+            <div class="privacy-point">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+              no app install
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-insight">Your data never leaves your browser.</div>
+    </div>
+
+    <!-- SCENE 6: CTA — filled with content -->
+    <div class="scene" id="scene-cta" style="align-items:center;text-align:center;justify-content:flex-start;padding-top:60px;">
+      <!-- Animated bg glow — more intense -->
+      <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 40%, rgba(212,168,67,0.15) 0%, rgba(212,168,67,0.04) 40%, transparent 65%);animation:ctaGlow 4s ease-in-out infinite alternate;"></div>
+      <!-- Floating circles -->
+      <div class="cta-bg-circle" style="width:500px;height:500px;top:5%;left:-15%;"></div>
+      <div class="cta-bg-circle" style="width:350px;height:350px;top:40%;right:-8%;animation-delay:2s;"></div>
+      <div class="cta-bg-circle" style="width:300px;height:300px;bottom:10%;left:15%;animation-delay:4s;"></div>
+
+      <div style="display:flex;flex-direction:column;align-items:center;gap:20px;z-index:2;width:100%;">
+        <!-- Logo + headline + button -->
+        <div class="flock-logo large">
+          <span class="logo-text">Flock</span>
+          <span class="logo-badge">BUSINESS</span>
+        </div>
+        <div class="cta-tagline" id="cta-tagline" style="font-size:52px;">Stop guessing. Start growing.</div>
+        <div class="cta-subtext" id="cta-subtext">See exactly what you're leaving on the table.</div>
+        <button class="cta-button" id="cta-button" style="padding:20px 64px;font-size:24px;position:relative;overflow:hidden;">Start Growing<span class="shimmer"></span></button>
+
+        <!-- ELEMENT A: Three stat callout cards -->
+        <div style="display:flex;gap:16px;margin-top:24px;opacity:0;transition:opacity 0.6s ease;" id="cta-stats">
+          <div style="flex:1;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px 12px;display:flex;align-items:center;gap:10px;justify-content:center;">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            <span style="font-family:'Quicksand',sans-serif;font-size:15px;color:var(--text-soft);font-weight:600;">Real-time analytics</span>
+          </div>
+          <div style="flex:1;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px 12px;display:flex;align-items:center;gap:10px;justify-content:center;">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            <span style="font-family:'Quicksand',sans-serif;font-size:15px;color:var(--text-soft);font-weight:600;">Post scoring</span>
+          </div>
+          <div style="flex:1;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px 12px;display:flex;align-items:center;gap:10px;justify-content:center;">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round"><path d="M12 2C8 2 5 5 5 8c0 2 1 3 1 3H8l-1 4h2v7h6v-7h2l-1-4h1s1-1 1-3c0-3-3-6-7-6z"/></svg>
+            <span style="font-family:'Quicksand',sans-serif;font-size:15px;color:var(--text-soft);font-weight:600;">Ghost detection</span>
+          </div>
+        </div>
+
+        <!-- ELEMENT B: Mock Flock Report card -->
+        <div style="width:100%;max-width:800px;background:var(--bg-card);border:1px solid var(--gold-border);border-radius:20px;padding:32px 36px;margin-top:16px;text-align:left;box-shadow:0 0 40px rgba(212,168,67,0.1);opacity:0;transition:opacity 0.6s ease;animation:reportPulse 3s ease-in-out infinite;" id="cta-report">
+          <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:20px;color:var(--text);margin-bottom:24px;text-align:center;">Your Weekly Flock Report</div>
+          <!-- Progress bar 1 -->
+          <div style="margin-bottom:18px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-family:'Quicksand',sans-serif;font-size:15px;color:var(--text-soft);">Audience Health</span>
+              <span style="font-family:'Nunito',sans-serif;font-weight:700;font-size:15px;color:var(--gold);">78%</span>
+            </div>
+            <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;">
+              <div style="width:78%;height:100%;background:var(--gradient-gold);border-radius:4px;"></div>
+            </div>
+          </div>
+          <!-- Progress bar 2 -->
+          <div style="margin-bottom:18px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-family:'Quicksand',sans-serif;font-size:15px;color:var(--text-soft);">Post Timing Score</span>
+              <span style="font-family:'Nunito',sans-serif;font-weight:700;font-size:15px;color:var(--gold);">61%</span>
+            </div>
+            <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;">
+              <div style="width:61%;height:100%;background:var(--gradient-gold);border-radius:4px;"></div>
+            </div>
+          </div>
+          <!-- Progress bar 3 -->
+          <div style="margin-bottom:18px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-family:'Quicksand',sans-serif;font-size:15px;color:var(--text-soft);">Format Efficiency</span>
+              <span style="font-family:'Nunito',sans-serif;font-weight:700;font-size:15px;color:var(--gold);">89%</span>
+            </div>
+            <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;">
+              <div style="width:89%;height:100%;background:var(--gradient-gold);border-radius:4px;"></div>
+            </div>
+          </div>
+          <div style="text-align:center;font-family:'Quicksand',sans-serif;font-size:15px;color:var(--gold);font-weight:600;margin-top:8px;">3 optimizations found
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-left:4px;"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+          </div>
+        </div>
+
+        <!-- ELEMENT C: Trust badges -->
+        <div style="display:flex;gap:32px;margin-top:16px;opacity:0;transition:opacity 0.6s ease;" id="cta-trust">
+          <div style="display:flex;align-items:center;gap:8px;font-family:'Quicksand',sans-serif;font-size:15px;color:var(--text-muted);">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            No password
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-family:'Quicksand',sans-serif;font-size:15px;color:var(--text-muted);">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="9" y1="18" x2="15" y2="18"/></svg>
+            No app install
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-family:'Quicksand',sans-serif;font-size:15px;color:var(--text-muted);">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            No stored data
+          </div>
+        </div>
+
+        <!-- ELEMENT D: Domain -->
+        <div style="font-family:'Quicksand',sans-serif;font-size:14px;color:var(--text-muted);opacity:0;transition:opacity 0.6s ease;margin-top:8px;" id="cta-domain">flockscan.org</div>
+      </div>
+    </div>
+
+    <!-- Lower-third overlays -->
+    <div class="lower-third" id="lt-1">Instagram engagement down 24% YoY -- 2026 data</div>
+    <div class="lower-third" id="lt-2">Reel creators grow 47% faster</div>
+    <div class="lower-third" id="lt-3">Carousels = highest save rate at 3.4%</div>
+    <div class="lower-third" id="lt-4">44% of Instagram followers are inactive</div>
+
+    <!-- Replay overlay -->
+    <div id="replay-btn">
+      <div class="replay-icon">
+        <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 105.13-11.74L1 10"/>
+        </svg>
+      </div>
+      <div class="replay-label">Replay</div>
+    </div>
+  </div>
+</div>
+
+<!-- Controls -->
+<div id="controls">
+  <button id="play-btn" aria-label="Play/Pause">
+    <svg id="icon-play" viewBox="0 0 24 24" width="18" height="18" fill="var(--gold)" stroke="none"><polygon points="6,3 20,12 6,21"/></svg>
+    <svg id="icon-pause" viewBox="0 0 24 24" width="18" height="18" fill="var(--gold)" stroke="none" style="display:none"><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg>
+  </button>
+  <div id="scrubber-wrap">
+    <div id="scrubber-fill"></div>
+  </div>
+  <div id="time-display">0:00 / 1:03</div>
+  <button id="format-toggle">Portrait</button>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // --- TIMELINE (adjusted to match voiceover clip durations + 1s padding) ---
+  // Clip durations: hook=8.2s, ghosts=11.2s, format=10s, revenue=15.3s, how=10s, cta=2.3s
+  const SCENES = [
+    { id: 'hook',    start: 0,     end: 9200,  audio: 'assets/vo-1-hook.mp3' },
+    { id: 'ghosts',  start: 9200,  end: 21400, audio: 'assets/vo-2-ghosts.mp3' },
+    { id: 'format',  start: 21400, end: 32400, audio: 'assets/vo-3-format.mp3' },
+    { id: 'revenue', start: 32400, end: 48700, audio: 'assets/vo-4-revenue.mp3' },
+    { id: 'how',     start: 48700, end: 59700, audio: 'assets/vo-5-how.mp3' },
+    { id: 'cta',     start: 59700, end: 63000, audio: 'assets/vo-6-cta.mp3' }
+  ];
+
+  const LOWER_THIRDS = [
+    { id: 'lt-1', start: 12000, duration: 3000 },
+    { id: 'lt-2', start: 25000, duration: 3000 },
+    { id: 'lt-3', start: 29000, duration: 3000 },
+    { id: 'lt-4', start: 40000, duration: 3000 }
+  ];
+
+  const TOTAL = 63000;
+
+  // --- AUDIO: Voiceover clips ---
+  const audioEls = {};
+  SCENES.forEach(function(s) {
+    var a = new Audio(s.audio);
+    a.preload = 'auto';
+    audioEls[s.id] = a;
+  });
+
+  // --- AUDIO: Background music ---
+  var bgMusic = new Audio('assets/bg-music.mp3');
+  bgMusic.preload = 'auto';
+  bgMusic.loop = true;
+  bgMusic.volume = 0.18; // low under voiceover
+
+  const sceneEls = {
+    hook: document.getElementById('scene-hook'),
+    ghosts: document.getElementById('scene-ghosts'),
+    format: document.getElementById('scene-format'),
+    revenue: document.getElementById('scene-revenue'),
+    how: document.getElementById('scene-how'),
+    cta: document.getElementById('scene-cta')
+  };
+
+  const frame = document.getElementById('video-frame');
+  const playBtn = document.getElementById('play-btn');
+  const iconPlay = document.getElementById('icon-play');
+  const iconPause = document.getElementById('icon-pause');
+  const scrubberWrap = document.getElementById('scrubber-wrap');
+  const scrubberFill = document.getElementById('scrubber-fill');
+  const timeDisplay = document.getElementById('time-display');
+  const formatToggle = document.getElementById('format-toggle');
+  const replayBtn = document.getElementById('replay-btn');
+
+  let elapsed = 0;
+  let playing = false;
+  let lastTimestamp = null;
+  let currentSceneId = null;
+  let isLandscape = false;
+  let seeked = false;
+
+  // --- SCALING ---
+  function scaleFrame() {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight - 80;
+    const fw = isLandscape ? 1920 : 1080;
+    const fh = isLandscape ? 1080 : 1920;
+    const scale = Math.min(vw / fw, vh / fh, 1);
+    frame.style.transform = 'scale(' + scale + ')';
+    frame.style.transformOrigin = 'top center';
+    frame.style.marginBottom = ((fh * scale) - fh) + 'px';
+  }
+  window.addEventListener('resize', scaleFrame);
+  scaleFrame();
+
+  // --- FORMAT TOGGLE ---
+  formatToggle.addEventListener('click', function() {
+    isLandscape = !isLandscape;
+    frame.classList.toggle('landscape', isLandscape);
+    formatToggle.textContent = isLandscape ? 'Landscape' : 'Portrait';
+    scaleFrame();
+  });
+
+  // --- PLAY/PAUSE ---
+  function togglePlay() {
+    if (elapsed >= TOTAL) {
+      elapsed = 0;
+      replayBtn.style.display = 'none';
+    }
+    playing = !playing;
+    if (playing) {
+      lastTimestamp = performance.now();
+      iconPlay.style.display = 'none';
+      iconPause.style.display = 'block';
+      // Resume current scene audio
+      if (currentSceneId && audioEls[currentSceneId]) {
+        var scn = SCENES.find(function(s){ return s.id === currentSceneId; });
+        if (scn) {
+          audioEls[currentSceneId].currentTime = (elapsed - scn.start) / 1000;
+          audioEls[currentSceneId].play().catch(function(){});
+        }
+      }
+      // Resume bg music
+      bgMusic.currentTime = elapsed / 1000;
+      bgMusic.play().catch(function(){});
+      requestAnimationFrame(tick);
+    } else {
+      iconPlay.style.display = 'block';
+      iconPause.style.display = 'none';
+      // Pause all audio
+      for (var key in audioEls) { audioEls[key].pause(); }
+      bgMusic.pause();
+    }
+  }
+
+  playBtn.addEventListener('click', togglePlay);
+  document.addEventListener('keydown', function(e) {
+    if (e.code === 'Space' && e.target === document.body) {
+      e.preventDefault();
+      togglePlay();
+    }
+  });
+
+  replayBtn.addEventListener('click', function() {
+    elapsed = 0;
+    replayBtn.style.display = 'none';
+    seeked = false;
+    if (!playing) togglePlay();
+  });
+
+  // --- SCRUBBER ---
+  function handleScrub(e) {
+    const rect = scrubberWrap.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    elapsed = pct * TOTAL;
+    seeked = true;
+    // Stop all audio on seek
+    for (var key in audioEls) { audioEls[key].pause(); audioEls[key].currentTime = 0; }
+    bgMusic.pause();
+    currentSceneId = null; // force scene re-entry to trigger audio
+    render(elapsed);
+  }
+  scrubberWrap.addEventListener('mousedown', function(e) {
+    handleScrub(e);
+    function onMove(ev) { handleScrub(ev); }
+    function onUp() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+
+  // --- TIME FORMATTING ---
+  function fmt(ms) {
+    const s = Math.floor(ms / 1000);
+    const m = Math.floor(s / 60);
+    const ss = s % 60;
+    return m + ':' + (ss < 10 ? '0' : '') + ss;
+  }
+
+  // --- MAIN LOOP ---
+  function tick(ts) {
+    if (!playing) return;
+    const dt = ts - lastTimestamp;
+    lastTimestamp = ts;
+    elapsed = Math.min(elapsed + dt, TOTAL);
+    seeked = false;
+    render(elapsed);
+    if (elapsed >= TOTAL) {
+      playing = false;
+      iconPlay.style.display = 'block';
+      iconPause.style.display = 'none';
+      replayBtn.style.display = 'flex';
+      for (var k in audioEls) { audioEls[k].pause(); audioEls[k].currentTime = 0; }
+      bgMusic.pause(); bgMusic.currentTime = 0;
+      return;
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // --- RENDER ---
+  function render(t) {
+    // Update scrubber
+    scrubberFill.style.width = ((t / TOTAL) * 100) + '%';
+    timeDisplay.textContent = fmt(t) + ' / 1:03';
+
+    // Determine active scene
+    let activeScene = SCENES[0];
+    for (let i = 0; i < SCENES.length; i++) {
+      if (t >= SCENES[i].start && t < SCENES[i].end) {
+        activeScene = SCENES[i];
+        break;
+      }
+    }
+    if (t >= TOTAL) activeScene = SCENES[SCENES.length - 1];
+
+    // Switch scenes
+    if (currentSceneId !== activeScene.id) {
+      // Stop previous scene audio
+      if (currentSceneId && audioEls[currentSceneId]) {
+        audioEls[currentSceneId].pause();
+        audioEls[currentSceneId].currentTime = 0;
+      }
+      for (const key in sceneEls) {
+        sceneEls[key].classList.toggle('active', key === activeScene.id);
+      }
+      currentSceneId = activeScene.id;
+      // Start new scene audio if playing (not seeking)
+      if (playing && !seeked && audioEls[activeScene.id]) {
+        audioEls[activeScene.id].currentTime = 0;
+        audioEls[activeScene.id].play().catch(function(){});
+      }
+    }
+
+    // Sync audio position if playing mid-scene
+    if (playing && !seeked && audioEls[activeScene.id]) {
+      var expectedTime = (t - activeScene.start) / 1000;
+      var actualTime = audioEls[activeScene.id].currentTime;
+      // Resync if drifted more than 0.3s
+      if (Math.abs(expectedTime - actualTime) > 0.3) {
+        audioEls[activeScene.id].currentTime = expectedTime;
+      }
+    }
+
+    // Scene-local time
+    const st = t - activeScene.start;
+    const isFinal = seeked; // show final state if seeked
+
+    // Animate each scene
+    switch (activeScene.id) {
+      case 'hook': renderHook(st, isFinal); break;
+      case 'ghosts': renderGhosts(st, isFinal); break;
+      case 'format': renderFormat(st, isFinal); break;
+      case 'revenue': renderRevenue(st, isFinal); break;
+      case 'how': renderHow(st, isFinal); break;
+      case 'cta': renderCta(st, isFinal); break;
+    }
+
+    // Lower thirds
+    LOWER_THIRDS.forEach(function(lt) {
+      const el = document.getElementById(lt.id);
+      const vis = t >= lt.start && t < lt.start + lt.duration;
+      el.classList.toggle('visible', vis);
+    });
+
+    // BG music volume: fade in first 3s, low during VO, swell at CTA
+    if (t < 3000) {
+      bgMusic.volume = 0.18 * (t / 3000); // fade in
+    } else if (t >= 59700) {
+      bgMusic.volume = 0.35; // swell at CTA scene
+    } else {
+      bgMusic.volume = 0.18; // steady low under voiceover
+    }
+  }
+
+  // --- SCENE RENDERERS ---
+
+  // Helper: count-up
+  function countUp(el, target, progress) {
+    const val = Math.round(target * Math.min(progress, 1));
+    el.textContent = val;
+  }
+
+  // Scene 1: Hook
+  function renderHook(st, fin) {
+    const line1 = document.getElementById('hook-line-1');
+    const line2 = document.getElementById('hook-line-2');
+    const line3 = document.getElementById('hook-line-3');
+    const c18 = document.getElementById('count-18');
+    const c6 = document.getElementById('count-6');
+
+    if (fin) {
+      line1.classList.add('visible');
+      line2.classList.add('visible');
+      line3.classList.add('visible');
+      c18.textContent = '18';
+      c6.textContent = '6';
+      return;
+    }
+
+    // Line 1 at 0ms
+    line1.classList.toggle('visible', st >= 0);
+    if (st >= 0 && st < 1500) {
+      countUp(c18, 18, st / 800);
+    } else if (st >= 0) {
+      c18.textContent = '18';
+    }
+
+    // Line 2 at 1500ms
+    line2.classList.toggle('visible', st >= 1500);
+    if (st >= 1500 && st < 3000) {
+      countUp(c6, 6, (st - 1500) / 600);
+    } else if (st >= 1500) {
+      c6.textContent = '6';
+    }
+
+    // Line 3 at 3500ms with slam
+    if (st >= 3500) {
+      line3.classList.add('visible');
+      if (st < 3800) {
+        const p = (st - 3500) / 300;
+        const s = 1.15 - 0.15 * p;
+        line3.style.transform = 'translateY(0) scale(' + s + ')';
+      } else {
+        line3.style.transform = 'translateY(0) scale(1)';
+      }
+    } else {
+      line3.classList.remove('visible');
+      line3.style.transform = '';
+    }
+  }
+
+  // Scene 2: Ghosts — SVG donut with properly chained arcs
+  var CIRC = 2 * Math.PI * 80; // ~502.65
+  var ghostLen = CIRC * 0.182;   // 91.5
+  var inactiveLen = CIRC * 0.44; // 221.2
+  var engagedLen = CIRC * 0.378; // 190.0
+
+  function renderGhosts(st, fin) {
+    var ghostArc = document.getElementById('donut-ghost');
+    var inactiveArc = document.getElementById('donut-inactive');
+    var engagedArc = document.getElementById('donut-engaged');
+    var pctEl = document.getElementById('donut-pct');
+    var callout = document.getElementById('ghost-callout');
+
+    if (fin) {
+      ghostArc.setAttribute('stroke-dasharray', ghostLen + ' ' + (CIRC - ghostLen));
+      inactiveArc.setAttribute('stroke-dasharray', inactiveLen + ' ' + (CIRC - inactiveLen));
+      engagedArc.setAttribute('stroke-dasharray', engagedLen + ' ' + (CIRC - engagedLen));
+      pctEl.textContent = '37.8%';
+      callout.classList.add('visible');
+      return;
+    }
+
+    // Ghost (red) builds 0–1.5s
+    var gp = Math.min(st / 1500, 1);
+    ghostArc.setAttribute('stroke-dasharray', (ghostLen * gp) + ' ' + (CIRC - ghostLen * gp));
+
+    // Inactive (amber) builds 1.5–3.5s
+    var ip = Math.max(0, Math.min((st - 1500) / 2000, 1));
+    inactiveArc.setAttribute('stroke-dasharray', (inactiveLen * ip) + ' ' + (CIRC - inactiveLen * ip));
+
+    // Engaged (green) builds 3.5–5.5s
+    var ep = Math.max(0, Math.min((st - 3500) / 2000, 1));
+    engagedArc.setAttribute('stroke-dasharray', (engagedLen * ep) + ' ' + (CIRC - engagedLen * ep));
+
+    // Center percentage tracks engaged segment
+    pctEl.textContent = ep > 0 ? (37.8 * ep).toFixed(1) + '%' : '0%';
+
+    // Callout at 7s scene-local (after all arcs finish)
+    callout.classList.toggle('visible', st >= 7000);
+  }
+
+  // Scene 3: Format — 3 cards stagger in
+  function renderFormat(st, fin) {
+    var card1 = document.getElementById('fmt-card-1');
+    var card2 = document.getElementById('fmt-card-2');
+    var card3 = document.getElementById('fmt-card-3');
+    var headline = document.getElementById('format-headline');
+
+    if (fin) {
+      card1.style.opacity = '1'; card1.style.transform = 'translateY(0)';
+      card2.style.opacity = '1'; card2.style.transform = 'translateY(0)';
+      card3.style.opacity = '1'; card3.style.transform = 'translateY(0)';
+      headline.classList.add('visible');
+      return;
+    }
+
+    // Cards stagger at 0.5s, 0.8s, 1.1s
+    if (st >= 500) { card1.style.opacity = '1'; card1.style.transform = 'translateY(0)'; }
+    if (st >= 800) { card2.style.opacity = '1'; card2.style.transform = 'translateY(0)'; }
+    if (st >= 1100) { card3.style.opacity = '1'; card3.style.transform = 'translateY(0)'; }
+    headline.classList.toggle('visible', st >= 5000);
+  }
+
+  // Scene 4: Revenue
+  function renderRevenue(st, fin) {
+    const lines = [
+      document.getElementById('calc-1'),
+      document.getElementById('calc-2'),
+      document.getElementById('calc-3')
+    ];
+    const div = document.getElementById('calc-div');
+    const calc4 = document.getElementById('calc-4');
+    const delta = document.getElementById('delta-block');
+
+    if (fin) {
+      lines.forEach(function(l) { l.classList.add('visible'); });
+      div.classList.add('visible');
+      calc4.classList.add('visible');
+      delta.classList.add('visible');
+      return;
+    }
+
+    lines[0].classList.toggle('visible', st >= 0);
+    lines[1].classList.toggle('visible', st >= 2000);
+    lines[2].classList.toggle('visible', st >= 4000);
+    div.classList.toggle('visible', st >= 6000);
+    calc4.classList.toggle('visible', st >= 8000);
+    delta.classList.toggle('visible', st >= 11000);
+  }
+
+  // Scene 5: How
+  function renderHow(st, fin) {
+    const steps = [
+      document.getElementById('step-1'),
+      document.getElementById('step-2'),
+      document.getElementById('step-3')
+    ];
+    const checks = [
+      document.getElementById('check-1'),
+      document.getElementById('check-2'),
+      document.getElementById('check-3')
+    ];
+    const checkPaths = [
+      document.getElementById('check-path-1'),
+      document.getElementById('check-path-2'),
+      document.getElementById('check-path-3')
+    ];
+
+    if (fin) {
+      steps.forEach(function(s) { s.classList.add('visible'); });
+      checks.forEach(function(c) { c.classList.add('visible'); });
+      checkPaths.forEach(function(p) { p.setAttribute('stroke-dashoffset', '0'); });
+      return;
+    }
+
+    // Steps at 0, 800, 1600
+    steps[0].classList.toggle('visible', st >= 0);
+    steps[1].classList.toggle('visible', st >= 800);
+    steps[2].classList.toggle('visible', st >= 1600);
+
+    // Checks after all steps
+    const checkStart = 3000;
+    for (let i = 0; i < 3; i++) {
+      const ct = st - (checkStart + i * 500);
+      if (ct >= 0) {
+        checks[i].classList.add('visible');
+        const p = Math.min(ct / 400, 1);
+        checkPaths[i].setAttribute('stroke-dashoffset', String(40 * (1 - p)));
+      } else {
+        checks[i].classList.remove('visible');
+        checkPaths[i].setAttribute('stroke-dashoffset', '40');
+      }
+    }
+  }
+
+  // Scene 6: CTA
+  function renderCta(st, fin) {
+    var tagline = document.getElementById('cta-tagline');
+    var subtext = document.getElementById('cta-subtext');
+    var button = document.getElementById('cta-button');
+    var stats = document.getElementById('cta-stats');
+    var report = document.getElementById('cta-report');
+    var trust = document.getElementById('cta-trust');
+    var domain = document.getElementById('cta-domain');
+    if (fin) {
+      tagline.classList.add('visible');
+      subtext.classList.add('visible');
+      button.classList.add('visible');
+      stats.style.opacity = '1';
+      report.style.opacity = '1';
+      trust.style.opacity = '1';
+      domain.style.opacity = '1';
+      return;
+    }
+    tagline.classList.toggle('visible', st >= 300);
+    subtext.classList.toggle('visible', st >= 600);
+    button.classList.toggle('visible', st >= 900);
+    stats.style.opacity = st >= 1200 ? '1' : '0';
+    report.style.opacity = st >= 1500 ? '1' : '0';
+    trust.style.opacity = st >= 2000 ? '1' : '0';
+    domain.style.opacity = st >= 2200 ? '1' : '0';
+  }
+
+  // --- INITIAL STATE ---
+  function resetAll() {
+    // Hide all scene animations to initial state
+    document.querySelectorAll('.hook-line').forEach(function(el) { el.classList.remove('visible'); el.style.transform = ''; });
+    document.getElementById('count-18').textContent = '0';
+    document.getElementById('count-6').textContent = '0';
+
+    var ca = document.getElementById('ghost-callout');
+    ca.classList.remove('visible');
+
+    document.getElementById('format-headline').classList.remove('visible');
+    ['fmt-card-1','fmt-card-2','fmt-card-3'].forEach(function(id) {
+      var el = document.getElementById(id);
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(30px)';
+    });
+
+    ['calc-1','calc-2','calc-3','calc-4','calc-div'].forEach(function(id) {
+      document.getElementById(id).classList.remove('visible');
+    });
+    document.getElementById('delta-block').classList.remove('visible');
+
+    ['step-1','step-2','step-3'].forEach(function(id) {
+      document.getElementById(id).classList.remove('visible');
+    });
+    ['check-1','check-2','check-3'].forEach(function(id) {
+      document.getElementById(id).classList.remove('visible');
+    });
+    ['check-path-1','check-path-2','check-path-3'].forEach(function(id) {
+      document.getElementById(id).setAttribute('stroke-dashoffset', '40');
+    });
+
+    document.getElementById('cta-tagline').classList.remove('visible');
+    document.getElementById('cta-subtext').classList.remove('visible');
+    document.getElementById('cta-button').classList.remove('visible');
+    document.getElementById('cta-stats').style.opacity = '0';
+    document.getElementById('cta-report').style.opacity = '0';
+    document.getElementById('cta-trust').style.opacity = '0';
+    document.getElementById('cta-domain').style.opacity = '0';
+
+    // Reset donut
+    document.getElementById('donut-ghost').setAttribute('stroke-dasharray', '0 ' + CIRC);
+    document.getElementById('donut-inactive').setAttribute('stroke-dasharray', '0 ' + CIRC);
+    document.getElementById('donut-engaged').setAttribute('stroke-dasharray', '0 ' + CIRC);
+    document.getElementById('donut-pct').textContent = '0%';
+
+    // Lower thirds
+    LOWER_THIRDS.forEach(function(lt) {
+      document.getElementById(lt.id).classList.remove('visible');
+    });
+  }
+
+  // Initialize: show scene 1
+  resetAll();
+  currentSceneId = 'hook';
+  sceneEls.hook.classList.add('active');
+  render(0);
+
+  // Don't auto-play — browser blocks audio without user gesture.
+  // Show a play overlay instead.
+  var playOverlay = document.createElement('div');
+  playOverlay.style.cssText = 'position:absolute;inset:0;background:rgba(8,8,15,0.92);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;z-index:200;cursor:pointer;';
+  playOverlay.innerHTML = '<div style="width:100px;height:100px;border:3px solid #D4A843;border-radius:50%;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" width="44" height="44" fill="#D4A843" stroke="none"><polygon points="6,3 20,12 6,21"/></svg></div><div style="font-family:Nunito,sans-serif;font-weight:700;font-size:24px;color:#D4A843;">Click to play</div>';
+  frame.appendChild(playOverlay);
+  playOverlay.addEventListener('click', function() {
+    playOverlay.remove();
+    togglePlay();
+  });
+
+})();
+</script>
+</body>
+</html>
