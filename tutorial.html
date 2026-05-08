@@ -159,6 +159,11 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   display:inline;
 }
 
+.source-cite{
+  font-family:var(--font-body);font-size:0.8rem;color:var(--text-muted);
+  margin-top:0.75rem;text-align:right;font-weight:500;font-style:italic;
+}
+
 /* ==================== CTA BUTTONS ==================== */
 .section-cta{
   display:inline-flex;align-items:center;gap:8px;
@@ -595,7 +600,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
     <span>Flock</span>
     <span class="logo-badge">Business</span>
   </div>
-  <a href="business.html" class="nav-cta">Start Free Scan</a>
+  <a href="business.html" class="nav-cta">See Pricing</a>
 </nav>
 
 <!-- ==================== HERO ==================== -->
@@ -610,116 +615,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   </div>
 </section>
 
-<!-- ==================== SECTION 1: AUDIENCE HEALTH CHECK ==================== -->
-<section class="tut-section" id="sec-audience">
-  <h2>What if a third of your audience is dead weight?</h2>
-  <div class="two-col">
-    <div class="chart-wrap" style="position:relative">
-      <canvas id="donutChart" width="400" height="300"></canvas>
-      <div class="donut-center">
-        <span class="donut-num" data-count="8184">0</span>
-        <span class="donut-label">real followers</span>
-      </div>
-    </div>
-    <div>
-      <div class="stat-block">
-        <div class="stat-label">Reported Engagement Rate</div>
-        <div class="stat-value" data-count="1.2" data-suffix="%" data-decimals="1">0%</div>
-      </div>
-      <div class="stat-block">
-        <div class="stat-label">Adjusted for Ghosts</div>
-        <div class="stat-value gold" data-count="1.8" data-suffix="%" data-decimals="1">0%</div>
-      </div>
-      <p class="stat-annotation">Your real rate is higher than you think -- but Instagram doesn't know that.</p>
-    </div>
-  </div>
-  <div class="cost-callout">
-    With 12,400 followers, 4,216 are ghosts dragging your engagement rate down. Instagram's algorithm sees 1.2% engagement and buries your posts. At $18 CPM, that's roughly <span class="cost-amount" data-count="340" data-prefix="$">$0</span>/mo in reach you're paying for but never getting.
-  </div>
-  <div class="section-cta-wrap">
-    <a href="business.html" class="section-cta">See your real audience health</a>
-  </div>
-</section>
-
-<!-- ==================== SECTION 2: POST GRAVEYARD ==================== -->
-<section class="tut-section" id="sec-graveyard">
-  <h2>What if you knew which posts were dead before you hit publish?</h2>
-  <div class="chart-wrap" style="margin-bottom:2rem">
-    <canvas id="barChart" width="600" height="280"></canvas>
-  </div>
-  <div class="post-grid" id="postGrid"></div>
-  <div class="cost-callout">
-    You posted 14 times last month. 9 were static images that reached fewer than 500 people each. If those had been Reels, you'd have reached an additional ~25,200 people. At $18 CPM, that's <span class="cost-amount" data-count="453" data-prefix="$">$0</span> left on the table.
-  </div>
-  <div class="section-cta-wrap">
-    <a href="business.html" class="section-cta">Stop guessing. See what's working.</a>
-  </div>
-</section>
-
-<!-- ==================== SECTION 3: POSTING TIME INTELLIGENCE ==================== -->
-<section class="tut-section" id="sec-timing">
-  <h2>What if you've been posting when nobody's watching?</h2>
-  <div class="heatmap-wrap">
-    <div class="heatmap" id="heatmap"></div>
-  </div>
-  <div class="compare-cards">
-    <div class="compare-card">
-      <div class="compare-label">You post at</div>
-      <div class="compare-value">10:00 AM weekdays</div>
-    </div>
-    <div class="compare-arrow">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="5" y1="12" x2="19" y2="12"/>
-        <polyline points="12 5 19 12 12 19"/>
-      </svg>
-      <span>4 hours off peak</span>
-    </div>
-    <div class="compare-card">
-      <div class="compare-label">They're online at</div>
-      <div class="compare-value gold">7:00 PM Tue, Thu, Sun</div>
-    </div>
-  </div>
-  <div class="cost-callout">
-    Posts published off-peak reach 40-60% fewer people. Across 14 posts last month, that's roughly 18,000 missed impressions -- <span class="cost-amount" data-count="324" data-prefix="$">$0</span> in invisible reach.
-  </div>
-  <div class="section-cta-wrap">
-    <a href="business.html" class="section-cta">Find your real peak hours</a>
-  </div>
-</section>
-
-<!-- ==================== SECTION 4: FOLLOWER MOMENTUM ==================== -->
-<section class="tut-section" id="sec-momentum">
-  <h2>What if your growth stalled and you didn't even notice?</h2>
-  <div class="momentum-chart-wrap">
-    <canvas id="lineChart" width="800" height="350"></canvas>
-    <div class="chart-annotation red" style="top:30%;left:28%">3 static posts &#8594; +47 unfollows</div>
-    <div class="chart-annotation green" style="top:22%;left:48%">5 Reels in 10 days &#8594; +189 followers</div>
-    <div class="chart-annotation red" style="top:38%;right:16%">No posts for 8 days &#8594; -32 followers</div>
-  </div>
-  <div class="mini-stats">
-    <div class="mini-stat">
-      <div class="ms-label">Net growth</div>
-      <div class="ms-value gold" data-count="214" data-prefix="+">0</div>
-    </div>
-    <div class="mini-stat">
-      <div class="ms-label">Hidden unfollows</div>
-      <div class="ms-value red" data-count="79" data-prefix="-">0</div>
-    </div>
-    <div class="mini-stat">
-      <div class="ms-label">Growth velocity</div>
-      <div class="ms-value muted" data-count="2.4" data-suffix="/day" data-decimals="1">0</div>
-      <div class="ms-note">below avg for your niche</div>
-    </div>
-  </div>
-  <div class="cost-callout">
-    Those 79 unfollows weren't random -- they correlated with your lowest-performing content. Every unfollow lowers your engagement rate, which lowers your reach, which lowers your next post's performance. It compounds.
-  </div>
-  <div class="section-cta-wrap">
-    <a href="business.html" class="section-cta">See what's driving your unfollows</a>
-  </div>
-</section>
-
-<!-- ==================== SECTION 5: REVENUE GAP CALCULATOR ==================== -->
+<!-- ==================== REVENUE GAP CALCULATOR (moved to top) ==================== -->
 <section class="tut-section" id="sec-calculator">
   <h2>How much is your Instagram actually leaving on the table?</h2>
   <div class="calc-card">
@@ -773,7 +669,121 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
         These estimates use industry-average CPM rates and assume optimization of content format, posting times, and audience targeting based on patterns we see across 2,400+ business accounts.
       </p>
     </details>
+    <div class="source-cite">Sources: Influencer Marketing Hub, CPM Benchmarks 2026; CreatorIQ, Micro-Influencer Rate Card Data 2026</div>
     <a href="business.html" class="cta-gold-full">Get Your Personalized Revenue Report</a>
+  </div>
+</section>
+
+<!-- ==================== SECTION 1: AUDIENCE HEALTH CHECK ==================== -->
+<section class="tut-section" id="sec-audience">
+  <h2>What if a third of your audience is dead weight?</h2>
+  <div class="two-col">
+    <div class="chart-wrap" style="position:relative">
+      <canvas id="donutChart" width="400" height="300"></canvas>
+      <div class="donut-center">
+        <span class="donut-num" data-count="8184">0</span>
+        <span class="donut-label">real followers</span>
+      </div>
+    </div>
+    <div>
+      <div class="stat-block">
+        <div class="stat-label">Reported Engagement Rate</div>
+        <div class="stat-value" data-count="1.2" data-suffix="%" data-decimals="1">0%</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-label">Adjusted for Ghosts</div>
+        <div class="stat-value gold" data-count="1.8" data-suffix="%" data-decimals="1">0%</div>
+      </div>
+      <p class="stat-annotation">Your real rate is higher than you think -- but Instagram doesn't know that.</p>
+    </div>
+  </div>
+  <div class="cost-callout">
+    With 12,400 followers, 4,216 are ghosts dragging your engagement rate down. Instagram's algorithm sees 1.2% engagement and buries your posts. At $18 CPM, that's roughly <span class="cost-amount" data-count="340" data-prefix="$">$0</span>/mo in reach you're paying for but never getting.
+  </div>
+  <div class="source-cite">Sources: SQ Magazine, Instagram Follower Statistics 2026; HypeAuditor, State of Influencer Marketing 2026</div>
+  <div class="section-cta-wrap">
+    <a href="business.html" class="section-cta">See your real audience health</a>
+  </div>
+</section>
+
+<!-- ==================== SECTION 2: POST GRAVEYARD ==================== -->
+<section class="tut-section" id="sec-graveyard">
+  <h2>What if you knew which posts were dead before you hit publish?</h2>
+  <div class="chart-wrap" style="margin-bottom:2rem">
+    <canvas id="barChart" width="600" height="280"></canvas>
+  </div>
+  <div class="post-grid" id="postGrid"></div>
+  <div class="cost-callout">
+    You posted 14 times last month. 9 were static images that reached fewer than 500 people each. If those had been Reels, you'd have reached an additional ~25,200 people. At $18 CPM, that's <span class="cost-amount" data-count="453" data-prefix="$">$0</span> left on the table.
+  </div>
+  <div class="source-cite">Sources: Socialinsider, 2026 Instagram Benchmark Report; InfluenceFlow, Content Format Performance Study 2026</div>
+  <div class="section-cta-wrap">
+    <a href="business.html" class="section-cta">Stop guessing. See what's working.</a>
+  </div>
+</section>
+
+<!-- ==================== SECTION 3: POSTING TIME INTELLIGENCE ==================== -->
+<section class="tut-section" id="sec-timing">
+  <h2>What if you've been posting when nobody's watching?</h2>
+  <div class="heatmap-wrap">
+    <div class="heatmap" id="heatmap"></div>
+  </div>
+  <div class="compare-cards">
+    <div class="compare-card">
+      <div class="compare-label">You post at</div>
+      <div class="compare-value">10:00 AM weekdays</div>
+    </div>
+    <div class="compare-arrow">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+        <polyline points="12 5 19 12 12 19"/>
+      </svg>
+      <span>4 hours off peak</span>
+    </div>
+    <div class="compare-card">
+      <div class="compare-label">They're online at</div>
+      <div class="compare-value gold">7:00 PM Tue, Thu, Sun</div>
+    </div>
+  </div>
+  <div class="cost-callout">
+    Posts published off-peak reach 40-60% fewer people. Across 14 posts last month, that's roughly 18,000 missed impressions -- <span class="cost-amount" data-count="324" data-prefix="$">$0</span> in invisible reach.
+  </div>
+  <div class="source-cite">Sources: Sprout Social, Best Times to Post on Instagram 2026; Later, Instagram Engagement Report 2026</div>
+  <div class="section-cta-wrap">
+    <a href="business.html" class="section-cta">Find your real peak hours</a>
+  </div>
+</section>
+
+<!-- ==================== SECTION 4: FOLLOWER MOMENTUM ==================== -->
+<section class="tut-section" id="sec-momentum">
+  <h2>What if your growth stalled and you didn't even notice?</h2>
+  <div class="momentum-chart-wrap">
+    <canvas id="lineChart" width="800" height="350"></canvas>
+    <div class="chart-annotation red" style="top:30%;left:28%">3 static posts &#8594; +47 unfollows</div>
+    <div class="chart-annotation green" style="top:22%;left:48%">5 Reels in 10 days &#8594; +189 followers</div>
+    <div class="chart-annotation red" style="top:38%;right:16%">No posts for 8 days &#8594; -32 followers</div>
+  </div>
+  <div class="mini-stats">
+    <div class="mini-stat">
+      <div class="ms-label">Net growth</div>
+      <div class="ms-value gold" data-count="214" data-prefix="+">0</div>
+    </div>
+    <div class="mini-stat">
+      <div class="ms-label">Hidden unfollows</div>
+      <div class="ms-value red" data-count="79" data-prefix="-">0</div>
+    </div>
+    <div class="mini-stat">
+      <div class="ms-label">Growth velocity</div>
+      <div class="ms-value muted" data-count="2.4" data-suffix="/day" data-decimals="1">0</div>
+      <div class="ms-note">below avg for your niche</div>
+    </div>
+  </div>
+  <div class="cost-callout">
+    Those 79 unfollows weren't random -- they correlated with your lowest-performing content. Every unfollow lowers your engagement rate, which lowers your reach, which lowers your next post's performance. It compounds.
+  </div>
+  <div class="source-cite">Sources: Hootsuite, Instagram Algorithm Deep Dive 2026; Instagram official documentation on engagement-based ranking</div>
+  <div class="section-cta-wrap">
+    <a href="business.html" class="section-cta">See what's driving your unfollows</a>
   </div>
 </section>
 
@@ -848,7 +858,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   <div class="final-cta">
     <h3>Ready to see what you're missing?</h3>
     <a href="business.html" class="cta-gold-full" style="max-width:400px;margin:0 auto;display:block">
-      Start Your Free Scan
+      Get Started
     </a>
   </div>
 </section>
