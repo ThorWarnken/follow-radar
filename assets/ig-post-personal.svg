@@ -1,0 +1,254 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1080" height="1080" viewBox="0 0 1080 1080">
+  <defs>
+    <linearGradient id="igGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f77737"/>
+      <stop offset="35%" stop-color="#e1306c"/>
+      <stop offset="100%" stop-color="#833ab4"/>
+    </linearGradient>
+
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#833ab4"/>
+      <stop offset="100%" stop-color="#5851db"/>
+    </linearGradient>
+
+    <linearGradient id="pinkGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#e1306c"/>
+      <stop offset="100%" stop-color="#833ab4"/>
+    </linearGradient>
+
+    <radialGradient id="bgGlow" cx="50%" cy="30%" r="55%">
+      <stop offset="0%" stop-color="#833ab4" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+
+    <radialGradient id="bgGlow2" cx="20%" cy="70%" r="40%">
+      <stop offset="0%" stop-color="#e1306c" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+
+    <filter id="cardShadow" x="-8%" y="-8%" width="116%" height="125%">
+      <feDropShadow dx="0" dy="4" stdDeviation="12" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+
+    <filter id="glowFilter">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Brighten logo filter -->
+    <filter id="logoBright" x="-20%" y="-20%" width="140%" height="140%">
+      <feComponentTransfer>
+        <feFuncR type="linear" slope="1.5" intercept="0.15"/>
+        <feFuncG type="linear" slope="1.5" intercept="0.15"/>
+        <feFuncB type="linear" slope="1.5" intercept="0.15"/>
+      </feComponentTransfer>
+    </filter>
+
+    <linearGradient id="trendGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f77737" stop-opacity="0.6"/>
+      <stop offset="50%" stop-color="#e1306c"/>
+      <stop offset="100%" stop-color="#833ab4"/>
+    </linearGradient>
+
+    <linearGradient id="trendFill" x1="0%" y1="0%" x2="0%" y2="1">
+      <stop offset="0%" stop-color="#e1306c" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#e1306c" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1080" height="1080" fill="#0f0f1a"/>
+  <rect width="1080" height="1080" fill="url(#bgGlow)"/>
+  <rect width="1080" height="1080" fill="url(#bgGlow2)"/>
+
+  <!-- Top accent bar -->
+  <rect x="0" y="0" width="1080" height="3" fill="url(#igGrad)"/>
+
+  <!-- Logo -->
+  <g transform="translate(540, 80)">
+    <image href="data:image/png;base64,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" x="-110" y="-32" width="64" height="64" filter="url(#logoBright)"/>
+    <text x="-34" y="16" font-family="'Nunito', 'Avenir Next', sans-serif" font-weight="800" font-size="42" fill="white" letter-spacing="1">Flock</text>
+  </g>
+
+  <!-- Headline -->
+  <text x="540" y="180" text-anchor="middle" font-family="'Nunito', 'Avenir Next', sans-serif" font-weight="800" font-size="50" fill="white">
+    Know your audience.
+  </text>
+  <text x="540" y="240" text-anchor="middle" font-family="'Nunito', 'Avenir Next', sans-serif" font-weight="800" font-size="50" fill="url(#igGrad)">
+    Grow with intention.
+  </text>
+
+  <!-- Subheadline -->
+  <text x="540" y="290" text-anchor="middle" font-family="'Quicksand', 'Avenir', sans-serif" font-weight="500" font-size="21" fill="#8a8a9a">
+    See who follows back, when to post, and what works.
+  </text>
+
+  <!-- === LEFT PANEL: Growth Insights === -->
+  <g transform="translate(72, 330)">
+    <rect x="0" y="0" width="450" height="310" rx="20" fill="#1a1a2e" filter="url(#cardShadow)"/>
+    <rect x="0" y="0" width="450" height="3" rx="2" fill="url(#pinkGrad)"/>
+
+    <!-- Header -->
+    <text x="24" y="38" font-family="'Nunito', sans-serif" font-weight="700" font-size="14" fill="#833ab4" letter-spacing="2">POTENTIAL GROWTH</text>
+    <rect x="200" y="22" width="42" height="20" rx="6" fill="url(#purpleGrad)"/>
+    <text x="221" y="36" text-anchor="middle" font-family="'Nunito', sans-serif" font-weight="800" font-size="9" fill="white" letter-spacing="1">PRO</text>
+
+    <!-- Engagement trend chart -->
+    <g transform="translate(24, 55)">
+      <text x="0" y="10" font-family="'Quicksand', sans-serif" font-size="10" fill="#555">5%</text>
+      <text x="0" y="50" font-family="'Quicksand', sans-serif" font-size="10" fill="#555">3%</text>
+      <text x="0" y="90" font-family="'Quicksand', sans-serif" font-size="10" fill="#555">1%</text>
+
+      <line x1="24" y1="7" x2="400" y2="7" stroke="#2a2a3e" stroke-width="0.5"/>
+      <line x1="24" y1="47" x2="400" y2="47" stroke="#2a2a3e" stroke-width="0.5"/>
+      <line x1="24" y1="87" x2="400" y2="87" stroke="#2a2a3e" stroke-width="0.5"/>
+
+      <path d="M24,78 C55,75 85,72 115,65 C145,57 175,63 205,50 C235,43 265,45 295,34 C325,27 360,20 400,12"
+            fill="none" stroke="url(#trendGrad)" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M24,78 C55,75 85,72 115,65 C145,57 175,63 205,50 C235,43 265,45 295,34 C325,27 360,20 400,12 L400,87 L24,87 Z"
+            fill="url(#trendFill)"/>
+
+      <circle cx="115" cy="65" r="3" fill="#e1306c"/>
+      <circle cx="205" cy="50" r="3" fill="#e1306c"/>
+      <circle cx="295" cy="34" r="3" fill="#833ab4"/>
+      <circle cx="400" cy="12" r="3" fill="#833ab4" filter="url(#glowFilter)"/>
+
+      <g transform="translate(260, 98)">
+        <path d="M0,10 L5,3 L10,10" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="16" y="11" font-family="'Quicksand', sans-serif" font-weight="600" font-size="12" fill="#4ade80">Engagement trending up</text>
+      </g>
+    </g>
+
+    <!-- Best time to post -->
+    <g transform="translate(24, 190)">
+      <rect x="0" y="0" width="402" height="46" rx="10" fill="#12122a"/>
+      <g transform="translate(14, 11) scale(1)">
+        <circle cx="12" cy="12" r="10" fill="none" stroke="#f77737" stroke-width="1.5"/>
+        <path d="M12 6v7l4 2" fill="none" stroke="#f77737" stroke-width="1.5" stroke-linecap="round"/>
+      </g>
+      <text x="46" y="19" font-family="'Quicksand', sans-serif" font-weight="500" font-size="12" fill="#8a8a9a">Best time to post</text>
+      <text x="46" y="36" font-family="'Nunito', sans-serif" font-weight="700" font-size="15" fill="white">Tuesdays at 7 PM</text>
+    </g>
+
+    <!-- Best content type -->
+    <g transform="translate(24, 248)">
+      <rect x="0" y="0" width="402" height="46" rx="10" fill="#12122a"/>
+      <g transform="translate(14, 11) scale(1)">
+        <rect x="2" y="2" width="20" height="20" rx="4" fill="none" stroke="#e1306c" stroke-width="1.5"/>
+        <path d="M10 8l6 4-6 4z" fill="#e1306c"/>
+      </g>
+      <text x="46" y="19" font-family="'Quicksand', sans-serif" font-weight="500" font-size="12" fill="#8a8a9a">Top performing format</text>
+      <text x="46" y="36" font-family="'Nunito', sans-serif" font-weight="700" font-size="15" fill="white">Reels  -  4.2% avg engagement</text>
+    </g>
+  </g>
+
+  <!-- === RIGHT PANEL: Follower Insights === -->
+  <g transform="translate(558, 330)">
+    <rect x="0" y="0" width="450" height="310" rx="20" fill="#1a1a2e" filter="url(#cardShadow)"/>
+    <rect x="0" y="0" width="450" height="3" rx="2" fill="url(#igGrad)"/>
+
+    <!-- Header -->
+    <text x="24" y="38" font-family="'Nunito', sans-serif" font-weight="700" font-size="14" fill="#f77737" letter-spacing="2">FOLLOWER AUDIT</text>
+
+    <!-- Donut chart -->
+    <g transform="translate(105, 175)">
+      <circle cx="0" cy="0" r="65" fill="none" stroke="#2a2a3e" stroke-width="16"/>
+      <circle cx="0" cy="0" r="65" fill="none" stroke="#833ab4" stroke-width="16"
+              stroke-dasharray="286 122" stroke-dashoffset="102" stroke-linecap="round"/>
+      <circle cx="0" cy="0" r="65" fill="none" stroke="#f77737" stroke-width="16"
+              stroke-dasharray="122 286" stroke-dashoffset="102" stroke-linecap="round"/>
+      <text x="0" y="-6" text-anchor="middle" font-family="'Nunito', sans-serif" font-weight="800" font-size="28" fill="white">802</text>
+      <text x="0" y="14" text-anchor="middle" font-family="'Quicksand', sans-serif" font-weight="500" font-size="11" fill="#8a8a9a" letter-spacing="1">FOLLOWING</text>
+    </g>
+
+    <!-- Legend -->
+    <g transform="translate(220, 115)">
+      <circle cx="0" cy="0" r="5" fill="#833ab4"/>
+      <text x="14" y="5" font-family="'Quicksand', sans-serif" font-weight="600" font-size="14" fill="#ccc">528 Mutuals</text>
+
+      <circle cx="0" cy="30" r="5" fill="#f77737"/>
+      <text x="14" y="35" font-family="'Quicksand', sans-serif" font-weight="600" font-size="14" fill="#ccc">274 Not following back</text>
+    </g>
+
+    <!-- Engagement ratio -->
+    <g transform="translate(220, 195)">
+      <text x="0" y="0" font-family="'Quicksand', sans-serif" font-weight="500" font-size="12" fill="#8a8a9a">Like-to-follower ratio</text>
+      <text x="0" y="22" font-family="'Nunito', sans-serif" font-weight="700" font-size="18" fill="#4ade80">3.8%</text>
+      <rect x="52" y="9" width="64" height="18" rx="6" fill="#0a2a15" stroke="#4ade80" stroke-width="0.5"/>
+      <text x="84" y="22" text-anchor="middle" font-family="'Quicksand', sans-serif" font-weight="600" font-size="10" fill="#4ade80">Excellent</text>
+    </g>
+
+    <!-- Sorted by -->
+    <g transform="translate(220, 248)">
+      <text x="0" y="0" font-family="'Quicksand', sans-serif" font-weight="500" font-size="12" fill="#8a8a9a">Sorted by</text>
+      <text x="0" y="20" font-family="'Nunito', sans-serif" font-weight="700" font-size="14" fill="white">Most Mutuals</text>
+    </g>
+  </g>
+
+  <!-- === BENEFITS: Single column, centered === -->
+  <g transform="translate(130, 690)">
+    <!-- Row 1 -->
+    <g transform="translate(0, 0)">
+      <circle cx="14" cy="0" r="14" fill="#1a1a2e"/>
+      <path d="M8,0 L12,4 L20,-4" fill="none" stroke="#833ab4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="38" y="5" font-family="'Quicksand', sans-serif" font-weight="600" font-size="16" fill="#ccc">See who doesn't follow back</text>
+    </g>
+    <!-- Row 2 -->
+    <g transform="translate(460, 0)">
+      <circle cx="14" cy="0" r="14" fill="#1a1a2e"/>
+      <path d="M8,0 L12,4 L20,-4" fill="none" stroke="#e1306c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="38" y="5" font-family="'Quicksand', sans-serif" font-weight="600" font-size="16" fill="#ccc">100% private</text>
+    </g>
+    <!-- Row 3 -->
+    <g transform="translate(0, 38)">
+      <circle cx="14" cy="0" r="14" fill="#1a1a2e"/>
+      <path d="M8,0 L12,4 L20,-4" fill="none" stroke="#e1306c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="38" y="5" font-family="'Quicksand', sans-serif" font-weight="600" font-size="16" fill="#ccc">Best time and format to post</text>
+    </g>
+    <!-- Row 4 -->
+    <g transform="translate(460, 38)">
+      <circle cx="14" cy="0" r="14" fill="#1a1a2e"/>
+      <path d="M8,0 L12,4 L20,-4" fill="none" stroke="#f77737" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="38" y="5" font-family="'Quicksand', sans-serif" font-weight="600" font-size="16" fill="#ccc">Export to CSV</text>
+    </g>
+    <!-- Row 5 -->
+    <g transform="translate(0, 76)">
+      <circle cx="14" cy="0" r="14" fill="#1a1a2e"/>
+      <path d="M8,0 L12,4 L20,-4" fill="none" stroke="#f77737" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="38" y="5" font-family="'Quicksand', sans-serif" font-weight="600" font-size="16" fill="#ccc">Engagement trend tracking</text>
+    </g>
+    <!-- Row 6 -->
+    <g transform="translate(460, 76)">
+      <circle cx="14" cy="0" r="14" fill="#1a1a2e"/>
+      <path d="M8,0 L12,4 L20,-4" fill="none" stroke="#833ab4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="38" y="5" font-family="'Quicksand', sans-serif" font-weight="600" font-size="16" fill="#ccc">No password needed</text>
+    </g>
+  </g>
+
+  <!-- Divider -->
+  <line x1="200" y1="830" x2="880" y2="830" stroke="url(#igGrad)" stroke-width="1" stroke-linecap="round" opacity="0.2"/>
+
+  <!-- Pricing highlight -->
+  <g transform="translate(540, 890)">
+    <text x="0" y="0" text-anchor="middle" font-family="'Quicksand', sans-serif" font-weight="500" font-size="18" fill="#8a8a9a">
+      Scan free  /  Full insights from $4
+    </text>
+  </g>
+
+  <!-- CTA Button -->
+  <g transform="translate(540, 950)">
+    <rect x="-150" y="-24" width="300" height="48" rx="24" fill="url(#igGrad)" opacity="0.95"/>
+    <text x="0" y="5" text-anchor="middle" font-family="'Nunito', 'Avenir Next', sans-serif" font-weight="700" font-size="19" fill="white" letter-spacing="0.5">flockscan.org</text>
+  </g>
+
+  <!-- Tagline -->
+  <text x="540" y="1030" text-anchor="middle" font-family="'Quicksand', 'Avenir', sans-serif" font-weight="600" font-size="15" fill="#444" letter-spacing="3">
+    ONE CLICK. NO LOGIN. NO SERVER.
+  </text>
+
+  <!-- Bottom accent bar -->
+  <rect x="0" y="1077" width="1080" height="3" fill="url(#igGrad)"/>
+</svg>

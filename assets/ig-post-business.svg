@@ -1,0 +1,341 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1080" height="1080" viewBox="0 0 1080 1080">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f5d87a"/>
+      <stop offset="40%" stop-color="#e8c547"/>
+      <stop offset="100%" stop-color="#d4a828"/>
+    </linearGradient>
+    <linearGradient id="warmGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#d4a828"/>
+      <stop offset="50%" stop-color="#e8c547"/>
+      <stop offset="100%" stop-color="#f5d87a"/>
+    </linearGradient>
+    <linearGradient id="btnGold" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#d4a828"/>
+      <stop offset="100%" stop-color="#e8c547"/>
+    </linearGradient>
+    <radialGradient id="bgGlow1" cx="50%" cy="25%" r="45%">
+      <stop offset="0%" stop-color="#d4a828" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+    <radialGradient id="bgGlow2" cx="30%" cy="65%" r="35%">
+      <stop offset="0%" stop-color="#8b6914" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+    <filter id="cardShadow" x="-6%" y="-6%" width="112%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="10" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+    <linearGradient id="cardTop" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#d4a828" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#e8c547" stop-opacity="0.3"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1080" height="1080" fill="#0d0b08"/>
+  <rect width="1080" height="1080" fill="url(#bgGlow1)"/>
+  <rect width="1080" height="1080" fill="url(#bgGlow2)"/>
+
+  <!-- Top accent bar -->
+  <rect x="0" y="0" width="1080" height="3" fill="url(#warmGrad)"/>
+
+  <!-- Ember particles -->
+  <circle cx="180" cy="200" r="1.5" fill="#e8c547" opacity="0.3"/>
+  <circle cx="820" cy="150" r="1" fill="#f5d87a" opacity="0.25"/>
+  <circle cx="900" cy="380" r="1.5" fill="#d4a828" opacity="0.2"/>
+  <circle cx="150" cy="500" r="1" fill="#e8c547" opacity="0.15"/>
+  <circle cx="950" cy="650" r="1.5" fill="#f5d87a" opacity="0.2"/>
+  <circle cx="120" cy="800" r="1" fill="#d4a828" opacity="0.15"/>
+
+  <!-- Logo + BUSINESS badge -->
+  <g transform="translate(540, 72)">
+    <image href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDI0IDEwMjQiIHJvbGU9ImltZyIgYXJpYS1sYWJlbGxlZGJ5PSJ0aXRsZSBkZXNjIj4KICA8dGl0bGUgaWQ9InRpdGxlIj5GbG9jayBnb2xkIGJpcmQgZW1ibGVtPC90aXRsZT4KICA8ZGVzYyBpZD0iZGVzYyI+QSB3YXJtIGdvbGQgRmxvY2sgYmlyZCBsb2dvIGluc2lkZSBhIGdsb3dpbmcgYW1iZXIgcmluZyBvbiBhIGNsZWFuIGRhcmsgYnJvd24gYmFja2dyb3VuZC48L2Rlc2M+CiAgPGRlZnM+CiAgICA8cmFkaWFsR3JhZGllbnQgaWQ9ImJnIiBjeD0iNTAlIiBjeT0iNTAlIiByPSI3MCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjMmIxNTA3Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iNTglIiBzdG9wLWNvbG9yPSIjMTIwOTA2Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzA2MDMwMyIvPgogICAgPC9yYWRpYWxHcmFkaWVudD4KCiAgICA8bGluZWFyR3JhZGllbnQgaWQ9InJpbmdHcmFkIiB4MT0iMTY4IiB5MT0iMTA4IiB4Mj0iODU2IiB5Mj0iOTE2IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNmZmYwN2EiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIyOCUiIHN0b3AtY29sb3I9IiNmZmQxMmIiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSI1OCUiIHN0b3AtY29sb3I9IiNmNmEyMGEiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjZmZjZjRhIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgoKICAgIDxsaW5lYXJHcmFkaWVudCBpZD0id2luZ0dvbGQiIHgxPSIyMTAiIHkxPSIyNTAiIHgyPSI2NjAiIHkyPSI3NjAiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZmZjQ2NiIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjM1JSIgc3RvcC1jb2xvcj0iI2ZmYzQwMCIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjczJSIgc3RvcC1jb2xvcj0iI2U4ODkwMCIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNiOTY3MDAiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJib2R5R29sZCIgeDE9IjU2NSIgeTE9IjI3NSIgeDI9Ijc5MCIgeTI9IjgwMCIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjZmZmNmJmIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iNDglIiBzdG9wLWNvbG9yPSIjZmZkOTc0Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI2YyYjQzMSIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KCiAgICA8ZmlsdGVyIGlkPSJyaW5nR2xvdyIgeD0iLTMwJSIgeT0iLTMwJSIgd2lkdGg9IjE2MCUiIGhlaWdodD0iMTYwJSI+CiAgICAgIDxmZUdhdXNzaWFuQmx1ciBzdGREZXZpYXRpb249IjgiIHJlc3VsdD0iYmx1ciIvPgogICAgICA8ZmVDb2xvck1hdHJpeCBpbj0iYmx1ciIgdHlwZT0ibWF0cml4IiB2YWx1ZXM9IjEgMCAwIDAgMSAgMCAwLjY0IDAgMCAwLjQzICAwIDAgMC4wNSAwIDAgIDAgMCAwIDAuNzUgMCIgcmVzdWx0PSJnb2xkR2xvdyIvPgogICAgICA8ZmVNZXJnZT4KICAgICAgICA8ZmVNZXJnZU5vZGUgaW49ImdvbGRHbG93Ii8+CiAgICAgICAgPGZlTWVyZ2VOb2RlIGluPSJTb3VyY2VHcmFwaGljIi8+CiAgICAgIDwvZmVNZXJnZT4KICAgIDwvZmlsdGVyPgoKICAgIDxmaWx0ZXIgaWQ9InNvZnRMb2dvR2xvdyIgeD0iLTIwJSIgeT0iLTIwJSIgd2lkdGg9IjE0MCUiIGhlaWdodD0iMTQwJSI+CiAgICAgIDxmZUdhdXNzaWFuQmx1ciBzdGREZXZpYXRpb249IjMuNSIgcmVzdWx0PSJibHVyIi8+CiAgICAgIDxmZUNvbG9yTWF0cml4IGluPSJibHVyIiB0eXBlPSJtYXRyaXgiIHZhbHVlcz0iMSAwIDAgMCAxICAwIDAuNzIgMCAwIDAuNDYgIDAgMCAwLjEyIDAgMCAgMCAwIDAgMC40NSAwIiByZXN1bHQ9Indhcm0iLz4KICAgICAgPGZlTWVyZ2U+CiAgICAgICAgPGZlTWVyZ2VOb2RlIGluPSJ3YXJtIi8+CiAgICAgICAgPGZlTWVyZ2VOb2RlIGluPSJTb3VyY2VHcmFwaGljIi8+CiAgICAgIDwvZmVNZXJnZT4KICAgIDwvZmlsdGVyPgoKICAgIDxmaWx0ZXIgaWQ9ImlubmVyU2hhZG93IiB4PSItMjAlIiB5PSItMjAlIiB3aWR0aD0iMTQwJSIgaGVpZ2h0PSIxNDAlIj4KICAgICAgPGZlRHJvcFNoYWRvdyBkeD0iMCIgZHk9IjIiIHN0ZERldmlhdGlvbj0iMiIgZmxvb2QtY29sb3I9IiM1YjI2MDAiIGZsb29kLW9wYWNpdHk9IjAuNDUiLz4KICAgIDwvZmlsdGVyPgogIDwvZGVmcz4KCiAgPHJlY3Qgd2lkdGg9IjEwMjQiIGhlaWdodD0iMTAyNCIgZmlsbD0idXJsKCNiZykiLz4KCiAgPGNpcmNsZSBjeD0iNTEyIiBjeT0iNTEyIiByPSI0NTQiIGZpbGw9Im5vbmUiIHN0cm9rZT0idXJsKCNyaW5nR3JhZCkiIHN0cm9rZS13aWR0aD0iMTEiIGZpbHRlcj0idXJsKCNyaW5nR2xvdykiLz4KICA8Y2lyY2xlIGN4PSI1MTIiIGN5PSI1MTIiIHI9IjQ0NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZkMzVhIiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuNiIvPgoKICA8ZyBmaWx0ZXI9InVybCgjc29mdExvZ29HbG93KSI+CiAgICA8IS0tIE1haW4gYmlyZCBib2R5IGFuZCBoZWFkIC0tPgogICAgPHBhdGggZD0iTTUzMCAzODIKICAgICAgICAgICAgIEM1NTIgMzI0IDYxMiAyODcgNjgzIDI4OQogICAgICAgICAgICAgQzczMyAyOTAgNzc1IDMxMSA3OTQgMzQ3CiAgICAgICAgICAgICBDODIzIDM0NiA4NTUgMzU3IDg3NiAzODIKICAgICAgICAgICAgIEM4NDMgMzc5IDgxMiAzOTEgNzk1IDQxNgogICAgICAgICAgICAgQzc4MCA0MzggNzc4IDQ2NyA3ODQgNDk3CiAgICAgICAgICAgICBDODAxIDU4MiA3ODEgNjk3IDcyNyA3NjcKICAgICAgICAgICAgIEM2ODQgODIzIDYxNiA4NDkgNTMwIDgzNQogICAgICAgICAgICAgQzU5NSA4MjcgNjMzIDc5MiA2NTUgNzM5CiAgICAgICAgICAgICBDNjgwIDY3OSA2ODIgNjA2IDY2MiA1NDcKICAgICAgICAgICAgIEM2NDUgNDk1IDYxMSA0NTcgNTY4IDQzMAogICAgICAgICAgICAgQzU1MyA0MjEgNTM3IDQxNCA1MTkgNDA5CiAgICAgICAgICAgICBDNTIzIDM5OSA1MjYgMzkwIDUzMCAzODIgWiIKICAgICAgICAgIGZpbGw9InVybCgjYm9keUdvbGQpIiBzdHJva2U9IiNmZmYzYjUiIHN0cm9rZS13aWR0aD0iMyIgZmlsdGVyPSJ1cmwoI2lubmVyU2hhZG93KSIvPgoKICAgIDwhLS0gVG9wIHdpbmcgLS0+CiAgICA8cGF0aCBkPSJNMjEyIDI1NQogICAgICAgICAgICAgQzI5NiAzNTYgNDEyIDQxNCA1NjMgNDQxCiAgICAgICAgICAgICBDNjIzIDQ1MiA2NjQgNDg0IDY3NSA1NDUKICAgICAgICAgICAgIEM2MjQgNTAzIDU1OCA1MDkgNDc2IDQ5NAogICAgICAgICAgICAgQzMzOCA0NjkgMjM5IDQwNSAyMTEgMzIyCiAgICAgICAgICAgICBDMjAyIDI5NSAyMDQgMjcyIDIxMiAyNTUgWiIKICAgICAgICAgIGZpbGw9InVybCgjd2luZ0dvbGQpIiBzdHJva2U9IiNmZmYxNzgiIHN0cm9rZS13aWR0aD0iMyIgZmlsdGVyPSJ1cmwoI2lubmVyU2hhZG93KSIvPgoKICAgIDwhLS0gTWlkZGxlIHdpbmcgLS0+CiAgICA8cGF0aCBkPSJNMjE2IDQ2NAogICAgICAgICAgICAgQzI5NiA1MzQgNDEwIDU3MCA1NTggNTY1CiAgICAgICAgICAgICBDNjEyIDU2MyA2NTQgNTkwIDY2NiA2NTEKICAgICAgICAgICAgIEM2MTIgNjExIDU1MSA2MjEgNDcwIDYyMAogICAgICAgICAgICAgQzM0MCA2MTkgMjUwIDU3NSAyMTkgNTExCiAgICAgICAgICAgICBDMjExIDQ5MyAyMTEgNDc2IDIxNiA0NjQgWiIKICAgICAgICAgIGZpbGw9InVybCgjd2luZ0dvbGQpIiBzdHJva2U9IiNmZmU2NjgiIHN0cm9rZS13aWR0aD0iMyIgZmlsdGVyPSJ1cmwoI2lubmVyU2hhZG93KSIvPgoKICAgIDwhLS0gTG93ZXIgd2luZyAtLT4KICAgIDxwYXRoIGQ9Ik0yODcgNjUxCiAgICAgICAgICAgICBDMzY4IDY5NiA0NTUgNzEyIDU0NCA2ODMKICAgICAgICAgICAgIEM1OTUgNjY2IDYzNyA2OTAgNjQxIDczMgogICAgICAgICAgICAgQzU4MyA3NjggNDk2IDc2NSA0MTMgNzQwCiAgICAgICAgICAgICBDMzUwIDcyMCAzMDUgNjg4IDI4NyA2NTEgWiIKICAgICAgICAgIGZpbGw9InVybCgjd2luZ0dvbGQpIiBzdHJva2U9IiNmZmQ2NTgiIHN0cm9rZS13aWR0aD0iMyIgZmlsdGVyPSJ1cmwoI2lubmVyU2hhZG93KSIvPgoKICAgIDwhLS0gRXllIGN1dG91dCAtLT4KICAgIDxjaXJjbGUgY3g9IjcwNCIgY3k9IjMzOCIgcj0iMTgiIGZpbGw9IiMwYzA3MDUiLz4KICAgIDxjaXJjbGUgY3g9IjcwNCIgY3k9IjMzOCIgcj0iMTkuNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmNWM4IiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuNTUiLz4KICA8L2c+Cjwvc3ZnPgo=" x="-155" y="-28" width="54" height="54"/>
+    <text x="-90" y="12" font-family="'Nunito', 'Avenir Next', sans-serif" font-weight="800" font-size="36" fill="white" letter-spacing="1">Flock</text>
+    <rect x="42" y="-6" width="76" height="22" rx="5" fill="url(#btnGold)"/>
+    <text x="80" y="10" text-anchor="middle" font-family="'Nunito', sans-serif" font-weight="800" font-size="9" fill="#0d0b08" letter-spacing="1.5">BUSINESS</text>
+  </g>
+
+  <!-- Headline -->
+  <text x="540" y="160" text-anchor="middle" font-family="'Nunito', 'Avenir Next', sans-serif" font-weight="800" font-size="44" fill="url(#goldGrad)">
+    Turn Your Instagram
+  </text>
+  <text x="540" y="212" text-anchor="middle" font-family="'Nunito', 'Avenir Next', sans-serif" font-weight="800" font-size="44" fill="url(#goldGrad)">
+    Into a Revenue Engine
+  </text>
+
+  <!-- Subheadline -->
+  <text x="540" y="258" text-anchor="middle" font-family="'Quicksand', 'Avenir', sans-serif" font-weight="500" font-size="18" fill="#9a9080">
+    AI-powered reports: what to post, when, and how to earn more.
+  </text>
+
+  <!-- === 2x2 FEATURE CARD GRID === -->
+
+  <!-- Card 1: Growth Playbook (top-left) -->
+  <g transform="translate(72, 295)">
+    <rect x="0" y="0" width="456" height="195" rx="16" fill="#16140f" filter="url(#cardShadow)"/>
+    <rect x="0" y="0" width="456" height="3" rx="2" fill="url(#cardTop)"/>
+
+    <!-- Icon -->
+    <g transform="translate(22, 22)">
+      <circle cx="14" cy="14" r="12" fill="none" stroke="#e8c547" stroke-width="1.5"/>
+      <circle cx="14" cy="14" r="6" fill="none" stroke="#e8c547" stroke-width="1.5"/>
+      <circle cx="14" cy="14" r="2.5" fill="#e8c547"/>
+    </g>
+
+    <text x="58" y="38" font-family="'Nunito', sans-serif" font-weight="700" font-size="18" fill="url(#goldGrad)">Growth Playbook</text>
+    <text x="22" y="70" font-family="'Quicksand', sans-serif" font-weight="500" font-size="13" fill="#b0a890">A prioritized action plan ranked by revenue impact.</text>
+
+    <!-- Mock items -->
+    <g transform="translate(22, 88)">
+      <rect x="0" y="0" width="412" height="28" rx="6" fill="#1e1c16"/>
+      <text x="12" y="18" font-family="'Quicksand', sans-serif" font-weight="600" font-size="11" fill="#e8c547">1.</text>
+      <text x="26" y="18" font-family="'Quicksand', sans-serif" font-weight="500" font-size="11" fill="#ccc">Post 3 Reels this week targeting your niche</text>
+      <rect x="340" y="5" width="62" height="17" rx="4" fill="#2a2518"/>
+      <text x="371" y="17" text-anchor="middle" font-family="'Nunito', sans-serif" font-weight="700" font-size="9" fill="#e8c547">HIGH</text>
+
+      <rect x="0" y="34" width="412" height="28" rx="6" fill="#1e1c16"/>
+      <text x="12" y="52" font-family="'Quicksand', sans-serif" font-weight="600" font-size="11" fill="#e8c547">2.</text>
+      <text x="26" y="52" font-family="'Quicksand', sans-serif" font-weight="500" font-size="11" fill="#ccc">Engage with 10 accounts in your space daily</text>
+      <rect x="340" y="39" width="62" height="17" rx="4" fill="#2a2518"/>
+      <text x="371" y="51" text-anchor="middle" font-family="'Nunito', sans-serif" font-weight="700" font-size="9" fill="#e8c547">MEDIUM</text>
+
+      <rect x="0" y="68" width="412" height="28" rx="6" fill="#1e1c16"/>
+      <text x="12" y="86" font-family="'Quicksand', sans-serif" font-weight="600" font-size="11" fill="#e8c547">3.</text>
+      <text x="26" y="86" font-family="'Quicksand', sans-serif" font-weight="500" font-size="11" fill="#ccc">Add CTA to bio + pin a testimonial post</text>
+      <rect x="340" y="73" width="62" height="17" rx="4" fill="#2a2518"/>
+      <text x="371" y="85" text-anchor="middle" font-family="'Nunito', sans-serif" font-weight="700" font-size="9" fill="#e8c547">HIGH</text>
+    </g>
+  </g>
+
+  <!-- Card 2: Content Calendar (top-right) -->
+  <g transform="translate(552, 295)">
+    <rect x="0" y="0" width="456" height="195" rx="16" fill="#16140f" filter="url(#cardShadow)"/>
+    <rect x="0" y="0" width="456" height="3" rx="2" fill="url(#cardTop)"/>
+
+    <!-- Icon -->
+    <g transform="translate(22, 22)">
+      <rect x="2" y="5" width="24" height="20" rx="3" fill="none" stroke="#e8c547" stroke-width="1.5"/>
+      <line x1="2" y1="12" x2="26" y2="12" stroke="#e8c547" stroke-width="1.5"/>
+      <line x1="9" y1="2" x2="9" y2="8" stroke="#e8c547" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="19" y1="2" x2="19" y2="8" stroke="#e8c547" stroke-width="1.5" stroke-linecap="round"/>
+    </g>
+
+    <text x="56" y="38" font-family="'Nunito', sans-serif" font-weight="700" font-size="18" fill="url(#goldGrad)">Content Calendar</text>
+    <text x="22" y="70" font-family="'Quicksand', sans-serif" font-weight="500" font-size="13" fill="#b0a890">A full week of posts, tailored to your niche and trends.</text>
+
+    <!-- Mock week grid -->
+    <g transform="translate(22, 88)">
+      <g>
+        <rect x="0" y="0" width="54" height="44" rx="6" fill="#1e1c16"/>
+        <text x="27" y="16" text-anchor="middle" font-family="'Quicksand', sans-serif" font-weight="600" font-size="9" fill="#666">MON</text>
+        <circle cx="27" cy="32" r="4" fill="#e8c547"/>
+      </g>
+      <g transform="translate(62, 0)">
+        <rect x="0" y="0" width="54" height="44" rx="6" fill="#1e1c16"/>
+        <text x="27" y="16" text-anchor="middle" font-family="'Quicksand', sans-serif" font-weight="600" font-size="9" fill="#666">TUE</text>
+        <circle cx="27" cy="32" r="4" fill="#e8c547"/>
+      </g>
+      <g transform="translate(124, 0)">
+        <rect x="0" y="0" width="54" height="44" rx="6" fill="#1e1c16"/>
+        <text x="27" y="16" text-anchor="middle" font-family="'Quicksand', sans-serif" font-weight="600" font-size="9" fill="#666">WED</text>
+        <circle cx="27" cy="32" r="4" fill="#e8c547" opacity="0.3"/>
+      </g>
+      <g transform="translate(186, 0)">
+        <rect x="0" y="0" width="54" height="44" rx="6" fill="#1e1c16"/>
+        <text x="27" y="16" text-anchor="middle" font-family="'Quicksand', sans-serif" font-weight="600" font-size="9" fill="#666">THU</text>
+        <circle cx="27" cy="32" r="4" fill="#e8c547"/>
+      </g>
+      <g transform="translate(248, 0)">
+        <rect x="0" y="0" width="54" height="44" rx="6" fill="#1e1c16"/>
+        <text x="27" y="16" text-anchor="middle" font-family="'Quicksand', sans-serif" font-weight="600" font-size="9" fill="#666">FRI</text>
+        <circle cx="27" cy="32" r="4" fill="#e8c547"/>
+      </g>
+      <g transform="translate(310, 0)">
+        <rect x="0" y="0" width="54" height="44" rx="6" fill="#1e1c16"/>
+        <text x="27" y="16" text-anchor="middle" font-family="'Quicksand', sans-serif" font-weight="600" font-size="9" fill="#666">SAT</text>
+        <circle cx="27" cy="32" r="4" fill="#e8c547" opacity="0.3"/>
+      </g>
+      <g transform="translate(372, 0)">
+        <rect x="0" y="0" width="54" height="44" rx="6" fill="#1e1c16"/>
+        <text x="27" y="16" text-anchor="middle" font-family="'Quicksand', sans-serif" font-weight="600" font-size="9" fill="#666">SUN</text>
+        <circle cx="27" cy="32" r="4" fill="#e8c547" opacity="0.3"/>
+      </g>
+
+      <text x="0" y="64" font-family="'Quicksand', sans-serif" font-weight="600" font-size="12" fill="#e8c547">5 posts planned and ready to go</text>
+
+      <!-- Post type pills -->
+      <g transform="translate(0, 76)">
+        <rect x="0" y="0" width="50" height="18" rx="9" fill="#2a2518"/>
+        <text x="25" y="13" text-anchor="middle" font-family="'Quicksand', sans-serif" font-weight="600" font-size="9" fill="#e8c547">Reel</text>
+        <rect x="58" y="0" width="66" height="18" rx="9" fill="#2a2518"/>
+        <text x="91" y="13" text-anchor="middle" font-family="'Quicksand', sans-serif" font-weight="600" font-size="9" fill="#e8c547">Carousel</text>
+        <rect x="132" y="0" width="50" height="18" rx="9" fill="#2a2518"/>
+        <text x="157" y="13" text-anchor="middle" font-family="'Quicksand', sans-serif" font-weight="600" font-size="9" fill="#e8c547">Story</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Card 3: Revenue Levers (bottom-left) -->
+  <g transform="translate(72, 515)">
+    <rect x="0" y="0" width="456" height="195" rx="16" fill="#16140f" filter="url(#cardShadow)"/>
+    <rect x="0" y="0" width="456" height="3" rx="2" fill="url(#cardTop)"/>
+
+    <!-- Icon: trending up -->
+    <g transform="translate(22, 22)">
+      <path d="M4 24 L10 16 L16 19 L24 8" fill="none" stroke="#e8c547" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M19 8 L24 8 L24 13" fill="none" stroke="#e8c547" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <text x="56" y="38" font-family="'Nunito', sans-serif" font-weight="700" font-size="18" fill="url(#goldGrad)">Revenue Levers</text>
+    <text x="22" y="70" font-family="'Quicksand', sans-serif" font-weight="500" font-size="13" fill="#b0a890">The 3 highest-impact moves to monetize your audience.</text>
+
+    <!-- Mock items -->
+    <g transform="translate(22, 88)">
+      <rect x="0" y="0" width="412" height="28" rx="6" fill="#1e1c16"/>
+      <text x="12" y="18" font-family="'Quicksand', sans-serif" font-weight="500" font-size="11" fill="#ccc">Launch a product collaboration Reel</text>
+      <rect x="340" y="5" width="62" height="17" rx="4" fill="#2a2518"/>
+      <text x="371" y="17" text-anchor="middle" font-family="'Nunito', sans-serif" font-weight="700" font-size="9" fill="#e8c547">HIGH</text>
+
+      <rect x="0" y="34" width="412" height="28" rx="6" fill="#1e1c16"/>
+      <text x="12" y="52" font-family="'Quicksand', sans-serif" font-weight="500" font-size="11" fill="#ccc">Set up a link-in-bio storefront</text>
+      <rect x="340" y="39" width="62" height="17" rx="4" fill="#2a2518"/>
+      <text x="371" y="51" text-anchor="middle" font-family="'Nunito', sans-serif" font-weight="700" font-size="9" fill="#e8c547">HIGH</text>
+
+      <rect x="0" y="68" width="412" height="28" rx="6" fill="#1e1c16"/>
+      <text x="12" y="86" font-family="'Quicksand', sans-serif" font-weight="500" font-size="11" fill="#ccc">Pin your top-performing testimonial</text>
+      <rect x="340" y="73" width="62" height="17" rx="4" fill="#2a2518"/>
+      <text x="371" y="85" text-anchor="middle" font-family="'Nunito', sans-serif" font-weight="700" font-size="9" fill="#e8c547">MEDIUM</text>
+    </g>
+  </g>
+
+  <!-- Card 4: Curated Resources (bottom-right) -->
+  <g transform="translate(552, 515)">
+    <rect x="0" y="0" width="456" height="195" rx="16" fill="#16140f" filter="url(#cardShadow)"/>
+    <rect x="0" y="0" width="456" height="3" rx="2" fill="url(#cardTop)"/>
+
+    <!-- Icon: book/resources -->
+    <g transform="translate(22, 22)">
+      <path d="M4 4h8a4 4 0 014 4v16a3 3 0 00-3-3H4z" fill="none" stroke="#e8c547" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M24 4h-8a4 4 0 00-4 4v16a3 3 0 013-3h9z" fill="none" stroke="#e8c547" stroke-width="1.5" stroke-linejoin="round"/>
+    </g>
+
+    <text x="56" y="38" font-family="'Nunito', sans-serif" font-weight="700" font-size="18" fill="url(#goldGrad)">Curated Resources</text>
+    <text x="22" y="70" font-family="'Quicksand', sans-serif" font-weight="500" font-size="13" fill="#b0a890">Hand-picked tools, guides, and links for each action step.</text>
+
+    <!-- Mock resource links -->
+    <g transform="translate(22, 88)">
+      <rect x="0" y="0" width="412" height="28" rx="6" fill="#1e1c16"/>
+      <!-- Link icon -->
+      <g transform="translate(10, 6) scale(0.6)">
+        <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" fill="none" stroke="#e8c547" stroke-width="2" stroke-linecap="round"/>
+        <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" fill="none" stroke="#e8c547" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <text x="28" y="18" font-family="'Quicksand', sans-serif" font-weight="500" font-size="11" fill="#ccc">How to set up CapCut for Reels</text>
+      <text x="296" y="18" font-family="'Quicksand', sans-serif" font-weight="500" font-size="10" fill="#7a7060">capcut.com</text>
+      <!-- Arrow -->
+      <g transform="translate(392, 6) scale(0.55)">
+        <path d="M7 17L17 7M7 7h10v10" fill="none" stroke="#e8c547" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+
+      <rect x="0" y="34" width="412" height="28" rx="6" fill="#1e1c16"/>
+      <g transform="translate(10, 40) scale(0.6)">
+        <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" fill="none" stroke="#e8c547" stroke-width="2" stroke-linecap="round"/>
+        <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" fill="none" stroke="#e8c547" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <text x="28" y="52" font-family="'Quicksand', sans-serif" font-weight="500" font-size="11" fill="#ccc">Free Linktree alternative for creators</text>
+      <text x="296" y="52" font-family="'Quicksand', sans-serif" font-weight="500" font-size="10" fill="#7a7060">stan.store</text>
+      <g transform="translate(392, 40) scale(0.55)">
+        <path d="M7 17L17 7M7 7h10v10" fill="none" stroke="#e8c547" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+
+      <rect x="0" y="68" width="412" height="28" rx="6" fill="#1e1c16"/>
+      <g transform="translate(10, 74) scale(0.6)">
+        <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" fill="none" stroke="#e8c547" stroke-width="2" stroke-linecap="round"/>
+        <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" fill="none" stroke="#e8c547" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <text x="28" y="86" font-family="'Quicksand', sans-serif" font-weight="500" font-size="11" fill="#ccc">Instagram collab post guide</text>
+      <text x="296" y="86" font-family="'Quicksand', sans-serif" font-weight="500" font-size="10" fill="#7a7060">later.com</text>
+      <g transform="translate(392, 74) scale(0.55)">
+        <path d="M7 17L17 7M7 7h10v10" fill="none" stroke="#e8c547" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- === HOW IT WORKS - 3 steps === -->
+  <g transform="translate(540, 762)">
+    <text x="0" y="0" text-anchor="middle" font-family="'Nunito', sans-serif" font-weight="700" font-size="13" fill="#665a3a" letter-spacing="3">HOW IT WORKS</text>
+
+    <g transform="translate(-350, 30)">
+      <circle cx="14" cy="12" r="14" fill="#1e1c16" stroke="#e8c547" stroke-width="1"/>
+      <text x="14" y="17" text-anchor="middle" font-family="'Nunito', sans-serif" font-weight="800" font-size="13" fill="#e8c547">1</text>
+      <text x="38" y="10" font-family="'Nunito', sans-serif" font-weight="700" font-size="15" fill="white">Click the bookmarklet</text>
+      <text x="38" y="26" font-family="'Quicksand', sans-serif" font-weight="400" font-size="12" fill="#7a7060">One click on Instagram</text>
+    </g>
+
+    <g transform="translate(-30, 30)">
+      <circle cx="14" cy="12" r="14" fill="#1e1c16" stroke="#e8c547" stroke-width="1"/>
+      <text x="14" y="17" text-anchor="middle" font-family="'Nunito', sans-serif" font-weight="800" font-size="13" fill="#e8c547">2</text>
+      <text x="38" y="10" font-family="'Nunito', sans-serif" font-weight="700" font-size="15" fill="white">Get your AI report</text>
+      <text x="38" y="26" font-family="'Quicksand', sans-serif" font-weight="400" font-size="12" fill="#7a7060">Playbook in seconds</text>
+    </g>
+
+    <g transform="translate(270, 30)">
+      <circle cx="14" cy="12" r="14" fill="#1e1c16" stroke="#e8c547" stroke-width="1"/>
+      <text x="14" y="17" text-anchor="middle" font-family="'Nunito', sans-serif" font-weight="800" font-size="13" fill="#e8c547">3</text>
+      <text x="38" y="10" font-family="'Nunito', sans-serif" font-weight="700" font-size="15" fill="white">Grow and earn</text>
+      <text x="38" y="26" font-family="'Quicksand', sans-serif" font-weight="400" font-size="12" fill="#7a7060">Execute, track, repeat</text>
+    </g>
+  </g>
+
+  <!-- Trust badges -->
+  <g transform="translate(540, 856)">
+    <g transform="translate(-340, 0)">
+      <g transform="translate(0, -8) scale(0.75)">
+        <path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7L12 2z" fill="none" stroke="#e8c547" stroke-width="1.5"/>
+        <path d="M9 12l2 2 4-4" fill="none" stroke="#e8c547" stroke-width="1.5" stroke-linecap="round"/>
+      </g>
+      <text x="24" y="2" font-family="'Quicksand', sans-serif" font-weight="600" font-size="13" fill="#b0a890">No password needed</text>
+    </g>
+    <g transform="translate(-100, 0)">
+      <g transform="translate(0, -8) scale(0.75)">
+        <path d="M12 3v12M7 11l5 5 5-5" fill="none" stroke="#e8c547" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M4 18h16" fill="none" stroke="#e8c547" stroke-width="1.5" stroke-linecap="round"/>
+      </g>
+      <text x="24" y="2" font-family="'Quicksand', sans-serif" font-weight="600" font-size="13" fill="#b0a890">PDF downloads</text>
+    </g>
+    <g transform="translate(120, 0)">
+      <g transform="translate(0, -8) scale(0.75)">
+        <path d="M4 12a8 8 0 0114-5.3M20 12a8 8 0 01-14 5.3" fill="none" stroke="#e8c547" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M20 4v4h-4M4 20v-4h4" fill="none" stroke="#e8c547" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+      <text x="24" y="2" font-family="'Quicksand', sans-serif" font-weight="600" font-size="13" fill="#b0a890">Unlimited reports</text>
+    </g>
+  </g>
+
+  <!-- Divider -->
+  <line x1="250" y1="890" x2="830" y2="890" stroke="url(#warmGrad)" stroke-width="1" opacity="0.12"/>
+
+  <!-- Social proof -->
+  <g transform="translate(540, 928)">
+    <g transform="translate(-148, -12) scale(0.65)">
+      <path d="M12 2l3 6.2 6.8 1-5 4.8 1.2 6.8L12 17.8 6 20.8l1.2-6.8-5-4.8L9 8.2z" fill="#e8c547"/>
+    </g>
+    <text x="0" y="2" text-anchor="middle" font-family="'Quicksand', sans-serif" font-weight="500" font-size="14" fill="#7a7060">
+      Trusted by forward-thinking businesses
+    </text>
+  </g>
+
+  <!-- CTA Button -->
+  <g transform="translate(540, 978)">
+    <rect x="-135" y="-22" width="270" height="44" rx="22" fill="url(#btnGold)"/>
+    <text x="0" y="4" text-anchor="middle" font-family="'Nunito', 'Avenir Next', sans-serif" font-weight="800" font-size="17" fill="#0d0b08" letter-spacing="0.5">Start Growing Today</text>
+  </g>
+
+  <!-- Domain -->
+  <text x="540" y="1042" text-anchor="middle" font-family="'Quicksand', 'Avenir', sans-serif" font-weight="600" font-size="14" fill="#3d3828" letter-spacing="2">
+    flockscan.org/business
+  </text>
+
+  <!-- Bottom accent bar -->
+  <rect x="0" y="1077" width="1080" height="3" fill="url(#warmGrad)"/>
+</svg>

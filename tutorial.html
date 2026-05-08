@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flock Business - See What You're Missing</title>
+<meta name="description" content="Your Instagram is leaving money on the table. See exactly how much with Flock Business — interactive preview of your revenue gap.">
+<link rel="icon" type="image/svg+xml" href="flock_gold_logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#08080f;
+  --bg-card:#12121f;
+  --border:#1e1e30;
+  --gold:#D4A843;
+  --gold-bg:rgba(212,168,67,0.08);
+  --gold-border:rgba(212,168,67,0.15);
+  --gradient-gold:linear-gradient(135deg,#D4A843,#C49530);
+  --text:#FFFFFF;
+  --text-soft:#d0d0e0;
+  --text-muted:#6b6b80;
+  --radius:12px;
+  --radius-lg:16px;
+  --radius-xl:24px;
+  --radius-pill:100px;
+  --shadow-sm:0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md:0 4px 20px rgba(0,0,0,0.4);
+  --shadow-lg:0 8px 40px rgba(0,0,0,0.5);
+  --shadow-gold:0 4px 24px rgba(212,168,67,0.2);
+  --font:'Nunito',sans-serif;
+  --font-body:'Quicksand',sans-serif;
+  --ease:cubic-bezier(0.16,1,0.3,1);
+  --cost-red:#e85454;
+  --cost-red-bg:rgba(232,84,84,0.08);
+  --gain-green:#4ade80;
+  --section-gap:120px;
+}
+html{scroll-behavior:smooth;background:var(--bg)}
+body{
+  font-family:var(--font-body);font-weight:400;color:var(--text);
+  line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased;
+  background:var(--bg);
+}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(212,168,67,0.3);border-radius:3px}
+
+/* ==================== NAVIGATION ==================== */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:0 2rem;height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(8,8,15,0.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+}
+.nav-logo{
+  display:flex;align-items:center;gap:10px;
+  font-family:var(--font);font-weight:800;font-size:1.15rem;color:#fff;
+}
+.nav-logo .logo-badge{
+  font-size:0.6rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+  background:var(--gradient-gold);color:#08080f;
+  padding:2px 6px;border-radius:4px;margin-left:2px;line-height:1.4;
+}
+.nav-cta{
+  font-size:0.85rem;font-weight:700;
+  padding:8px 20px;border-radius:var(--radius-pill);
+  background:var(--gradient-gold);color:#08080f;
+  transition:transform 0.2s var(--ease),box-shadow 0.2s;
+  font-family:var(--font);display:inline-block;
+}
+.nav-cta:hover{
+  transform:translateY(-1px);
+  box-shadow:var(--shadow-gold);
+}
+
+/* ==================== HERO ==================== */
+.hero{
+  position:relative;overflow:hidden;
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  padding:120px 2rem 80px;
+  background:radial-gradient(ellipse at 50% 40%,rgba(212,168,67,0.08) 0%,var(--bg) 70%);
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--font);font-weight:700;font-size:0.8rem;
+  letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--gold);padding:8px 18px;
+  background:rgba(212,168,67,0.06);
+  border:1px solid rgba(212,168,67,0.22);
+  border-radius:var(--radius-pill);margin-bottom:2rem;
+}
+.hero h1{
+  font-family:var(--font);font-weight:800;
+  font-size:clamp(2.5rem,5vw,4rem);
+  line-height:1.1;letter-spacing:-0.025em;
+  color:var(--text);max-width:800px;
+  margin-bottom:1.5rem;
+}
+.hero-subtitle{
+  font-family:var(--font-body);font-weight:500;
+  font-size:clamp(1rem,2vw,1.25rem);
+  color:var(--text-soft);max-width:580px;
+  line-height:1.7;margin-bottom:3rem;
+}
+.scroll-indicator{
+  position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);
+  animation:scrollBounce 2s var(--ease) infinite;
+}
+.scroll-indicator svg{width:32px;height:32px;color:var(--gold);opacity:0.6}
+@keyframes scrollBounce{
+  0%,100%{transform:translateX(-50%) translateY(0)}
+  50%{transform:translateX(-50%) translateY(12px)}
+}
+
+/* ==================== SECTIONS ==================== */
+.tut-section{
+  padding:var(--section-gap) 2rem;
+  max-width:1100px;margin:0 auto;
+  opacity:0;transform:translateY(40px);
+  transition:opacity 0.6s var(--ease),transform 0.6s var(--ease);
+}
+.tut-section.visible{
+  opacity:1;transform:translateY(0);
+}
+.tut-section h2{
+  font-family:var(--font);font-weight:800;
+  font-size:clamp(1.8rem,3.5vw,2.6rem);
+  line-height:1.2;letter-spacing:-0.015em;
+  text-align:center;margin-bottom:3rem;
+}
+.two-col{
+  display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;
+  margin-bottom:2.5rem;
+}
+
+/* ==================== COST CALLOUT ==================== */
+.cost-callout{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-left:4px solid var(--cost-red);
+  border-radius:var(--radius);
+  padding:1.5rem 2rem;
+  margin:2rem 0;
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.95rem;color:var(--text-soft);line-height:1.7;
+}
+.cost-callout .cost-amount{
+  font-family:var(--font);font-weight:800;
+  font-size:1.5rem;color:var(--cost-red);
+  display:inline;
+}
+
+/* ==================== CTA BUTTONS ==================== */
+.section-cta{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--font);font-weight:700;font-size:1rem;
+  padding:14px 32px;border-radius:var(--radius-pill);
+  color:var(--gold);
+  border:2px solid var(--gold-border);
+  background:transparent;
+  transition:transform 0.25s var(--ease),box-shadow 0.25s,border-color 0.25s,background 0.25s;
+  animation:ctaPulse 2s infinite;
+  text-decoration:none;
+}
+.section-cta:hover{
+  transform:translateY(-2px);
+  border-color:var(--gold);
+  box-shadow:0 8px 32px rgba(212,168,67,0.15);
+  background:rgba(212,168,67,0.06);
+}
+@keyframes ctaPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(212,168,67,0.2)}
+  50%{box-shadow:0 0 20px 4px rgba(212,168,67,0.15)}
+}
+.section-cta-wrap{text-align:center;margin-top:2rem}
+
+.cta-gold-full{
+  display:block;width:100%;text-align:center;
+  font-family:var(--font);font-weight:700;font-size:1.1rem;
+  padding:18px 36px;border-radius:var(--radius-pill);
+  background:var(--gradient-gold);color:#08080f;
+  border:none;cursor:pointer;text-decoration:none;
+  transition:transform 0.25s var(--ease),box-shadow 0.25s;
+  animation:ctaPulse 2s infinite;
+}
+.cta-gold-full:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 32px rgba(212,168,67,0.35);
+}
+
+/* ==================== STAT BLOCKS ==================== */
+.stat-block{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1.25rem 1.5rem;margin-bottom:1rem;
+}
+.stat-label{
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.85rem;color:var(--text-muted);margin-bottom:0.25rem;
+}
+.stat-value{
+  font-family:var(--font);font-weight:800;
+  font-size:1.8rem;letter-spacing:-0.01em;
+}
+.stat-value.gold{color:var(--gold)}
+.stat-annotation{
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.88rem;color:var(--text-muted);
+  margin-top:0.75rem;line-height:1.6;font-style:italic;
+}
+
+/* ==================== CHART CONTAINERS ==================== */
+.chart-wrap{
+  position:relative;
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:1.5rem;
+}
+.donut-center{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  text-align:center;pointer-events:none;
+}
+.donut-center .donut-num{
+  font-family:var(--font);font-weight:800;
+  font-size:1.6rem;color:var(--gold);display:block;
+}
+.donut-center .donut-label{
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.8rem;color:var(--text-muted);
+}
+
+/* ==================== SECTION 2: POST GRAVEYARD ==================== */
+.post-grid{
+  display:grid;grid-template-columns:repeat(7,1fr);gap:8px;
+  margin:2rem 0;
+}
+.post-cell{
+  aspect-ratio:1;border-radius:8px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.65rem;color:var(--text-muted);
+  position:relative;
+  background:var(--bg-card);border:1px solid var(--border);
+  transition:transform 0.2s;
+}
+.post-cell.good{
+  border-color:var(--gold-border);
+  box-shadow:0 0 12px rgba(212,168,67,0.15);
+}
+.post-cell.good svg{color:var(--gold)}
+.post-cell.dead{
+  background:rgba(8,8,15,0.7);
+}
+.post-cell.dead svg{color:var(--cost-red);opacity:0.6}
+.post-cell span{margin-top:2px}
+
+/* ==================== SECTION 3: HEATMAP ==================== */
+.heatmap-wrap{margin:2rem 0}
+.heatmap{
+  display:grid;grid-template-columns:auto repeat(7,1fr);gap:4px;
+  margin-bottom:2rem;
+}
+.heatmap-label{
+  font-family:var(--font-body);font-weight:600;
+  font-size:0.7rem;color:var(--text-muted);
+  display:flex;align-items:center;justify-content:center;
+  padding:4px;
+}
+.heatmap-cell{
+  aspect-ratio:1;border-radius:6px;
+  background:rgba(212,168,67,var(--heat,0.05));
+  position:relative;
+  min-height:36px;
+  transition:background 0.3s;
+}
+.heatmap-cell .post-dot{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:8px;height:8px;border-radius:50%;
+  background:#fff;
+  box-shadow:0 0 6px rgba(255,255,255,0.5);
+}
+.compare-cards{
+  display:grid;grid-template-columns:1fr auto 1fr;gap:1.5rem;align-items:center;
+  margin:2rem 0;
+}
+.compare-card{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1.25rem 1.5rem;text-align:center;
+}
+.compare-label{
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.8rem;color:var(--text-muted);margin-bottom:0.5rem;
+}
+.compare-value{
+  font-family:var(--font);font-weight:700;font-size:1.1rem;
+}
+.compare-value.gold{color:var(--gold)}
+.compare-arrow{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+}
+.compare-arrow svg{color:var(--cost-red);width:32px;height:32px}
+.compare-arrow span{
+  font-family:var(--font);font-weight:700;
+  font-size:0.8rem;color:var(--cost-red);white-space:nowrap;
+}
+
+/* ==================== SECTION 4: MOMENTUM ==================== */
+.momentum-chart-wrap{
+  position:relative;
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:1.5rem;margin-bottom:2rem;
+}
+.chart-annotation{
+  position:absolute;
+  padding:6px 10px;border-radius:6px;
+  font-family:var(--font-body);font-weight:600;
+  font-size:0.7rem;line-height:1.3;
+  white-space:nowrap;pointer-events:none;
+  z-index:5;
+}
+.chart-annotation.red{
+  background:var(--cost-red-bg);
+  border:1px solid rgba(232,84,84,0.25);
+  color:var(--cost-red);
+}
+.chart-annotation.green{
+  background:rgba(74,222,128,0.08);
+  border:1px solid rgba(74,222,128,0.25);
+  color:var(--gain-green);
+}
+.mini-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;
+  margin-bottom:2rem;
+}
+.mini-stat{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1.25rem;text-align:center;
+}
+.mini-stat .ms-label{
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.8rem;color:var(--text-muted);margin-bottom:0.35rem;
+}
+.mini-stat .ms-value{
+  font-family:var(--font);font-weight:800;font-size:1.4rem;
+}
+.mini-stat .ms-note{
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.72rem;color:var(--text-muted);margin-top:0.25rem;
+}
+.ms-value.gold{color:var(--gold)}
+.ms-value.red{color:var(--cost-red)}
+.ms-value.muted{color:var(--text-muted)}
+
+/* ==================== SECTION 5: CALCULATOR ==================== */
+.calc-card{
+  background:var(--bg-card);
+  border:1px solid var(--gold-border);
+  border-radius:var(--radius-xl);
+  padding:3rem;
+  box-shadow:var(--shadow-gold);
+}
+.calc-inputs{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:2rem;
+  margin-bottom:2.5rem;
+}
+.calc-field label{
+  display:block;font-family:var(--font);font-weight:700;
+  font-size:0.9rem;margin-bottom:0.75rem;
+}
+.calc-field input[type="range"]{
+  -webkit-appearance:none;appearance:none;
+  width:100%;height:6px;border-radius:3px;
+  background:var(--border);outline:none;
+  cursor:pointer;
+}
+.calc-field input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:20px;height:20px;border-radius:50%;
+  background:var(--gold);border:2px solid #08080f;
+  cursor:pointer;box-shadow:0 0 8px rgba(212,168,67,0.4);
+}
+.calc-field input[type="range"]::-moz-range-thumb{
+  width:20px;height:20px;border-radius:50%;
+  background:var(--gold);border:2px solid #08080f;
+  cursor:pointer;box-shadow:0 0 8px rgba(212,168,67,0.4);
+}
+.calc-field input[type="range"]::-webkit-slider-runnable-track{
+  border-radius:3px;
+}
+.calc-field input[type="number"]{
+  width:100%;margin-top:0.5rem;
+  font-family:var(--font-body);font-weight:600;font-size:0.95rem;
+  color:var(--text);background:var(--bg);
+  border:1px solid var(--border);border-radius:var(--radius);
+  padding:8px 12px;outline:none;
+  transition:border-color 0.2s;
+}
+.calc-field input[type="number"]:focus{border-color:var(--gold)}
+.calc-field select{
+  width:100%;
+  font-family:var(--font-body);font-weight:600;font-size:0.95rem;
+  color:var(--text);background:var(--bg);
+  border:1px solid var(--border);border-radius:var(--radius);
+  padding:10px 12px;outline:none;cursor:pointer;
+  transition:border-color 0.2s;
+}
+.calc-field select:focus{border-color:var(--gold)}
+.calc-output{
+  display:grid;grid-template-columns:1fr 1fr;gap:2rem;
+  text-align:center;margin-bottom:2rem;
+  padding-bottom:2rem;
+  border-bottom:1px solid var(--border);
+}
+.calc-output-item .co-label{
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.85rem;color:var(--text-muted);margin-bottom:0.35rem;
+}
+.calc-output-item .co-value{
+  font-family:var(--font);font-weight:800;font-size:2rem;
+}
+.co-value.muted{color:var(--text-muted)}
+.co-value.gold{color:var(--gold)}
+.calc-delta{
+  text-align:center;margin-bottom:2rem;
+}
+.calc-delta .delta-main{
+  font-family:var(--font);font-weight:800;
+  font-size:clamp(1.4rem,3vw,1.8rem);
+  color:var(--cost-red);
+  animation:deltaPulse 2s infinite;
+}
+.calc-delta .delta-annual{
+  font-family:var(--font-body);font-weight:600;
+  font-size:1rem;color:var(--text-muted);margin-top:0.5rem;
+}
+@keyframes deltaPulse{
+  0%,100%{opacity:1}
+  50%{opacity:0.7}
+}
+.calc-details{
+  margin:1.5rem 0 2rem;
+}
+.calc-details summary{
+  font-family:var(--font);font-weight:700;
+  font-size:0.85rem;color:var(--text-muted);
+  cursor:pointer;padding:0.5rem 0;
+  transition:color 0.2s;
+}
+.calc-details summary:hover{color:var(--text-soft)}
+.calc-details p{
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.85rem;color:var(--text-muted);
+  line-height:1.7;padding:0.75rem 0;
+}
+.calc-details code{
+  background:var(--bg);padding:2px 6px;border-radius:4px;
+  font-size:0.82rem;
+}
+
+/* ==================== SECTION 6: HOW IT WORKS ==================== */
+.steps-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;
+  margin:3rem 0;
+}
+.step-card{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:2rem;text-align:center;
+  transition:transform 0.3s var(--ease),border-color 0.3s;
+}
+.step-card:hover{
+  transform:translateY(-4px);
+  border-color:var(--gold-border);
+}
+.step-num{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:48px;height:48px;border-radius:50%;
+  background:var(--gold-bg);border:2px solid var(--gold-border);
+  font-family:var(--font);font-weight:800;font-size:1.2rem;
+  color:var(--gold);margin-bottom:1rem;
+}
+.step-icon{
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 1rem;
+}
+.step-icon svg{width:32px;height:32px;color:var(--gold)}
+.step-card h3{
+  font-family:var(--font);font-weight:700;font-size:1.1rem;
+  margin-bottom:0.5rem;
+}
+.step-card p{
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.9rem;color:var(--text-soft);line-height:1.6;
+}
+
+.trust-strip{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:2rem;
+  margin:3rem 0;
+}
+.trust-item{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--font-body);font-weight:600;
+  font-size:0.9rem;color:var(--text-soft);
+}
+.trust-item svg{width:18px;height:18px;color:var(--gold);flex-shrink:0}
+
+.final-cta{
+  background:var(--bg-card);
+  border:1px solid var(--gold-border);
+  border-radius:var(--radius-xl);
+  padding:3rem;text-align:center;
+  margin-top:3rem;
+}
+.final-cta h3{
+  font-family:var(--font);font-weight:800;
+  font-size:clamp(1.4rem,3vw,1.8rem);
+  margin-bottom:1.5rem;
+}
+
+/* ==================== FOOTER ==================== */
+.tut-footer{
+  text-align:center;
+  padding:2rem;
+  font-family:var(--font-body);font-weight:500;
+  font-size:0.85rem;color:var(--text-muted);
+  border-top:1px solid var(--border);
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media(max-width:1024px){
+  .two-col{gap:2rem}
+  .calc-inputs{grid-template-columns:1fr 1fr;gap:1.5rem}
+  .steps-grid{gap:1rem}
+}
+@media(max-width:768px){
+  :root{--section-gap:80px}
+  .nav{padding:0 1.25rem}
+  .hero{padding:100px 1.5rem 60px}
+  .tut-section{padding:var(--section-gap) 1.5rem}
+  .two-col{grid-template-columns:1fr;gap:2rem}
+  .calc-inputs{grid-template-columns:1fr}
+  .calc-output{grid-template-columns:1fr;gap:1rem}
+  .calc-card{padding:1.5rem}
+  .steps-grid{grid-template-columns:1fr}
+  .mini-stats{grid-template-columns:1fr}
+  .compare-cards{grid-template-columns:1fr;gap:1rem}
+  .compare-arrow{
+    flex-direction:row;justify-content:center;
+  }
+  .compare-arrow svg{transform:rotate(90deg)}
+  .post-grid{gap:4px}
+  .heatmap-cell{min-height:28px}
+}
+@media(max-width:480px){
+  .hero h1{font-size:2rem}
+  .post-grid{grid-template-columns:repeat(7,1fr);gap:3px}
+  .post-cell{font-size:0.55rem}
+}
+
+/* ==================== REDUCED MOTION ==================== */
+@media(prefers-reduced-motion:reduce){
+  .tut-section{opacity:1;transform:none;transition:none}
+  .scroll-indicator{animation:none}
+  .section-cta,.cta-gold-full{animation:none}
+  .calc-delta .delta-main{animation:none}
+  @keyframes scrollBounce{0%,100%{transform:translateX(-50%)}}
+  @keyframes ctaPulse{0%,100%{box-shadow:none}}
+  @keyframes deltaPulse{0%,100%{opacity:1}}
+}
+</style>
+</head>
+<body>
+
+<!-- ==================== NAVIGATION ==================== -->
+<nav class="nav">
+  <div class="nav-logo">
+    <span>Flock</span>
+    <span class="logo-badge">Business</span>
+  </div>
+  <a href="business.html" class="nav-cta">Start Free Scan</a>
+</nav>
+
+<!-- ==================== HERO ==================== -->
+<section class="hero">
+  <h1>Your Instagram is leaving money on the table.</h1>
+  <div class="hero-badge">SEE WHAT YOU'RE MISSING</div>
+  <p class="hero-subtitle">We analyzed 2,400 business accounts. Here's what they all have in common.</p>
+  <div class="scroll-indicator">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ==================== SECTION 1: AUDIENCE HEALTH CHECK ==================== -->
+<section class="tut-section" id="sec-audience">
+  <h2>What if a third of your audience is dead weight?</h2>
+  <div class="two-col">
+    <div class="chart-wrap" style="position:relative">
+      <canvas id="donutChart" width="400" height="300"></canvas>
+      <div class="donut-center">
+        <span class="donut-num" data-count="8184">0</span>
+        <span class="donut-label">real followers</span>
+      </div>
+    </div>
+    <div>
+      <div class="stat-block">
+        <div class="stat-label">Reported Engagement Rate</div>
+        <div class="stat-value" data-count="1.2" data-suffix="%" data-decimals="1">0%</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-label">Adjusted for Ghosts</div>
+        <div class="stat-value gold" data-count="1.8" data-suffix="%" data-decimals="1">0%</div>
+      </div>
+      <p class="stat-annotation">Your real rate is higher than you think -- but Instagram doesn't know that.</p>
+    </div>
+  </div>
+  <div class="cost-callout">
+    With 12,400 followers, 4,216 are ghosts dragging your engagement rate down. Instagram's algorithm sees 1.2% engagement and buries your posts. At $18 CPM, that's roughly <span class="cost-amount" data-count="340" data-prefix="$">$0</span>/mo in reach you're paying for but never getting.
+  </div>
+  <div class="section-cta-wrap">
+    <a href="business.html" class="section-cta">See your real audience health</a>
+  </div>
+</section>
+
+<!-- ==================== SECTION 2: POST GRAVEYARD ==================== -->
+<section class="tut-section" id="sec-graveyard">
+  <h2>What if you knew which posts were dead before you hit publish?</h2>
+  <div class="chart-wrap" style="margin-bottom:2rem">
+    <canvas id="barChart" width="600" height="280"></canvas>
+  </div>
+  <div class="post-grid" id="postGrid"></div>
+  <div class="cost-callout">
+    You posted 14 times last month. 9 were static images that reached fewer than 500 people each. If those had been Reels, you'd have reached an additional ~25,200 people. At $18 CPM, that's <span class="cost-amount" data-count="453" data-prefix="$">$0</span> left on the table.
+  </div>
+  <div class="section-cta-wrap">
+    <a href="business.html" class="section-cta">Stop guessing. See what's working.</a>
+  </div>
+</section>
+
+<!-- ==================== SECTION 3: POSTING TIME INTELLIGENCE ==================== -->
+<section class="tut-section" id="sec-timing">
+  <h2>What if you've been posting when nobody's watching?</h2>
+  <div class="heatmap-wrap">
+    <div class="heatmap" id="heatmap"></div>
+  </div>
+  <div class="compare-cards">
+    <div class="compare-card">
+      <div class="compare-label">You post at</div>
+      <div class="compare-value">10:00 AM weekdays</div>
+    </div>
+    <div class="compare-arrow">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+        <polyline points="12 5 19 12 12 19"/>
+      </svg>
+      <span>4 hours off peak</span>
+    </div>
+    <div class="compare-card">
+      <div class="compare-label">They're online at</div>
+      <div class="compare-value gold">7:00 PM Tue, Thu, Sun</div>
+    </div>
+  </div>
+  <div class="cost-callout">
+    Posts published off-peak reach 40-60% fewer people. Across 14 posts last month, that's roughly 18,000 missed impressions -- <span class="cost-amount" data-count="324" data-prefix="$">$0</span> in invisible reach.
+  </div>
+  <div class="section-cta-wrap">
+    <a href="business.html" class="section-cta">Find your real peak hours</a>
+  </div>
+</section>
+
+<!-- ==================== SECTION 4: FOLLOWER MOMENTUM ==================== -->
+<section class="tut-section" id="sec-momentum">
+  <h2>What if your growth stalled and you didn't even notice?</h2>
+  <div class="momentum-chart-wrap">
+    <canvas id="lineChart" width="800" height="350"></canvas>
+    <div class="chart-annotation red" style="top:30%;left:28%">3 static posts &#8594; +47 unfollows</div>
+    <div class="chart-annotation green" style="top:22%;left:48%">5 Reels in 10 days &#8594; +189 followers</div>
+    <div class="chart-annotation red" style="top:38%;right:16%">No posts for 8 days &#8594; -32 followers</div>
+  </div>
+  <div class="mini-stats">
+    <div class="mini-stat">
+      <div class="ms-label">Net growth</div>
+      <div class="ms-value gold" data-count="214" data-prefix="+">0</div>
+    </div>
+    <div class="mini-stat">
+      <div class="ms-label">Hidden unfollows</div>
+      <div class="ms-value red" data-count="79" data-prefix="-">0</div>
+    </div>
+    <div class="mini-stat">
+      <div class="ms-label">Growth velocity</div>
+      <div class="ms-value muted" data-count="2.4" data-suffix="/day" data-decimals="1">0</div>
+      <div class="ms-note">below avg for your niche</div>
+    </div>
+  </div>
+  <div class="cost-callout">
+    Those 79 unfollows weren't random -- they correlated with your lowest-performing content. Every unfollow lowers your engagement rate, which lowers your reach, which lowers your next post's performance. It compounds.
+  </div>
+  <div class="section-cta-wrap">
+    <a href="business.html" class="section-cta">See what's driving your unfollows</a>
+  </div>
+</section>
+
+<!-- ==================== SECTION 5: REVENUE GAP CALCULATOR ==================== -->
+<section class="tut-section" id="sec-calculator">
+  <h2>How much is your Instagram actually leaving on the table?</h2>
+  <div class="calc-card">
+    <div class="calc-inputs">
+      <div class="calc-field">
+        <label>Follower count</label>
+        <input type="range" id="calcFollowers" min="1000" max="500000" step="1000" value="12000">
+        <input type="number" id="calcFollowersNum" min="1000" max="500000" step="1000" value="12000">
+      </div>
+      <div class="calc-field">
+        <label>Niche</label>
+        <select id="calcNiche">
+          <option value="22">Fashion ($22 CPM)</option>
+          <option value="18" selected>Fitness ($18 CPM)</option>
+          <option value="15">Food ($15 CPM)</option>
+          <option value="28">Beauty ($28 CPM)</option>
+          <option value="20">Travel ($20 CPM)</option>
+          <option value="35">Tech ($35 CPM)</option>
+          <option value="45">Business / Finance ($45 CPM)</option>
+          <option value="16">Lifestyle ($16 CPM)</option>
+          <option value="12">Other ($12 CPM)</option>
+        </select>
+      </div>
+      <div class="calc-field">
+        <label>Posts per month</label>
+        <input type="range" id="calcPosts" min="1" max="60" step="1" value="12">
+        <input type="number" id="calcPostsNum" min="1" max="60" step="1" value="12">
+      </div>
+    </div>
+    <div class="calc-output">
+      <div class="calc-output-item">
+        <div class="co-label">Current estimated reach value</div>
+        <div class="co-value muted" id="calcCurrent">$0/mo</div>
+      </div>
+      <div class="calc-output-item">
+        <div class="co-label">Optimized reach value</div>
+        <div class="co-value gold" id="calcOptimized">$0/mo</div>
+      </div>
+    </div>
+    <div class="calc-delta">
+      <div class="delta-main" id="calcDelta">You're leaving $0/mo on the table</div>
+      <div class="delta-annual" id="calcAnnual">That's $0/year</div>
+    </div>
+    <details class="calc-details">
+      <summary>How we calculate this</summary>
+      <p>
+        <strong>Current monthly reach value</strong> = followers x 0.15 (average organic reach rate) x posts x CPM / 1,000<br>
+        <strong>Optimized monthly reach value</strong> = followers x 0.35 (optimized reach rate with better content mix and timing) x posts x CPM / 1,000<br>
+        <strong>Gap</strong> = optimized - current<br>
+        <strong>Annual</strong> = gap x 12<br><br>
+        These estimates use industry-average CPM rates and assume optimization of content format, posting times, and audience targeting based on patterns we see across 2,400+ business accounts.
+      </p>
+    </details>
+    <a href="business.html" class="cta-gold-full">Get Your Personalized Revenue Report</a>
+  </div>
+</section>
+
+<!-- ==================== SECTION 6: HOW IT WORKS ==================== -->
+<section class="tut-section" id="sec-howto">
+  <h2>One click. No passwords. No installs. No data stored.</h2>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <div class="step-icon">
+        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="6" y="4" width="20" height="26" rx="3"/>
+          <polyline points="12 4 16 10 20 4"/>
+        </svg>
+      </div>
+      <h3>Drag to your bookmarks bar</h3>
+      <p>One-time setup. Takes 3 seconds.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <div class="step-icon">
+        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="4" width="24" height="24" rx="6"/>
+          <circle cx="16" cy="16" r="6"/>
+          <circle cx="23" cy="9" r="1.5" fill="currentColor"/>
+        </svg>
+      </div>
+      <h3>Visit Instagram and click it</h3>
+      <p>Flock reads your session in your own browser. No passwords leave your device. Ever.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <div class="step-icon">
+        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="8" width="24" height="20" rx="2"/>
+          <polyline points="8 24 14 16 18 20 24 12"/>
+          <polyline points="20 12 24 12 24 16"/>
+        </svg>
+      </div>
+      <h3>Get your AI growth report</h3>
+      <p>Personalized playbook: what to post, when to post, and how to turn followers into revenue.</p>
+    </div>
+  </div>
+
+  <div class="trust-strip">
+    <div class="trust-item">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="4 10 8 14 16 6"/>
+      </svg>
+      No password required
+    </div>
+    <div class="trust-item">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="4 10 8 14 16 6"/>
+      </svg>
+      No app to install
+    </div>
+    <div class="trust-item">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="4 10 8 14 16 6"/>
+      </svg>
+      Nothing stored on our servers
+    </div>
+    <div class="trust-item">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="4 10 8 14 16 6"/>
+      </svg>
+      Works in 60 seconds
+    </div>
+  </div>
+
+  <div class="final-cta">
+    <h3>Ready to see what you're missing?</h3>
+    <a href="business.html" class="cta-gold-full" style="max-width:400px;margin:0 auto;display:block">
+      Start Your Free Scan
+    </a>
+  </div>
+</section>
+
+<!-- ==================== FOOTER ==================== -->
+<footer class="tut-footer">
+  flockscan.org/business
+</footer>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ==================== REDUCED MOTION CHECK ==================== */
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ==================== INTERSECTION OBSERVER ==================== */
+  const sections = document.querySelectorAll('.tut-section');
+  const sectionState = {};
+
+  if (prefersReducedMotion) {
+    sections.forEach(s => s.classList.add('visible'));
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        const id = entry.target.id;
+        if (!sectionState[id]) {
+          sectionState[id] = true;
+          initSection(id);
+        }
+      }
+    });
+  }, { threshold: 0.15 });
+
+  sections.forEach(s => observer.observe(s));
+
+  /* ==================== COUNT-UP ANIMATION ==================== */
+  function countUp(el, target, duration, prefix, suffix, decimals) {
+    if (prefersReducedMotion) {
+      el.textContent = (prefix || '') + formatNum(target, decimals) + (suffix || '');
+      return;
+    }
+    const start = performance.now();
+    const dur = duration || 1500;
+    function frame(now) {
+      const t = Math.min((now - start) / dur, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const val = target * eased;
+      el.textContent = (prefix || '') + formatNum(val, decimals) + (suffix || '');
+      if (t < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function formatNum(n, decimals) {
+    if (decimals && decimals > 0) return n.toFixed(decimals);
+    return Math.round(n).toLocaleString('en-US');
+  }
+
+  function initCounters(sectionEl) {
+    sectionEl.querySelectorAll('[data-count]').forEach(el => {
+      const target = parseFloat(el.getAttribute('data-count'));
+      const prefix = el.getAttribute('data-prefix') || '';
+      const suffix = el.getAttribute('data-suffix') || '';
+      const decimals = parseInt(el.getAttribute('data-decimals')) || 0;
+      countUp(el, target, 1500, prefix, suffix, decimals);
+    });
+  }
+
+  /* ==================== SECTION INIT ==================== */
+  function initSection(id) {
+    const sec = document.getElementById(id);
+    initCounters(sec);
+
+    switch(id) {
+      case 'sec-audience': createDonutChart(); break;
+      case 'sec-graveyard': createBarChart(); buildPostGrid(); break;
+      case 'sec-timing': buildHeatmap(); break;
+      case 'sec-momentum': createLineChart(); break;
+      case 'sec-calculator': initCalculator(); break;
+    }
+  }
+
+  /* If reduced motion, init all sections immediately */
+  if (prefersReducedMotion) {
+    sections.forEach(s => {
+      sectionState[s.id] = true;
+      initSection(s.id);
+    });
+  }
+
+  /* ==================== DONUT CHART ==================== */
+  function createDonutChart() {
+    const ctx = document.getElementById('donutChart');
+    if (!ctx) return;
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Real Followers', 'Ghost Followers'],
+        datasets: [{
+          data: [66, 34],
+          backgroundColor: ['#D4A843', '#e85454'],
+          borderColor: ['#D4A843', '#e85454'],
+          borderWidth: 0,
+          hoverOffset: 4,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        cutout: '70%',
+        animation: prefersReducedMotion ? false : { duration: 1000 },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#12121f',
+            titleColor: '#fff',
+            bodyColor: '#d0d0e0',
+            borderColor: '#1e1e30',
+            borderWidth: 1,
+            callbacks: {
+              label: function(ctx) { return ctx.label + ': ' + ctx.parsed + '%'; }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  /* ==================== BAR CHART ==================== */
+  function createBarChart() {
+    const ctx = document.getElementById('barChart');
+    if (!ctx) return;
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Reels', 'Carousels', 'Static Images'],
+        datasets: [{
+          label: 'Avg Reach',
+          data: [3200, 1800, 420],
+          backgroundColor: ['#D4A843', '#6b6b80', '#e85454'],
+          borderRadius: 6,
+          barThickness: 40,
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: true,
+        animation: prefersReducedMotion ? false : { duration: 1000 },
+        scales: {
+          x: {
+            grid: { color: 'rgba(30,30,48,0.5)', drawBorder: false },
+            ticks: { color: '#6b6b80', font: { family: 'Quicksand', size: 12 } },
+          },
+          y: {
+            grid: { display: false },
+            ticks: { color: '#d0d0e0', font: { family: 'Nunito', weight: '700', size: 13 } },
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#12121f',
+            titleColor: '#fff',
+            bodyColor: '#d0d0e0',
+            borderColor: '#1e1e30',
+            borderWidth: 1,
+            callbacks: {
+              label: function(ctx) { return ctx.parsed.x.toLocaleString() + ' avg reach'; }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  /* ==================== POST GRID ==================== */
+  function buildPostGrid() {
+    const grid = document.getElementById('postGrid');
+    if (!grid) return;
+    const goodIndices = [0, 3, 7, 10, 13];
+    for (let i = 0; i < 14; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'post-cell';
+      if (goodIndices.includes(i)) {
+        cell.classList.add('good');
+        cell.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Reel</span>';
+      } else {
+        cell.classList.add('dead');
+        cell.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><span>&lt; 500</span>';
+      }
+      grid.appendChild(cell);
+    }
+  }
+
+  /* ==================== HEATMAP ==================== */
+  function buildHeatmap() {
+    const heatmap = document.getElementById('heatmap');
+    if (!heatmap) return;
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const times = ['12a-4a', '4a-8a', '8a-12p', '12p-4p', '4p-8p', '8p-12a'];
+    /* Heat values: row x col, higher = more active */
+    const heat = [
+      [0.03, 0.03, 0.03, 0.03, 0.03, 0.05, 0.05],
+      [0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05],
+      [0.12, 0.15, 0.12, 0.15, 0.12, 0.08, 0.08],
+      [0.15, 0.20, 0.15, 0.20, 0.15, 0.18, 0.18],
+      [0.20, 0.45, 0.20, 0.45, 0.20, 0.30, 0.50],
+      [0.15, 0.30, 0.15, 0.30, 0.15, 0.20, 0.25],
+    ];
+    /* Where user posts: row 2 (8a-12p), Mon-Fri */
+    const postCells = [[2,0],[2,1],[2,2],[2,3],[2,4]];
+
+    /* Header row: empty corner + day labels */
+    heatmap.appendChild(makeLabel(''));
+    days.forEach(d => heatmap.appendChild(makeLabel(d)));
+
+    for (let r = 0; r < 6; r++) {
+      heatmap.appendChild(makeLabel(times[r]));
+      for (let c = 0; c < 7; c++) {
+        const cell = document.createElement('div');
+        cell.className = 'heatmap-cell';
+        cell.style.setProperty('--heat', heat[r][c]);
+        const isPost = postCells.some(p => p[0] === r && p[1] === c);
+        if (isPost) cell.innerHTML = '<div class="post-dot"></div>';
+        heatmap.appendChild(cell);
+      }
+    }
+
+    function makeLabel(text) {
+      const el = document.createElement('div');
+      el.className = 'heatmap-label';
+      el.textContent = text;
+      return el;
+    }
+  }
+
+  /* ==================== LINE CHART ==================== */
+  function createLineChart() {
+    const ctx = document.getElementById('lineChart');
+    if (!ctx) return;
+    /* Generate 90-day follower data */
+    const data = [];
+    let val = 12050;
+    for (let i = 0; i < 90; i++) {
+      if (i >= 28 && i <= 32) val += Math.round(-8 + Math.random() * 3);
+      else if (i >= 45 && i <= 55) val += Math.round(15 + Math.random() * 8);
+      else if (i >= 63 && i <= 70) val += Math.round(-4 + Math.random() * 2);
+      else val += Math.round(1 + Math.random() * 4);
+      data.push(val);
+    }
+    const labels = [];
+    for (let i = 0; i < 90; i++) {
+      if (i % 15 === 0) labels.push('Day ' + (i + 1));
+      else labels.push('');
+    }
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Followers',
+          data: data,
+          borderColor: '#D4A843',
+          backgroundColor: 'rgba(212,168,67,0.08)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          borderWidth: 2.5,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        animation: prefersReducedMotion ? false : { duration: 1000 },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: '#6b6b80', font: { family: 'Quicksand', size: 11 }, maxRotation: 0 },
+          },
+          y: {
+            grid: { color: 'rgba(30,30,48,0.4)', drawBorder: false },
+            ticks: {
+              color: '#6b6b80',
+              font: { family: 'Quicksand', size: 11 },
+              callback: function(v) { return v.toLocaleString(); }
+            },
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#12121f',
+            titleColor: '#fff',
+            bodyColor: '#d0d0e0',
+            borderColor: '#1e1e30',
+            borderWidth: 1,
+          }
+        }
+      }
+    });
+  }
+
+  /* ==================== CALCULATOR ==================== */
+  function initCalculator() {
+    const fSlider = document.getElementById('calcFollowers');
+    const fNum = document.getElementById('calcFollowersNum');
+    const niche = document.getElementById('calcNiche');
+    const pSlider = document.getElementById('calcPosts');
+    const pNum = document.getElementById('calcPostsNum');
+    const elCurrent = document.getElementById('calcCurrent');
+    const elOptimized = document.getElementById('calcOptimized');
+    const elDelta = document.getElementById('calcDelta');
+    const elAnnual = document.getElementById('calcAnnual');
+
+    function sync(slider, num) {
+      slider.addEventListener('input', () => { num.value = slider.value; calc(); });
+      num.addEventListener('input', () => {
+        let v = parseInt(num.value);
+        if (isNaN(v)) return;
+        v = Math.max(parseInt(slider.min), Math.min(parseInt(slider.max), v));
+        slider.value = v;
+        calc();
+      });
+    }
+    sync(fSlider, fNum);
+    sync(pSlider, pNum);
+    niche.addEventListener('change', calc);
+
+    let animFrame = null;
+    function calc() {
+      const followers = parseInt(fSlider.value);
+      const cpm = parseInt(niche.value);
+      const posts = parseInt(pSlider.value);
+
+      const current = followers * 0.15 * posts * cpm / 1000;
+      const optimized = followers * 0.35 * posts * cpm / 1000;
+      const delta = optimized - current;
+      const annual = delta * 12;
+
+      if (prefersReducedMotion) {
+        elCurrent.textContent = '$' + Math.round(current).toLocaleString() + '/mo';
+        elOptimized.textContent = '$' + Math.round(optimized).toLocaleString() + '/mo';
+        elDelta.textContent = "You're leaving $" + Math.round(delta).toLocaleString() + "/mo on the table";
+        elAnnual.textContent = "That's $" + Math.round(annual).toLocaleString() + "/year";
+        return;
+      }
+
+      /* Animate to new values */
+      const prevCurrent = parseVal(elCurrent.textContent);
+      const prevOptimized = parseVal(elOptimized.textContent);
+      const prevDelta = parseVal(elDelta.textContent);
+      const prevAnnual = parseVal(elAnnual.textContent);
+
+      if (animFrame) cancelAnimationFrame(animFrame);
+      const start = performance.now();
+      const dur = 400;
+
+      function frame(now) {
+        const t = Math.min((now - start) / dur, 1);
+        const e = 1 - Math.pow(1 - t, 3);
+        const c = lerp(prevCurrent, current, e);
+        const o = lerp(prevOptimized, optimized, e);
+        const d = lerp(prevDelta, delta, e);
+        const a = lerp(prevAnnual, annual, e);
+        elCurrent.textContent = '$' + Math.round(c).toLocaleString() + '/mo';
+        elOptimized.textContent = '$' + Math.round(o).toLocaleString() + '/mo';
+        elDelta.textContent = "You're leaving $" + Math.round(d).toLocaleString() + "/mo on the table";
+        elAnnual.textContent = "That's $" + Math.round(a).toLocaleString() + "/year";
+        if (t < 1) animFrame = requestAnimationFrame(frame);
+      }
+      animFrame = requestAnimationFrame(frame);
+    }
+
+    function parseVal(str) {
+      const m = str.match(/[\d,]+/);
+      return m ? parseInt(m[0].replace(/,/g, '')) : 0;
+    }
+    function lerp(a, b, t) { return a + (b - a) * t; }
+
+    calc();
+  }
+
+})();
+</script>
+</body>
+</html>
