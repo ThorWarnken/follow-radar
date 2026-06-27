@@ -165,7 +165,15 @@
     'X-IG-WWW-Claim': '0',
     'X-Requested-With': 'XMLHttpRequest',
     'Accept': '*/*',
+    'X-ASBD-ID': '198387',
   };
+
+  // Instagram now requires the CSRF token on API requests.
+  // csrftoken is always set in cookies for logged-in instagram.com sessions.
+  try {
+    var _csrfm = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
+    if (_csrfm) igHeaders['X-CSRFToken'] = _csrfm[1];
+  } catch (e) { /* ignore */ }
 
   // fetchPage does the actual HTTP call, with throttling and retry.
   // Returns {users, nextCursor} or throws.
@@ -424,6 +432,34 @@
         }
       } catch (e) { /* fall through */ }
     }
+
+    // Scan <script type="application/json"> tags — Instagram embeds page state as JSON
+    // and the logged-in viewer object is often present there.
+    try {
+      function _fv(obj, d) {
+        if (!obj || typeof obj !== 'object' || Array.isArray(obj) || d > 8) return null;
+        var uid = obj.pk || obj.id;
+        if (obj.username && uid && /^\d+$/.test(String(uid))) {
+          return { userId: String(uid), username: obj.username };
+        }
+        for (var _k in obj) {
+          if (_k === 'viewer' || _k === 'current_user' || _k === 'user') {
+            var _r = _fv(obj[_k], d + 1);
+            if (_r) return _r;
+          }
+        }
+        return null;
+      }
+      var _ss = document.querySelectorAll('script[type="application/json"]');
+      for (var _si = 0; _si < _ss.length; _si++) {
+        var _st = _ss[_si].textContent || '';
+        if (_st.indexOf('"username"') === -1) continue;
+        try {
+          var _vr = _fv(JSON.parse(_st), 0);
+          if (_vr) return _vr;
+        } catch (e) { /* skip unparseable tag */ }
+      }
+    } catch (e) { /* fall through */ }
 
     throw new Error("Could not determine logged-in user. Make sure you're logged into instagram.com.");
   }
