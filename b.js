@@ -398,6 +398,23 @@
       if (m) cookieUserId = m[1];
     } catch (e) { /* fall through */ }
 
+    // Fast path: if the user is on their own profile page (Edit Profile link is visible),
+    // we can read the username straight from the URL and userId from the cookie —
+    // no API call needed.
+    if (cookieUserId) {
+      try {
+        var _editLink = document.querySelector('a[href="/accounts/edit/"]') ||
+                        document.querySelector('a[href*="/accounts/edit"]');
+        if (_editLink) {
+          var _pm = window.location.pathname.match(/^\/([a-z0-9_.]{1,30})\/?$/i);
+          var _reserved = ['explore','direct','reels','stories','accounts','reel','p','tv','ar'];
+          if (_pm && _reserved.indexOf(_pm[1].toLowerCase()) === -1) {
+            return { userId: cookieUserId, username: _pm[1] };
+          }
+        }
+      } catch (e) { /* fall through */ }
+    }
+
     // Try /api/v1/accounts/current_user/ endpoint.
     if (cookieUserId) {
       try {
@@ -407,11 +424,13 @@
         });
         if (r.ok) {
           const j = await r.json();
-          if (j && j.user && j.user.pk && j.user.username) {
-            return { userId: String(j.user.pk), username: j.user.username };
+          if (j) {
+            const u = j.user || j;
+            const uid = u.pk || u.id;
+            if (u.username && uid) return { userId: String(uid), username: u.username };
           }
-        }
-      } catch (e) { /* fall through */ }
+        } else { console.warn('[flock] current_user http ' + r.status); }
+      } catch (e) { console.warn('[flock] current_user err', e.message); }
     }
 
     // Try the web accounts info endpoint.
@@ -422,12 +441,16 @@
       });
       if (r.ok) {
         const j = await r.json();
-        if (j && j.user_id && j.username) return { userId: String(j.user_id), username: j.username };
-      }
-    } catch (e) { /* fall through */ }
+        if (j) {
+          // Old format: {user_id, username}  New format: {user: {pk, username}}
+          if (j.user_id && j.username) return { userId: String(j.user_id), username: j.username };
+          const u = j.user || j.viewer;
+          if (u && (u.pk || u.id) && u.username) return { userId: String(u.pk || u.id), username: u.username };
+        }
+      } else { console.warn('[flock] login/ajax/info http ' + r.status); }
+    } catch (e) { console.warn('[flock] login/ajax/info err', e.message); }
 
-    // Last resort: use cookie userId + fetch username from web_profile_info by
-    // reading the current page's profile if we're on one.
+    // Try /api/v1/users/<id>/info/.
     if (cookieUserId) {
       try {
         const r = await doFetch('https://i.instagram.com/api/v1/users/' + cookieUserId + '/info/', {
@@ -436,11 +459,10 @@
         });
         if (r.ok) {
           const j = await r.json();
-          if (j && j.user && j.user.username) {
-            return { userId: cookieUserId, username: j.user.username };
-          }
-        }
-      } catch (e) { /* fall through */ }
+          const uname = j && ((j.user && j.user.username) || j.username);
+          if (uname) return { userId: cookieUserId, username: uname };
+        } else { console.warn('[flock] users/info http ' + r.status); }
+      } catch (e) { console.warn('[flock] users/info err', e.message); }
     }
 
     // Scan <script type="application/json"> tags — Instagram embeds page state as JSON
