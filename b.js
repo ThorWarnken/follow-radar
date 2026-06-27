@@ -411,6 +411,9 @@
           /"viewerId"\s*:\s*"(\d{7,15})"/,
           /"actor_id"\s*:\s*"(\d{7,15})"/,
           /"actorID"\s*:\s*"(\d{7,15})"/,
+          /"account_id"\s*:\s*"(\d{7,15})"/,
+          /"USER_ID"\s*:\s*"(\d{7,15})"/,
+          /"userId"\s*:\s*"(\d{7,15})"/,
         ];
         var _bAll = document.querySelectorAll('script');
         _bloop: for (var _bi = 0; _bi < _bAll.length; _bi++) {
@@ -419,6 +422,29 @@
             var _bm = _bt.match(_bPats[_bpi]);
             if (_bm) { bootstrapUserId = _bm[1]; break _bloop; }
           }
+        }
+      } catch (e) { /* fall through */ }
+    }
+
+    // Also check meta tags and html/body data attributes for the account ID.
+    if (!bootstrapUserId) {
+      try {
+        var _metaSelectors = [
+          'meta[name="account-id"]', 'meta[name="user-id"]',
+          'meta[property="al:ios:url"]', // sometimes contains user id
+        ];
+        for (var _msi = 0; _msi < _metaSelectors.length; _msi++) {
+          var _mel = document.querySelector(_metaSelectors[_msi]);
+          if (_mel) {
+            var _mev = _mel.getAttribute('content') || '';
+            var _meid = _mev.match(/(\d{7,15})/);
+            if (_meid) { bootstrapUserId = _meid[1]; break; }
+          }
+        }
+        if (!bootstrapUserId) {
+          var _htmlId = (document.documentElement.getAttribute('data-account-id') ||
+                        document.documentElement.getAttribute('data-user-id') || '').match(/(\d{7,15})/);
+          if (_htmlId) bootstrapUserId = _htmlId[1];
         }
       } catch (e) { /* fall through */ }
     }
@@ -448,22 +474,29 @@
           if (!_pkRe) _pkRe = _pgt.match(new RegExp('"pk"\\s*:\\s*"(\\d{7,15})"[\\s\\S]{0,300}"username"\\s*:\\s*"' + _escU + '"'));
           if (_pkRe) { console.log('[flock] returning from script scan:', _pkRe[1]); return { userId: _pkRe[1], username: _uname }; }
         }
-        // 3. web_profile_info — same endpoint checkAccountSize uses; pk is in data.user
-        try {
-          const _wpR = await doFetch('https://i.instagram.com/api/v1/users/web_profile_info/?username=' + encodeURIComponent(_uname), {
-            credentials: 'include',
-            headers: igHeaders,
-          });
-          console.log('[flock] web_profile_info status:', _wpR.status);
-          if (_wpR.ok) {
-            const _wpJ = await _wpR.json();
-            const _wpU = _wpJ && _wpJ.data && _wpJ.data.user;
-            if (_wpU) {
-              const _wpId = String(_wpU.pk || _wpU.id || '');
-              if (_wpId) { console.log('[flock] returning from web_profile_info:', _wpId); return { userId: _wpId, username: _uname }; }
+        // 3. web_profile_info: try three ways in order
+        //    a) no custom headers → simple CORS request, no preflight needed
+        //    b) with igHeaders on i.instagram.com
+        //    c) same-origin www.instagram.com (avoids CORS entirely)
+        var _wpHosts = [
+          { url: 'https://i.instagram.com/api/v1/users/web_profile_info/?username=' + encodeURIComponent(_uname), opts: { credentials: 'include' } },
+          { url: 'https://i.instagram.com/api/v1/users/web_profile_info/?username=' + encodeURIComponent(_uname), opts: { credentials: 'include', headers: igHeaders } },
+          { url: 'https://www.instagram.com/api/v1/users/web_profile_info/?username=' + encodeURIComponent(_uname), opts: { credentials: 'include', headers: igHeaders } },
+        ];
+        for (var _whi = 0; _whi < _wpHosts.length; _whi++) {
+          try {
+            const _wpR = await doFetch(_wpHosts[_whi].url, _wpHosts[_whi].opts);
+            console.log('[flock] wpi[' + _whi + '] status:', _wpR.status);
+            if (_wpR.ok) {
+              const _wpJ = await _wpR.json();
+              const _wpU = _wpJ && _wpJ.data && _wpJ.data.user;
+              if (_wpU) {
+                const _wpId = String(_wpU.pk || _wpU.id || '');
+                if (_wpId) { console.log('[flock] returning from wpi[' + _whi + ']:', _wpId); return { userId: _wpId, username: _uname }; }
+              }
             }
-          }
-        } catch (e) { console.warn('[flock] web_profile_info err:', e.message); }
+          } catch (e) { console.warn('[flock] wpi[' + _whi + '] err:', e.message); }
+        }
       }
     } catch (e) { console.warn('[flock] profile-page path err:', e.message); }
 
