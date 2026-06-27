@@ -391,32 +391,66 @@
       }
     } catch (e) { /* fall through */ }
 
-    // Try ds_user_id cookie (set by Instagram on login, most reliable).
+    // Try ds_user_id cookie (set by Instagram on login).
+    // Note: Instagram may have made this HttpOnly, in which case this will be null.
     let cookieUserId = null;
     try {
       const m = document.cookie.match(/(?:^|;\s*)ds_user_id=(\d+)/);
       if (m) cookieUserId = m[1];
     } catch (e) { /* fall through */ }
 
-    // Fast path: if the user is on their own profile page (Edit Profile link is visible),
-    // we can read the username straight from the URL and userId from the cookie —
-    // no API call needed.
-    if (cookieUserId) {
+    // Scan ALL script tags for Meta/Instagram bootstrap patterns that embed the
+    // logged-in user's numeric ID server-side. These exist regardless of whether
+    // ds_user_id is an HttpOnly cookie.
+    let bootstrapUserId = cookieUserId;
+    if (!bootstrapUserId) {
       try {
-        var _editLink = document.querySelector('a[href="/accounts/edit/"]') ||
-                        document.querySelector('a[href*="/accounts/edit"]');
-        if (_editLink) {
-          var _pm = window.location.pathname.match(/^\/([a-z0-9_.]{1,30})\/?$/i);
-          var _reserved = ['explore','direct','reels','stories','accounts','reel','p','tv','ar'];
-          if (_pm && _reserved.indexOf(_pm[1].toLowerCase()) === -1) {
-            return { userId: cookieUserId, username: _pm[1] };
+        var _bPats = [
+          /"ACCOUNT_ID"\s*:\s*"(\d{7,15})"/,
+          /"viewer_id"\s*:\s*"(\d{7,15})"/,
+          /"viewerId"\s*:\s*"(\d{7,15})"/,
+          /"actor_id"\s*:\s*"(\d{7,15})"/,
+          /"actorID"\s*:\s*"(\d{7,15})"/,
+        ];
+        var _bAll = document.querySelectorAll('script');
+        _bloop: for (var _bi = 0; _bi < _bAll.length; _bi++) {
+          var _bt = _bAll[_bi].textContent || '';
+          for (var _bpi = 0; _bpi < _bPats.length; _bpi++) {
+            var _bm = _bt.match(_bPats[_bpi]);
+            if (_bm) { bootstrapUserId = _bm[1]; break _bloop; }
           }
         }
       } catch (e) { /* fall through */ }
     }
 
+    // Own-profile fast path: the Edit Profile link is only present on your own profile.
+    // Extract username from the URL; pair it with the userId from cookie or bootstrap data.
+    // If we still have no userId, search page scripts for pk adjacent to the username.
+    try {
+      var _editLink = document.querySelector('a[href="/accounts/edit/"]') ||
+                      document.querySelector('a[href*="/accounts/edit"]');
+      if (_editLink) {
+        var _pm = window.location.pathname.match(/^\/([a-z0-9_.]{1,30})\/?$/i);
+        var _reserved = ['explore','direct','reels','stories','accounts','reel','p','tv','ar'];
+        if (_pm && _reserved.indexOf(_pm[1].toLowerCase()) === -1) {
+          var _uname = _pm[1];
+          if (bootstrapUserId) return { userId: bootstrapUserId, username: _uname };
+          // No userId yet — search for pk near this username in any script tag
+          var _escU = _uname.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          var _pgAll = document.querySelectorAll('script');
+          for (var _pgi = 0; _pgi < _pgAll.length; _pgi++) {
+            var _pgt = _pgAll[_pgi].textContent || '';
+            if (_pgt.indexOf('"' + _uname + '"') === -1) continue;
+            var _pkRe = _pgt.match(new RegExp('"username"\\s*:\\s*"' + _escU + '"[\\s\\S]{0,300}"pk"\\s*:\\s*"(\\d{7,15})"'));
+            if (!_pkRe) _pkRe = _pgt.match(new RegExp('"pk"\\s*:\\s*"(\\d{7,15})"[\\s\\S]{0,300}"username"\\s*:\\s*"' + _escU + '"'));
+            if (_pkRe) return { userId: _pkRe[1], username: _uname };
+          }
+        }
+      }
+    } catch (e) { /* fall through */ }
+
     // Try /api/v1/accounts/current_user/ endpoint.
-    if (cookieUserId) {
+    if (bootstrapUserId) {
       try {
         const r = await doFetch('https://i.instagram.com/api/v1/accounts/current_user/?edit=true', {
           credentials: 'include',
@@ -433,34 +467,37 @@
       } catch (e) { console.warn('[flock] current_user err', e.message); }
     }
 
-    // Try the web accounts info endpoint.
-    try {
-      const r = await doFetch('https://www.instagram.com/api/v1/web/accounts/login/ajax/info/', {
-        credentials: 'include',
-        headers: igHeaders,
-      });
-      if (r.ok) {
-        const j = await r.json();
-        if (j) {
-          // Old format: {user_id, username}  New format: {user: {pk, username}}
-          if (j.user_id && j.username) return { userId: String(j.user_id), username: j.username };
-          const u = j.user || j.viewer;
-          if (u && (u.pk || u.id) && u.username) return { userId: String(u.pk || u.id), username: u.username };
-        }
-      } else { console.warn('[flock] login/ajax/info http ' + r.status); }
-    } catch (e) { console.warn('[flock] login/ajax/info err', e.message); }
+    // Try the same-origin web accounts info endpoint — both with and without igHeaders,
+    // since extra headers can cause rejections on same-origin requests.
+    for (var _wi = 0; _wi < 2; _wi++) {
+      try {
+        const _wOpts = _wi === 0
+          ? { credentials: 'include', headers: igHeaders }
+          : { credentials: 'include' };
+        const r = await doFetch('https://www.instagram.com/api/v1/web/accounts/login/ajax/info/', _wOpts);
+        if (r.ok) {
+          const j = await r.json();
+          if (j) {
+            if (j.user_id && j.username) return { userId: String(j.user_id), username: j.username };
+            const u = j.user || j.viewer;
+            if (u && (u.pk || u.id) && u.username) return { userId: String(u.pk || u.id), username: u.username };
+          }
+          break; // 200 OK but unexpected format — no point retrying without headers
+        } else { console.warn('[flock] login/ajax/info[' + _wi + '] http ' + r.status); }
+      } catch (e) { console.warn('[flock] login/ajax/info[' + _wi + '] err', e.message); }
+    }
 
     // Try /api/v1/users/<id>/info/.
-    if (cookieUserId) {
+    if (bootstrapUserId) {
       try {
-        const r = await doFetch('https://i.instagram.com/api/v1/users/' + cookieUserId + '/info/', {
+        const r = await doFetch('https://i.instagram.com/api/v1/users/' + bootstrapUserId + '/info/', {
           credentials: 'include',
           headers: igHeaders,
         });
         if (r.ok) {
           const j = await r.json();
           const uname = j && ((j.user && j.user.username) || j.username);
-          if (uname) return { userId: cookieUserId, username: uname };
+          if (uname) return { userId: bootstrapUserId, username: uname };
         } else { console.warn('[flock] users/info http ' + r.status); }
       } catch (e) { console.warn('[flock] users/info err', e.message); }
     }
