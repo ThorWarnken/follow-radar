@@ -383,6 +383,7 @@
   // ─── Current user resolution + size check ────────────────────────
 
   async function getCurrentUser() {
+    const _diag = ['v7'];
     // Try _sharedData (works on legacy IG web pages).
     try {
       const sd = window._sharedData && window._sharedData.config && window._sharedData.config.viewer;
@@ -449,6 +450,7 @@
       } catch (e) { /* fall through */ }
     }
 
+    _diag.push('ck=' + (cookieUserId || 'null') + ' bs=' + (bootstrapUserId || 'null') + ' path=' + window.location.pathname);
     console.log('[flock] cookie uid:', cookieUserId, '| bootstrap uid:', bootstrapUserId, '| path:', window.location.pathname);
 
     // Profile-page fast path: if the URL looks like a profile (/username/), extract the
@@ -486,6 +488,7 @@
         for (var _whi = 0; _whi < _wpHosts.length; _whi++) {
           try {
             const _wpR = await doFetch(_wpHosts[_whi].url, _wpHosts[_whi].opts);
+            _diag.push('wpi' + _whi + '=' + _wpR.status);
             console.log('[flock] wpi[' + _whi + '] status:', _wpR.status);
             if (_wpR.ok) {
               const _wpJ = await _wpR.json();
@@ -495,7 +498,7 @@
                 if (_wpId) { console.log('[flock] returning from wpi[' + _whi + ']:', _wpId); return { userId: _wpId, username: _uname }; }
               }
             }
-          } catch (e) { console.warn('[flock] wpi[' + _whi + '] err:', e.message); }
+          } catch (e) { _diag.push('wpi' + _whi + '=err:' + e.message.slice(0,20)); console.warn('[flock] wpi[' + _whi + '] err:', e.message); }
         }
       }
     } catch (e) { console.warn('[flock] profile-page path err:', e.message); }
@@ -506,6 +509,7 @@
         credentials: 'include',
         headers: igHeaders,
       });
+      _diag.push('cu=' + r.status);
       console.log('[flock] current_user status:', r.status);
       if (r.ok) {
         const j = await r.json();
@@ -515,7 +519,7 @@
           if (u.username && uid) return { userId: String(uid), username: u.username };
         }
       }
-    } catch (e) { console.warn('[flock] current_user err:', e.message); }
+    } catch (e) { _diag.push('cu=err:' + e.message.slice(0, 20)); console.warn('[flock] current_user err:', e.message); }
 
     // Try /api/v1/users/<id>/info/.
     if (bootstrapUserId) {
@@ -566,7 +570,7 @@
       }
     } catch (e) { /* fall through */ }
 
-    throw new Error("Could not determine logged-in user. Make sure you're logged into instagram.com.");
+    throw new Error("Could not determine logged-in user.\n\nDiag: " + _diag.join(' | ') + "\n\nMake sure you're logged into instagram.com and open from your own profile page.");
   }
 
   async function checkAccountSize(username) {
