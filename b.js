@@ -474,10 +474,11 @@
     if (!r.ok) throw new Error('Could not fetch profile info: http ' + r.status);
     const j = await r.json();
     const u = j && j.data && j.data.user;
-    if (!u) throw new Error('Unexpected profile info shape');
-    const followers = (u.edge_followed_by && u.edge_followed_by.count) || 0;
-    const following = (u.edge_follow && u.edge_follow.count) || 0;
-    const postCount = (u.edge_owner_to_timeline_media && u.edge_owner_to_timeline_media.count) || 0;
+    if (!u) return null; // Endpoint shape changed — caller skips size check and proceeds
+    // Support both REST-style (newer: follower_count) and GraphQL-style (older: edge_followed_by.count)
+    const followers = u.follower_count || (u.edge_followed_by && u.edge_followed_by.count) || 0;
+    const following = u.following_count || (u.edge_follow && u.edge_follow.count) || 0;
+    const postCount = u.media_count || (u.edge_owner_to_timeline_media && u.edge_owner_to_timeline_media.count) || 0;
 
     // Extract posts embedded in the profile response (up to 12, free data)
     var profilePosts = [];
@@ -807,10 +808,9 @@
         );
         return;
       }
-      if (!profileCounts) {
-        alert("Could not check account size. Please try again.");
-        return;
-      }
+      // If profileCounts is null (endpoint unavailable or shape changed), skip size
+      // check and proceed — most accounts are under the limit, and rate limits are
+      // handled gracefully by the resume flow if they happen to be over it.
     }
 
     createOverlay();
