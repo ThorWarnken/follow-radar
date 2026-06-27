@@ -175,6 +175,16 @@
     if (_csrfm) igHeaders['X-CSRFToken'] = _csrfm[1];
   } catch (e) { /* ignore */ }
 
+  // Meta LSD token — a second-layer CSRF mechanism now required by Instagram's
+  // internal APIs. Embedded in every page in JSON script tags.
+  try {
+    var _lsdAll = document.querySelectorAll('script[type="application/json"]');
+    for (var _lk = 0; _lk < _lsdAll.length; _lk++) {
+      var _lm = (_lsdAll[_lk].textContent || '').match(/"LSD",\[\],\{"token":"([^"]+)"/);
+      if (_lm) { igHeaders['X-FB-LSD'] = _lm[1]; break; }
+    }
+  } catch (e) { /* ignore */ }
+
   // fetchPage does the actual HTTP call, with throttling and retry.
   // Returns {users, nextCursor} or throws.
   async function fetchPage(url, opts) {
@@ -437,16 +447,22 @@
     // and the logged-in viewer object is often present there.
     try {
       function _fv(obj, d) {
-        if (!obj || typeof obj !== 'object' || Array.isArray(obj) || d > 8) return null;
+        if (!obj || typeof obj !== 'object' || d > 12) return null;
+        if (Array.isArray(obj)) {
+          for (var _ai = 0; _ai < obj.length && _ai < 20; _ai++) {
+            var _ar = _fv(obj[_ai], d + 1);
+            if (_ar) return _ar;
+          }
+          return null;
+        }
         var uid = obj.pk || obj.id;
-        if (obj.username && uid && /^\d+$/.test(String(uid))) {
+        // Instagram user IDs are 7-15 digit numbers
+        if (obj.username && uid && /^\d{7,15}$/.test(String(uid))) {
           return { userId: String(uid), username: obj.username };
         }
         for (var _k in obj) {
-          if (_k === 'viewer' || _k === 'current_user' || _k === 'user') {
-            var _r = _fv(obj[_k], d + 1);
-            if (_r) return _r;
-          }
+          var _r = _fv(obj[_k], d + 1);
+          if (_r) return _r;
         }
         return null;
       }
