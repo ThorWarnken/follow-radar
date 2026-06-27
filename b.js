@@ -423,19 +423,23 @@
       } catch (e) { /* fall through */ }
     }
 
-    // Own-profile fast path: the Edit Profile link is only present on your own profile.
-    // Extract username from the URL; pair it with the userId from cookie or bootstrap data.
-    // If we still have no userId, search page scripts for pk adjacent to the username.
+    console.log('[flock] cookie uid:', cookieUserId, '| bootstrap uid:', bootstrapUserId);
+
+    // Own-profile fast path: the Edit Profile link only appears on your own profile.
+    // Extract username from URL; get userId from cookie/bootstrap, script scan, or
+    // a direct web_profile_info call (same endpoint checkAccountSize uses).
     try {
       var _editLink = document.querySelector('a[href="/accounts/edit/"]') ||
                       document.querySelector('a[href*="/accounts/edit"]');
+      console.log('[flock] editLink found:', !!_editLink, '| path:', window.location.pathname);
       if (_editLink) {
         var _pm = window.location.pathname.match(/^\/([a-z0-9_.]{1,30})\/?$/i);
         var _reserved = ['explore','direct','reels','stories','accounts','reel','p','tv','ar'];
         if (_pm && _reserved.indexOf(_pm[1].toLowerCase()) === -1) {
           var _uname = _pm[1];
+          // 1. Cookie or bootstrap data already found the userId
           if (bootstrapUserId) return { userId: bootstrapUserId, username: _uname };
-          // No userId yet — search for pk near this username in any script tag
+          // 2. Regex: search for pk adjacent to this username in any script tag
           var _escU = _uname.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
           var _pgAll = document.querySelectorAll('script');
           for (var _pgi = 0; _pgi < _pgAll.length; _pgi++) {
@@ -445,47 +449,42 @@
             if (!_pkRe) _pkRe = _pgt.match(new RegExp('"pk"\\s*:\\s*"(\\d{7,15})"[\\s\\S]{0,300}"username"\\s*:\\s*"' + _escU + '"'));
             if (_pkRe) return { userId: _pkRe[1], username: _uname };
           }
+          // 3. web_profile_info — same endpoint checkAccountSize uses; returns pk in data.user
+          try {
+            const _wpR = await doFetch('https://i.instagram.com/api/v1/users/web_profile_info/?username=' + encodeURIComponent(_uname), {
+              credentials: 'include',
+              headers: igHeaders,
+            });
+            console.log('[flock] web_profile_info status:', _wpR.status);
+            if (_wpR.ok) {
+              const _wpJ = await _wpR.json();
+              const _wpU = _wpJ && _wpJ.data && _wpJ.data.user;
+              if (_wpU) {
+                const _wpId = String(_wpU.pk || _wpU.id || '');
+                if (_wpId) return { userId: _wpId, username: _uname };
+              }
+            }
+          } catch (e) { console.warn('[flock] web_profile_info err:', e.message); }
         }
       }
-    } catch (e) { /* fall through */ }
+    } catch (e) { console.warn('[flock] own-profile path err:', e.message); }
 
     // Try /api/v1/accounts/current_user/ endpoint.
-    if (bootstrapUserId) {
-      try {
-        const r = await doFetch('https://i.instagram.com/api/v1/accounts/current_user/?edit=true', {
-          credentials: 'include',
-          headers: igHeaders,
-        });
-        if (r.ok) {
-          const j = await r.json();
-          if (j) {
-            const u = j.user || j;
-            const uid = u.pk || u.id;
-            if (u.username && uid) return { userId: String(uid), username: u.username };
-          }
-        } else { console.warn('[flock] current_user http ' + r.status); }
-      } catch (e) { console.warn('[flock] current_user err', e.message); }
-    }
-
-    // Try the same-origin web accounts info endpoint — both with and without igHeaders,
-    // since extra headers can cause rejections on same-origin requests.
-    for (var _wi = 0; _wi < 2; _wi++) {
-      try {
-        const _wOpts = _wi === 0
-          ? { credentials: 'include', headers: igHeaders }
-          : { credentials: 'include' };
-        const r = await doFetch('https://www.instagram.com/api/v1/web/accounts/login/ajax/info/', _wOpts);
-        if (r.ok) {
-          const j = await r.json();
-          if (j) {
-            if (j.user_id && j.username) return { userId: String(j.user_id), username: j.username };
-            const u = j.user || j.viewer;
-            if (u && (u.pk || u.id) && u.username) return { userId: String(u.pk || u.id), username: u.username };
-          }
-          break; // 200 OK but unexpected format — no point retrying without headers
-        } else { console.warn('[flock] login/ajax/info[' + _wi + '] http ' + r.status); }
-      } catch (e) { console.warn('[flock] login/ajax/info[' + _wi + '] err', e.message); }
-    }
+    try {
+      const r = await doFetch('https://i.instagram.com/api/v1/accounts/current_user/?edit=true', {
+        credentials: 'include',
+        headers: igHeaders,
+      });
+      console.log('[flock] current_user status:', r.status);
+      if (r.ok) {
+        const j = await r.json();
+        if (j) {
+          const u = j.user || j;
+          const uid = u.pk || u.id;
+          if (u.username && uid) return { userId: String(uid), username: u.username };
+        }
+      }
+    } catch (e) { console.warn('[flock] current_user err:', e.message); }
 
     // Try /api/v1/users/<id>/info/.
     if (bootstrapUserId) {
